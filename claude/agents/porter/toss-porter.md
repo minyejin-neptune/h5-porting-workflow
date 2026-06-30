@@ -1089,9 +1089,11 @@ void ShowInterstitial(/* 종료 콜백 */)
 }
 ```
 
-로드 시점 판단 기준:
-- 기존 코드에 pre-load 구조가 있으면 → HLSDK도 pre-load 적용 (아래 패턴2 사용)
-- 기존 코드가 on-demand이면 → HLSDK도 on-demand 유지 (위 패턴 코드, Load 메서드 생략)
+> ⚠️ **필수 — 광고 Load는 절대 생략 금지 (과거 누락 사례).** HLSDK는 자동 로드가 없다. `ShowRewardedAd`/`ShowInterstitialAd`를 호출하려면 그 전에 반드시 `LoadRewardedAd`/`LoadInterstitialAd`로 로드돼 있어야 한다. Show 분기만 추가하고 Load를 빼면 **광고가 절대 뜨지 않는다.** 따라서 판단 대상은 "Load를 넣을지"가 아니라 **"언제 로드할지(타이밍)"뿐이다.** VOCAB 광고 행의 `Load메서드`·`첫시작로드`·`실패재로드` 항목을 반드시 대응 이식할 것.
+
+로드 시점(타이밍) 판단 기준 — **어느 쪽이든 Load 호출 자체는 항상 포함**:
+- 기존 코드에 pre-load 구조가 있으면 → HLSDK도 pre-load 적용 (아래 패턴2: 진입점 1회 선로드 + show 미로드 시 pending + closeCall 재로드)
+- 기존 코드가 on-demand(show 시점 로드)이면 → 패턴2의 "미로드 시 `_pendingShow*`에 예약 후 `Load*()` 호출 → 로드 완료 시 자동 노출" 구조로 이식한다. **Load 메서드를 생략하고 Show만 호출하는 형태는 금지**(HLSDK에서 즉시 빈 광고로 실패).
 
 ---
 
