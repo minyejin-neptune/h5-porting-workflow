@@ -1,0 +1,7 @@
+{
+  "name": "h5-porting",
+  "description": "Unity 모바일 게임 → Toss/PureWeb WebGL H5 포팅 워크플로우 (스캔·검증·포터·컴파일 체크)",
+  "version": "0.1.0",
+  "author": { "name": "minyejin-neptune" },
+  "repository": "https://github.com/minyejin-neptune/h5-porting-workflow"
+}
