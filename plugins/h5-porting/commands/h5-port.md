@@ -31,7 +31,7 @@ $ARGUMENTS 프로젝트의 H5 포팅을 순서대로 실행한다.
 
 ## STEP 0 — 프로젝트 초기 설정
 
-`${CLAUDE_PLUGIN_ROOT}/commands/project/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
+`${CLAUDE_PLUGIN_ROOT}/commands/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
 
 완료 후 아래 절차를 순서대로 실행한다.
 
@@ -266,12 +266,12 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 
 ### 2-A. porting-scan [직접 실행]
 
-`${CLAUDE_PLUGIN_ROOT}/commands/h5/porting-scan.md` 파일을 읽고 해당 지침에 따라 실행한다.
+`${CLAUDE_PLUGIN_ROOT}/commands/porting-scan.md` 파일을 읽고 해당 지침에 따라 실행한다.
 인자: $ARGUMENTS
 
 ### 2-B. porting-scan-verify [2-A 완료 후]
 
-`${CLAUDE_PLUGIN_ROOT}/commands/h5/porting-scan-verify.md` 파일을 읽고 해당 지침에 따라 실행한다.
+`${CLAUDE_PLUGIN_ROOT}/commands/porting-scan-verify.md` 파일을 읽고 해당 지침에 따라 실행한다.
 단, porting-scan-verify.md의 VERIFY-COMPILE 항목(안내 출력)은 실행하지 않는다. 컴파일 체크는 STEP 3 직전에 직접 실행한다.
 
 ### 2-B-commit. 분석 산출물 커밋 [2-B 완료 후]

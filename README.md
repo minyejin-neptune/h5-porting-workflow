@@ -11,8 +11,7 @@ plugins/h5-porting/                 # 플러그인 (name: h5-porting)
   agents/        toss-porter, pureweb-porter, unity-compile-checker,
                  h5-game-porting-analyst, toss-sdk-expert,
                  iap-analyzer, iaa-analyzer, save-point-analyzer
-  commands/h5/   h5-port, porting-scan, porting-scan-verify
-  commands/project/  porting-init
+  commands/      h5-port, porting-scan, porting-scan-verify, porting-init
   templates/     CLAUDE_Porting.md, h5-porter-template.md, scripts/, Editor/
   docs/          REDESIGN.md, PORTING_WORKFLOW_STATUS.md
 ```
@@ -29,9 +28,9 @@ private repo이므로 git 인증(gh auth / SSH)이 돼 있어야 add 됩니다.
 ## 사용
 
 ```bash
-/h5-port            # 전체 오케스트레이터 (STEP 0~4)
-/h5-port toss       # 토스 포팅 바로
-/porting-scan       # 사전 분석만
+/h5-porting:h5-port         # 전체 오케스트레이터 (STEP 0~4)
+/h5-porting:h5-port toss    # 토스 포팅 바로
+/h5-porting:porting-scan    # 사전 분석만
 ```
 
 ## 경로 규칙
