@@ -264,7 +264,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 **심볼 섹션 최신 여부 확인**
 
 ```bash
-grep 'WEBGL_\|UNITY_WEBGL' ${CLAUDE_PLUGIN_ROOT}/templates/h5-porter-template.md
+grep 'WEBGL_\|UNITY_WEBGL' ~/github/.templates/h5-porter-template.md
 ```
 
 이 파일 **플랫폼 전처리기 심볼** 섹션에 없는 심볼이 결과에 있으면 사용자에게 보고 후 계속 진행.
@@ -901,7 +901,7 @@ grep 대신 전처리문 구조 파서로 정확하게 검증한다. PORTING_VOC
 
 ```bash
 # {AD_REWARDED_METHOD}, {IAP_METHOD}, {SAVE_METHOD}를 PORTING_VOCAB.md 실제 값으로 대체
-python ${CLAUDE_PLUGIN_ROOT}/templates/scripts/h5-port-verify.py \
+python ~/github/.templates/scripts/h5-port-verify.py \
   --platform WEBGL_PUREWEB \
   --scripts Assets/Script \
   --method {AD_REWARDED_METHOD} \
@@ -1122,7 +1122,7 @@ CompileChecker: 통과 / 에러 N건
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/templates/scripts/h5-port-verify.py \
+python3 ~/github/.templates/scripts/h5-port-verify.py \
   --platform WEBGL_PUREWEB \
   --vocab Docs/porting/PORTING_VOCAB.md \
   --scripts {SCRIPTS_PATH}

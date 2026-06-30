@@ -148,7 +148,7 @@ A 처리 완료 파일(`using D_SDK_NS` 있고 UNITY_WEBGL 가드 있는 파일)
 
 ```bash
 # 스크립트가 없으면 템플릿에서 복사
-[ -f Docs/porting/h5-port-verify.py ] || cp ${CLAUDE_PLUGIN_ROOT}/templates/scripts/h5-port-verify.py Docs/porting/
+[ -f Docs/porting/h5-port-verify.py ] || cp ~/github/.templates/scripts/h5-port-verify.py Docs/porting/
 
 python3 Docs/porting/h5-port-verify.py \
   --platform {PLATFORM_SYMBOL} \
@@ -243,7 +243,7 @@ STEP 1 완료를 기다리지 않고 즉시 실행 가능.
 
 ```bash
 # 스크립트가 없으면 템플릿에서 복사
-[ -f Docs/porting/h5-port-verify.py ] || cp ${CLAUDE_PLUGIN_ROOT}/templates/scripts/h5-port-verify.py Docs/porting/
+[ -f Docs/porting/h5-port-verify.py ] || cp ~/github/.templates/scripts/h5-port-verify.py Docs/porting/
 
 python3 Docs/porting/h5-port-verify.py \
   --platform {PLATFORM_SYMBOL} \
