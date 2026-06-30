@@ -1,3 +1,7 @@
+---
+description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분석해 PORTING_ANALYSIS.md·PORTING_VOCAB.md 생성
+---
+
 # 포팅 사전 분석 스캔
 
 프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/PORTING_ANALYSIS.md`와 `Docs/porting/PORTING_VOCAB.md`를 생성한다.

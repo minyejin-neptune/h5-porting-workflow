@@ -1,3 +1,7 @@
+---
+description: 포팅 스캔 검증 — PORTING_ANALYSIS·VOCAB가 실제 코드와 일치하는지 7종 병렬 검증
+---
+
 # 포팅 스캔 검증
 
 `Docs/porting/PORTING_ANALYSIS.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 porting-scan 결과가 실제 코드와 일치하는지 검증한다.
