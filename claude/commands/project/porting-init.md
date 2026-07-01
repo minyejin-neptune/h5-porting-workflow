@@ -1,5 +1,5 @@
 ---
-description: 프로젝트 초기 설정 — CLAUDE.md · Docs/README.md 복사 + Editor 스크립트 심볼릭 링크 → CLAUDE.md 초기화 → FRAMEWORK_REFERENCE.md 생성
+description: 프로젝트 초기 설정 — CLAUDE.md · Docs/README.md · Editor 스크립트 복사 → CLAUDE.md 초기화 → FRAMEWORK_REFERENCE.md 생성
 ---
 
 다음 순서로 실행해주세요.
@@ -20,26 +20,30 @@ cp -n ~/github/.templates/README.md ./Docs/README.md \
   || echo "⚠ Docs/README.md 이미 존재 — 건너뜀 (덮어쓰려면 사용자에게 확인)"
 ```
 
-### 1-B. 심볼릭 링크 (템플릿 수정이 전 프로젝트에 즉시 반영되어야 하는 파일)
+### 1-B. Editor 스크립트 복사
 
-Editor 스크립트는 링크로 연결합니다. `.cs` 본체만 링크하고 Unity가 생성하는 `.meta`는 프로젝트 로컬에 남습니다.
-기존에 실제 파일(링크 아님)이 있으면 덮어쓰지 않고 건너뜁니다:
+Editor 스크립트는 프로젝트에 **복사**합니다 (심볼릭 링크 금지).
+이유: 원격/CI 빌더엔 `~/github/.templates`가 없어 심볼릭이면 dangling으로 깨진다. 실파일로 복사해야 프로젝트 git에 커밋되어 어디서든 빌드된다.
+`.cs`만 복사하고 `.meta`는 Unity가 프로젝트 로컬에 생성합니다. 기존에 실제 파일이 있으면 덮어쓰지 않고 건너뜁니다:
 
 ```bash
-link_template() {
+copy_template() {
   local src="$1" dst="$2"
-  if [ -e "$dst" ] && [ ! -L "$dst" ]; then
-    echo "⚠ $dst 이미 실제 파일로 존재 — 건너뜀 (링크로 바꾸려면 사용자에게 확인)"
+  if [ -f "$dst" ] && [ ! -L "$dst" ]; then
+    echo "⚠ $dst 이미 실제 파일로 존재 — 건너뜀 (갱신하려면 사용자에게 확인)"
   else
-    ln -sf "$src" "$dst" && echo "✓ $dst → 링크 완료"
+    rm -f "$dst"   # 과거 심볼릭 링크가 있으면 제거 후 복사
+    cp "$src" "$dst" && echo "✓ $dst → 복사 완료"
   fi
 }
 
-link_template ~/github/.templates/Editor/CompileChecker.cs      ./Assets/Editor/CompileChecker.cs
-link_template ~/github/.templates/Editor/CompileResultWindow.cs ./Assets/Editor/CompileResultWindow.cs
-link_template ~/github/.templates/Editor/TextureFormatSetter.cs ./Assets/Editor/TextureFormatSetter.cs
-link_template ~/github/.templates/Editor/HLAddressableTool.cs   ./Assets/Editor/HLAddressableTool.cs
+copy_template ~/github/.templates/Editor/CompileChecker.cs      ./Assets/Editor/CompileChecker.cs
+copy_template ~/github/.templates/Editor/CompileResultWindow.cs ./Assets/Editor/CompileResultWindow.cs
+copy_template ~/github/.templates/Editor/TextureFormatSetter.cs ./Assets/Editor/TextureFormatSetter.cs
+copy_template ~/github/.templates/Editor/HLAddressableTool.cs   ./Assets/Editor/HLAddressableTool.cs
 ```
+
+> 템플릿 갱신 시 각 프로젝트에서 재복사해야 반영됩니다 (복사 방식의 트레이드오프). 자주 바뀌면 회사 SDK 병합으로 대체 예정.
 
 > **링크/복사 제외**: `~/github/.templates/scripts/` 폴더는 프로젝트에 두지 않는다.
 > 검증 스크립트는 템플릿에서 직접 실행한다:

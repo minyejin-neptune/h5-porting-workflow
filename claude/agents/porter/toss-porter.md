@@ -1850,60 +1850,25 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" Assets/Scripts --inc
 
 발견된 파일을 Read해서 SafeArea 로직 확인:
 
-**기존 SafeArea 클래스 있음** → 파일을 Read해서 `#if UNITY_WEBGL` 분기 안에 HLSDK inset 적용 추가.
+**기존 SafeArea 클래스 있음** → 레이아웃 적용 함수(`ApplyOffset()` 등)의 `#if UNITY_WEBGL` 분기 안에서 `HLSDK.Instance.GetSafeAreaTop()` / `GetSafeAreaBottom()` inset을 기존 BasePadding에 더해 `offsetMin` / `offsetMax`에 반영한다. 클래스 상단 상수가 `#if UNITY_WEBGL && WEBGL_TOSS` / `#else`로 분기되어 있으면 Toss 전용 BasePadding 값만 확인 후 설정.
 
-`ApplyOffset()` 등 레이아웃 적용 함수 내부 `#if UNITY_WEBGL` 분기에 삽입:
+**기존 SafeArea 클래스 없음** → 공용 템플릿 `SafeAreaAdjuster`를 프로젝트로 **복사**한다 (Editor 스크립트와 동일한 porting-init 방식). 신규 코드를 프로젝트마다 새로 작성하지 않는다.
 
-```csharp
-#if UNITY_WEBGL
-    float insetTop = HLSDK.Instance.GetSafeAreaTop();
-    float insetBottom = HLSDK.Instance.GetSafeAreaBottom();
-    _panel.offsetMin = new Vector2(BasePaddingLeft + _offsetLeft, BasePaddingBottom + insetBottom + _offsetBottom);
-    _panel.offsetMax = new Vector2(-(BasePaddingRight + _offsetRight), -(BasePaddingTop + insetTop + _offsetTop));
-#else
-    _panel.offsetMin = new Vector2(BasePaddingLeft + _offsetLeft, BasePaddingBottom + _offsetBottom);
-    _panel.offsetMax = new Vector2(-(BasePaddingRight + _offsetRight), -(BasePaddingTop + _offsetTop));
-#endif
-```
+> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `~/github/.templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다. (템플릿 갱신 시 재복사 필요. 자주 바뀌면 회사 SDK 병합으로 대체 예정)
 
-클래스 상단 상수가 `#if UNITY_WEBGL && WEBGL_TOSS` / `#else`로 분기되어 있으면 Toss 전용 BasePadding 값 확인 후 설정.
-
-**기존 SafeArea 클래스 없음** → AskUserQuestion:
-
-> "SafeArea 처리 클래스가 없습니다. 어떻게 처리할까요?"
-> - 신규 클래스 작성 → SafeAreaAdjuster 패턴으로 생성:
->   ```csharp
->   public class SafeAreaAdjuster : MonoBehaviour
->   {
->   #if UNITY_WEBGL && WEBGL_TOSS
->       private const float BasePaddingTop = 100f;
->       private const float BasePaddingBottom = 0f;
->   #else
->       private const float BasePaddingTop = 0f;
->       private const float BasePaddingBottom = 0f;
->   #endif
->
->       private RectTransform _panel;
->
->       private void Awake() { _panel = GetComponent<RectTransform>(); }
->       private void Start() { ApplyOffset(); }
->
->       private void ApplyOffset()
->       {
->   #if UNITY_WEBGL
->           float insetTop = HLSDK.Instance.GetSafeAreaTop();
->           float insetBottom = HLSDK.Instance.GetSafeAreaBottom();
->           _panel.offsetMin = new Vector2(0, BasePaddingBottom + insetBottom);
->           _panel.offsetMax = new Vector2(0, -(BasePaddingTop + insetTop));
->   #else
->           _panel.offsetMin = new Vector2(0, BasePaddingBottom);
->           _panel.offsetMax = new Vector2(0, -(BasePaddingTop));
->   #endif
->       }
->   }
->   ```
->   BasePaddingTop 값은 기획 확인 후 설정 (👤)
-> - 기존 UI 매니저에 직접 삽입 → 어느 파일·메서드에 넣을지 확인 후 삽입
+- 템플릿 위치: `~/github/.templates/Runtime/SafeAreaAdjuster.cs`
+- `.cs`를 복사한다. `.meta`는 Unity가 프로젝트 로컬에 생성한다:
+  ```bash
+  mkdir -p Assets/Scripts/UI
+  cp ~/github/.templates/Runtime/SafeAreaAdjuster.cs \
+     Assets/Scripts/UI/SafeAreaAdjuster.cs
+  ```
+- 템플릿의 `OffsetPaddingTop` / `OffsetPaddingBottom`은 `const`가 아니라 `[SerializeField]` 필드다. `#if UNITY_WEBGL && WEBGL_TOSS` 분기로 기본값(Top=50f)이 지정되며, 프로젝트별 최종값은 인스펙터에서 조정한다 (기획 확인 후 설정 👤).
+- 템플릿은 대상 유형으로 분기한다:
+  - **RectTransform(UI)** → `offsetMin/offsetMax`로 inset 적용 (기존 동작).
+  - **일반 Transform(SpriteRenderer 등 월드 오브젝트)** → orthographic 카메라(`_worldCamera` 비면 `Camera.main`)로 px→월드 유닛 변환 후, 인스펙터의 `_worldAnchor`(Top/Bottom)가 가리키는 가장자리 방향으로 `localPosition`을 이동. perspective 카메라면 변환 근거가 없어 건너뛴다.
+- 복사 방식이라 프로젝트마다 사본이 생긴다. 템플릿을 고치면 각 프로젝트에서 재복사해야 반영된다.
+- 기존 UI 매니저에 직접 삽입하는 방식이 필요하면 어느 파일·메서드에 넣을지 확인 후 삽입.
 
 ---
 
