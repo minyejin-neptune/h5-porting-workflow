@@ -2,10 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Toss WebGL SafeArea 적용 컴포넌트.
-/// - RectTransform(UI): 루트에 붙여 상단/하단 inset을 offset으로 적용한다.
+/// - RectTransform(UI): 세로 스트레치는 offset, 점앵커는 위치로 상/하 inset을 적용한다.
 /// - 일반 Transform(SpriteRenderer 등 월드 오브젝트): orthographic 카메라로 px→월드 유닛 변환 후
 ///   지정한 가장자리(_worldAnchor) 방향으로 localPosition을 이동한다.
-/// 심볼릭 링크로 연결되므로, 프로젝트 내에서는 직접 수정하지 말 것
 /// </summary>
 public class SafeAreaAdjuster : MonoBehaviour
 {
@@ -32,15 +31,16 @@ public class SafeAreaAdjuster : MonoBehaviour
     // 월드 오브젝트가 실제 적용한 월드 Y 이동량을 알린다(음수=아래로). 값이 바뀔 때만 발생.
     public event System.Action<float> OnWorldOffsetApplied;
 
-    private RectTransform _panel;
+    [SerializeField] private RectTransform _panel;  // 비우면 Awake에서 GetComponent 폴백
     private Vector3 _worldBaseLocalPos;
     private bool _worldBaseCaptured;
     private float _lastWorldOffsetY = float.NaN;
 
     private void Awake()
     {
-        // 월드 오브젝트면 RectTransform이 없어 null이 된다.
-        _panel = GetComponent<RectTransform>();
+        // 인스펙터 지정이 없으면 GetComponent 폴백. 월드 오브젝트면 둘 다 null → World 경로.
+        if (_panel == null)
+            _panel = GetComponent<RectTransform>();
     }
 
     private void Start()
@@ -50,12 +50,11 @@ public class SafeAreaAdjuster : MonoBehaviour
 
     private void ApplyOffset()
     {
-#if UNITY_WEBGL
-        float insetTop = HLSDK.Instance.GetSafeAreaTop();
-        float insetBottom = HLSDK.Instance.GetSafeAreaBottom();
-#else
         float insetTop = 0f;
         float insetBottom = 0f;
+#if UNITY_WEBGL
+        insetTop = HLSDK.Instance.GetSafeAreaTop();
+        insetBottom = HLSDK.Instance.GetSafeAreaBottom();
 #endif
 
         float totalTop = OffsetPaddingTop + insetTop;
@@ -71,11 +70,31 @@ public class SafeAreaAdjuster : MonoBehaviour
         }
     }
 
-    // RectTransform(UI)용: 최종 여백(px)을 offsetMin/offsetMax에 적용.
+    // RectTransform(UI)용: 세로 스트레치면 offset, 점앵커면 위치로 상/하 inset을 기존 값에 더해 적용.
     private void ApplyRectOffset(float totalTop, float totalBottom)
     {
-        _panel.offsetMin = new Vector2(0f, totalBottom);
-        _panel.offsetMax = new Vector2(0f, -totalTop);
+        if (!Mathf.Approximately(_panel.anchorMin.y, _panel.anchorMax.y))
+        {
+            Vector2 offsetMin = _panel.offsetMin;
+            Vector2 offsetMax = _panel.offsetMax;
+            offsetMin.y += totalBottom;
+            offsetMax.y -= totalTop;
+            _panel.offsetMin = offsetMin;
+            _panel.offsetMax = offsetMax;
+        }
+        else
+        {
+            Vector2 anchoredPosition = _panel.anchoredPosition;
+            if (_panel.anchorMax.y > 0.5f)
+            {
+                anchoredPosition.y -= totalTop;
+            }
+            else
+            {
+                anchoredPosition.y += totalBottom;
+            }
+            _panel.anchoredPosition = anchoredPosition;
+        }
     }
 
     // SpriteRenderer 등 월드 오브젝트용: 최종 여백(px)을 월드 유닛으로 변환해 localPosition 이동.
@@ -89,7 +108,6 @@ public class SafeAreaAdjuster : MonoBehaviour
         }
 
         // 최초 1회 기준 위치 캡처(다른 컴포넌트의 Awake 위치 설정 이후인 Start 시점).
-        // Update에서 매 프레임 호출돼도 base+offset로 절대 적용해 누적(드리프트)되지 않게 한다.
         if (!_worldBaseCaptured)
         {
             _worldBaseLocalPos = transform.localPosition;
@@ -105,7 +123,7 @@ public class SafeAreaAdjuster : MonoBehaviour
         pos.y = _worldBaseLocalPos.y + deltaY;
         transform.localPosition = pos;
 
-        // 이동량이 바뀔 때만 통지(예: 세이프에어리어 변경). 매 프레임 스팸 방지.
+        // 이동량이 바뀔 때만 통지(예: 세이프에어리어 변경).
         if (deltaY != _lastWorldOffsetY)
         {
             _lastWorldOffsetY = deltaY;
