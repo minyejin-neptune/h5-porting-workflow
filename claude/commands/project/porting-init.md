@@ -4,6 +4,21 @@ description: 프로젝트 초기 설정 — CLAUDE.md · Docs/README.md · Edito
 
 다음 순서로 실행해주세요.
 
+## Step 0 — 기존 구조 감지 (붙이기 전 확인)
+
+기존 프로젝트에 워크플로우를 붙이는 경우, 이미 있는 문서·폴더 구조를 먼저 파악해 **그 구조를 따른다** (템플릿 구조를 강요하지 않음).
+
+```bash
+ls -d Docs Doc 2>/dev/null || echo "문서 폴더 없음"   # Docs/ vs Doc/ vs 없음
+find Docs -maxdepth 2 -type d 2>/dev/null              # 기존 Docs 하위 구조
+ls CLAUDE.md 2>/dev/null && echo "CLAUDE.md 존재" || echo "CLAUDE.md 없음"
+```
+
+판정:
+- **문서 폴더·CLAUDE.md 모두 없음** → Step 1의 템플릿 기본 구조(`Docs/design`·`Docs/porting` 등) 사용.
+- **기존 문서 구조 있음** → 그 위치를 기준으로 삼는다. 이후 단계·에이전트가 확인된 경로에 저장(역기획서·포팅 산출물 위치). `Doc/`(단수) 등 다른 규칙이면 그걸 따르고 사용자에게 보고.
+- **기존 CLAUDE.md 있음** → Step 1의 `cp -n`이 덮어쓰지 않으므로 포팅 전용 규칙(Build/Deploy·define·porting 문서 참조)이 빠져 있을 수 있다. 사용자에게 알리고 누락 규칙만 병합 안내.
+
 ## Step 1 — 템플릿 파일 연결
 
 ### 1-A. 복사 (프로젝트별로 내용이 달라지는 파일)

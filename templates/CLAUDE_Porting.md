@@ -166,17 +166,15 @@ If changes are already mixed on the same branch — before committing:
 
 ## Documentation Rules
 
-### Target Audience — strictly distinguish
+### Target Audience & Location — strictly distinguish
 
-| Doc type | Audience | Rule |
-|---|---|---|
-| 역기획서 (design doc) | Planner | No raw code dumps. Explain mechanics in plain language only. |
-| 개발 작업 가이드 (dev guide) | Developer | Implementation notes allowed (e.g., 0-based index, API names). |
+| Type | Location | Audience | Rule |
+|---|---|---|---|
+| 역기획서 (design doc) | `Docs/design/` (per-system subfolders) | Planner | No raw code dumps. Explain mechanics in plain language only. |
+| 개발 작업 가이드 (dev guide) | `Docs/FRAMEWORK_REFERENCE.md` | Developer | Implementation notes allowed (e.g., 0-based index, API names). |
+| Porting artifacts | `Docs/porting/` | Workflow | PORTING_ANALYSIS, VOCAB, checklist, logs, porting notes |
+| Content definitions | `Docs/design/contents/` | Planner | Unlock conditions, values |
 
-- Never mix content types: index/API notes belong in the dev guide, not the 역기획서.
-- When creating a new doc, confirm with the user which type it is before writing.
-
-### File Location
-
-- Save all documentation under `Docs/` (not `Doc/`).
-- Confirm the save path with the user before creating a new file.
+- Never mix types: index/API notes belong in the dev guide, not the 역기획서.
+- When creating a new doc, confirm its type and save location with the user.
+- Save all documentation under `Docs/`. **But if the project already has a different doc structure, follow that structure.**
