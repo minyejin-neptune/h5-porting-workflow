@@ -51,10 +51,18 @@ copy_template ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs
 > python ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py --platform WEBGL_PUREWEB
 > ```
 
-## Step 2 — CLAUDE.md 초기화
+## Step 2 — CLAUDE.md 초기화 (프로젝트별 설정 채우기)
 
-`init` 스킬을 실행하세요.
-인자(args): `CLAUDE.md와 Docs/README.md를 읽고, 프로젝트 코드를 탐색해 CLAUDE.md의 빈 placeholder(Architecture Overview 등)를 채워주세요.`
+`init` 스킬을 실행하세요. 인자로 아래 지시를 전달합니다:
+
+> "CLAUDE.md와 Docs/README.md를 읽고, 프로젝트 코드를 탐색해 CLAUDE.md 상단 `## 프로젝트별 설정` 섹션을 실제 프로젝트에 맞게 채우거나 없는 항목은 삭제하세요. 추론 금지 — 코드에서 확인한 것만 기재, 확인 못 하면 '확인 필요'로 남기고 사용자에게 보고."
+
+각 하위 항목 검증 방법 (grep의 `--include` 글롭은 반드시 따옴표 — zsh에서 unquoted면 에러):
+
+- **프로젝트 요약** — 진입점·게임 성격 코드를 탐색해 한 줄 설명 작성 (필요 시 `.md/PROJECT.md`)
+- **커스텀 빌드 진입점** — 프로젝트 자체 빌드 메뉴(예: `Xxx/Build/`)는 SDK 빌드 스크립트(Tapjoy·BuildReport 등)와 섞여 grep만으론 판별 불가. **porting-scan(STEP 2)의 "자체 빌드 스크립트" 결과로 확정**하고, 그 전이면 "확인 필요"로 남긴다.
+- **배포 명령** — `find . -maxdepth 5 -name "deploy*.sh" 2>/dev/null` → 히트면 실제 경로로 교체, 0건이면 그 줄 삭제
+- **프로젝트 전용 define** — `grep -rhoE "#if [A-Z][A-Z0-9_]+" Assets/Scripts --include="*.cs" | grep -vE "UNITY_|WEBGL_|ENABLE_LOG" | sort -u` (또는 `ProjectSettings/ProjectSettings.asset`의 `scriptingDefineSymbols`) → 후보 나열(서드파티 SDK define 섞일 수 있음) → 실제 프로젝트가 쓰는 것만 확정하고 예시(`AVOEX_*`)는 교체/삭제. 불명확하면 "확인 필요"
 
 ## Step 3 — FRAMEWORK_REFERENCE.md 생성
 
