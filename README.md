@@ -19,7 +19,6 @@ templates/                    # 워크플로우가 repo 경로로 직접 참조 
   scripts/h5-port-verify.py
   Editor/*.cs, Runtime/*.cs
 install.sh                    # claude/ 를 ~/.claude 로 심볼릭 연결
-docs/                         # 내부 설계 문서
 ```
 
 > **clone 위치 고정**: 워크플로우가 `~/github/h5-porting-workflow/templates/...` 를 직접 참조하므로
