@@ -14,13 +14,16 @@ claude/                       # ~/.claude 에 심볼릭될 내용
   commands/
     h5/        h5-port, porting-scan, porting-scan-verify
     project/   porting-init
-templates/                    # ~/github/.templates 에 심볼릭될 내용
+templates/                    # 워크플로우가 repo 경로로 직접 참조 (심볼릭 없음)
   CLAUDE_Porting.md, h5-porter-template.md, README.md
   scripts/h5-port-verify.py
-  Editor/*.cs
-install.sh                    # 위 둘을 심볼릭으로 연결
+  Editor/*.cs, Runtime/*.cs
+install.sh                    # claude/ 를 ~/.claude 로 심볼릭 연결
 docs/                         # 내부 설계 문서
 ```
+
+> **clone 위치 고정**: 워크플로우가 `~/github/h5-porting-workflow/templates/...` 를 직접 참조하므로
+> repo는 반드시 **`~/github/h5-porting-workflow`** 에 clone해야 한다 (다른 경로면 템플릿 참조가 깨짐).
 
 ## 설치 (각자 1회)
 
@@ -32,8 +35,10 @@ cd ~/github/h5-porting-workflow
 
 `install.sh` 가 하는 일:
 - `claude/` 의 모든 파일 → `~/.claude/` 에 심볼릭 (agents·commands)
-- `templates/` → `~/github/.templates` 에 심볼릭
-- 기존 실제 파일/폴더가 있으면 `.bak` 으로 백업
+- 기존 실제 파일이 있으면 `.bak` 으로 백업
+- (구버전 `~/github/.templates` 심볼릭이 있으면 제거)
+
+> `templates/` 는 심볼릭하지 않는다. 워크플로우가 `~/github/h5-porting-workflow/templates/` 를 직접 참조한다.
 
 설치 후 Claude Code에서 `/reload-plugins` 또는 재시작.
 
@@ -42,7 +47,8 @@ cd ~/github/h5-porting-workflow
 ```bash
 cd ~/github/h5-porting-workflow && git pull
 ```
-심볼릭이라 **별도 재설치 없이** 즉시 반영. 프로젝트의 Editor 스크립트도 `~/github/.templates` 경유라 자동 갱신.
+`~/.claude` 는 심볼릭이라 **재설치 없이** 즉시 반영. 템플릿(`templates/`)도 repo 실파일이라 pull하면 바로 최신.
+단, 이미 포팅한 프로젝트에 **복사된** Editor 스크립트는 자동 갱신 안 됨(복사본) — 갱신하려면 porting-init 재실행 또는 수동 재복사.
 
 ## 사용
 
@@ -54,11 +60,11 @@ cd ~/github/h5-porting-workflow && git pull
 
 ## 경로 규칙 (기여 시)
 
-repo 안 파일끼리의 참조는 설치 후 경로 기준:
-- 커맨드 상호참조 → `~/.claude/commands/...`
-- 템플릿·스크립트·Editor → `~/github/.templates/...`
+repo 안 파일끼리의 참조 경로 기준:
+- 커맨드 상호참조 → `~/.claude/commands/...` (심볼릭 경유)
+- 템플릿·스크립트·Editor·Runtime → `~/github/h5-porting-workflow/templates/...` (repo 직접)
 
-절대경로(`/Users/<이름>/...`)를 새로 박지 말 것. `~/.claude` · `~/github/.templates` 만 사용.
+절대경로(`/Users/<이름>/...`)를 새로 박지 말 것. `~/.claude` · `~/github/h5-porting-workflow/templates` 만 사용.
 
 ## ⚠️ 테스트 필요
 

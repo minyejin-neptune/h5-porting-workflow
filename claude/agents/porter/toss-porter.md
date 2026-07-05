@@ -378,7 +378,7 @@ TossHandler 전용 호출(배너·Managed 프로모션) 로그에만 `[TOSS]` pr
 **0-A단계 — 심볼 섹션 최신 여부 확인**
 
 ```bash
-grep 'WEBGL_\|UNITY_WEBGL' ~/github/.templates/h5-porter-template.md
+grep 'WEBGL_\|UNITY_WEBGL' ~/github/h5-porting-workflow/templates/h5-porter-template.md
 ```
 
 이 파일 **플랫폼 전처리기 심볼** 섹션에 없는 심볼이 결과에 있으면 사용자에게 보고 후 계속 진행.
@@ -1854,13 +1854,13 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" Assets/Scripts --inc
 
 **기존 SafeArea 클래스 없음** → 공용 템플릿 `SafeAreaAdjuster`를 프로젝트로 **복사**한다 (Editor 스크립트와 동일한 porting-init 방식). 신규 코드를 프로젝트마다 새로 작성하지 않는다.
 
-> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `~/github/.templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다. (템플릿 갱신 시 재복사 필요. 자주 바뀌면 회사 SDK 병합으로 대체 예정)
+> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `~/github/h5-porting-workflow/templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다. (템플릿 갱신 시 재복사 필요. 자주 바뀌면 회사 SDK 병합으로 대체 예정)
 
-- 템플릿 위치: `~/github/.templates/Runtime/SafeAreaAdjuster.cs`
+- 템플릿 위치: `~/github/h5-porting-workflow/templates/Runtime/SafeAreaAdjuster.cs`
 - `.cs`를 복사한다. `.meta`는 Unity가 프로젝트 로컬에 생성한다:
   ```bash
   mkdir -p Assets/Scripts/UI
-  cp ~/github/.templates/Runtime/SafeAreaAdjuster.cs \
+  cp ~/github/h5-porting-workflow/templates/Runtime/SafeAreaAdjuster.cs \
      Assets/Scripts/UI/SafeAreaAdjuster.cs
   ```
 - 템플릿의 `OffsetPaddingTop` / `OffsetPaddingBottom`은 `const`가 아니라 `[SerializeField]` 필드다. `#if UNITY_WEBGL && WEBGL_TOSS` 분기로 기본값(Top=50f)이 지정되며, 프로젝트별 최종값은 인스펙터에서 조정한다 (기획 확인 후 설정 👤).
@@ -2435,7 +2435,7 @@ CompileChecker: 통과 / 에러 N건
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
 
 ```bash
-python3 ~/github/.templates/scripts/h5-port-verify.py \
+python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
   --platform WEBGL_TOSS \
   --vocab Docs/porting/PORTING_VOCAB.md \
   --scripts {SCRIPTS_PATH}
