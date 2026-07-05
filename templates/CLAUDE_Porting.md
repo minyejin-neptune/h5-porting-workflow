@@ -129,7 +129,7 @@ If changes are already mixed on the same branch — before committing:
 | Toss DEV | `WEBGL_TOSS`, `WEBGL_DEV_VER`, `ENABLE_LOG`, `WEBGL_DEBUG_CONSOLE` |
 | Toss LIVE | `WEBGL_TOSS`, `WEBGL_LIVE_VER` |
 | Pure DEV | `WEBGL_PUREWEB`, `WEBGL_DEV_VER`, `ENABLE_LOG`, `WEBGL_DEBUG_CONSOLE` |
-| Pure LIVE | `WEBGL_PUREWEB`, `WEBGL_DEV_VER` |
+| Pure LIVE | `WEBGL_PUREWEB`, `WEBGL_LIVE_VER` |
 
 ### Define Symbol Reference
 
