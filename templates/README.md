@@ -13,7 +13,7 @@
 |---|---|---|
 | `FRAMEWORK_REFERENCE.md` | project-init | 개발 전 필수 참고. 진입점·시스템·유틸·헬퍼·재사용 API 요약(개조식) |
 | `porting/NATIVE_BASELINE.md` | porting-scan | 포팅 전 네이티브 불변 스냅샷 — SDK 인벤토리·프로젝트 정보·게임 구조 (scan-verify 후 동결) |
-| `porting/pureweb-checklist.md` | porting-scan | 기반 작업목록(가변) — 컴파일·런타임·공백 이슈 단일 기록처 + 단계 진행 |
+| `porting/pureweb-checklist.md` | porting-scan | 기반 작업목록(가변) — pureweb-porter가 처리하는 기반 포팅 이슈(컴파일·런타임·공백) + 단계 진행 |
 | `porting/toss-checklist.md` | porting-scan | 토스 플랫폼 작업목록(가변) — 단계 진행·기획자 보고·교정 기록 |
 | `porting/PORTING_VOCAB.md` | porting-scan | 포터 에이전트가 참조하는 메서드·클래스 어휘 사전(위치 인덱스) |
 | `porting/compile_result.log` | CompileChecker | 플랫폼별 컴파일 체크 결과 |
