@@ -105,7 +105,7 @@ grep -rln "BuildPlayer\|BuildPipeline" Assets --include="*.cs" 2>/dev/null | gre
       ↓
 [플랫폼 선택] $ARGUMENTS 또는 AskUserQuestion (toss / pureweb / 전체)
       ↓
-[병렬 실행] STEP 1 SDK 목록  |  STEP 3 런타임 이슈  |  STEP 4 게임 구조 파악  |  STEP 6 WebGL 공백
+[병렬 실행] STEP 1 SDK 목록 확보(에이전트)  |  STEP 3 런타임 이슈  |  STEP 4 게임 구조 파악  |  STEP 6 WebGL 공백
       ↓ (STEP 1 완료 후)
 [순차 실행] D → A 교차 검증  (D 대상 SDK의 코드 가드 누락 파일 확인)
       ↓
@@ -114,35 +114,26 @@ grep -rln "BuildPlayer\|BuildPipeline" Assets --include="*.cs" 2>/dev/null | gre
 [순차 실행] STEP 5 문서 저장
 ```
 
-STEP 1·3·4는 서로 독립적이므로 Bash 호출을 동시에 실행한다.
-D → A 교차 검증은 STEP 1에서 D 대상 SDK가 확정된 후 즉시 실행한다.
+STEP 1(Agent 호출)·3·4는 서로 독립적이므로 같은 응답에서 동시에 실행한다.
+D → A 교차 검증은 STEP 1 수용 목록에서 D 대상 SDK가 확정된 후 즉시 실행한다.
 STEP 2는 교차 검증 결과를 포함해 전체 컴파일 이슈를 최종 정리한다.
 
 ---
 
-### STEP 1 — SDK 목록 작성 [병렬]
+### STEP 1 — 외부 SDK 목록 확보 [병렬]
 
-사전 감지에서 확인한 SDK 폴더별로:
+`Agent 도구(subagent_type: "sdk-list-analyzer")`를 실행한다. SDK 목록 작성 로직(감지·용도 판단·A/B/C/D 분류·Zero-Hit Fallback)은 이 에이전트가 **단일 소스**다 — 여기서 재구현하지 않는다.
 
-0. 폴더명·네임스페이스를 보고 용도를 한 줄로 판단한다 (예: `광고 (AdMob)`, `인앱결제`, `마케팅 어트리뷰션`). 판단 불가 시 "확인 필요"로 표시.
-1. 폴더 내 `.jslib` 파일 존재 여부 확인
-2. SCRIPTS_PATH에서 해당 SDK 네임스페이스 사용 파일 수 집계
-   ```bash
-   grep -rln "using {네임스페이스}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | wc -l
-   ```
-3. SDK 타입을 상속하는 파일 존재 여부 (stub 클래스 필요성 판단)
-   ```bash
-   grep -rn ": IStore\|: IDetailedStore\|: IUnityAds\|: IAdsListener" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null
-   ```
+에이전트가 스스로 판정하므로 조건 분기 없이 항상 호출한다 (에이전트 STEP 0):
+- `NATIVE_BASELINE.md` 존재 → 분석 생략 안내 — BASELINE `## 외부 SDK 목록`을 사용한다 (재스캔 케이스)
+- `Docs/porting/.sdk-list.md` 존재 + 신선(기준 커밋 대비 관련 변경 0건) → 재분석 생략, 기존 산출물 사용
+- 그 외(낡음/없음) → 분석 실행
 
-처리 방법 분류:
-- **A (using 래핑)** — `#if !UNITY_WEBGL using ... #endif` 로 충분한 경우
-- **B (stub 클래스)** — SDK 타입을 상속·파라미터로 사용, 껍데기 타입 정의 필요
-- **C (파일 전체 래핑)** — WebGL에서 완전히 불필요한 파일
-- **D (.meta WebGL 비활성화)** — `.dll` / `.jslib` / `.aar` 등 플러그인 파일의 `.meta`에서 `WebGL: enabled: 1` → `0` 으로 변경. C# 코드 가드만으로는 차단되지 않으므로 반드시 별도 처리
+완료 후 `Docs/porting/.sdk-list.md`를 Read해 **spot-check**(표에서 1~2행의 폴더 실존을 `ls`로 확인) 후 수용한다. 이 목록이 이후 단계(D→A 교차 검증, STEP 5 NATIVE_BASELINE 기재)의 외부 SDK 목록이다.
 
-> **타이머/트위닝 라이브러리 메모**: DOTween·UniTask·LeanTween 등이 SDK 목록에 있으면 별도로 메모해 둔다.
-> 4-B 광고 중 게임 중지 탐색 시 외부 라이브러리 Unscaled 설정 grep도 함께 실행한다.
+처리 방법 A/B/C/D 정의는 sdk-list-analyzer 에이전트 문서를 따른다.
+
+> **타이머/트위닝 라이브러리 메모**: 산출물 `## 메모`에 기록돼 있다 — 4-B 광고 중 게임 중지 탐색 시 외부 라이브러리 Unscaled 설정 grep과 함께 사용한다.
 
 #### D → A 교차 검증 [STEP 1 완료 직후]
 
@@ -196,17 +187,7 @@ A 처리 파일을 Read한 후:
 
 > grep 결과만으로 판정하지 않는다. 파일 Read 후 `#if` 블록 경계를 직접 확인한다.
 
-**Zero-Hit Fallback** — SDK 폴더·네임스페이스 grep이 모두 0건이면 의존성 메타데이터를 읽는다 (최대 5개 파일, 1단계):
-
-```bash
-find Assets -name "*.asmdef" 2>/dev/null | xargs grep -l "references" 2>/dev/null
-cat Packages/manifest.json 2>/dev/null
-find Assets -name "link.xml" 2>/dev/null | xargs cat 2>/dev/null
-grep -rhoE "^namespace [A-Za-z0-9_.]+" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
-  | awk '{print $2}' | cut -d. -f1 | sort | uniq -c | sort -rn | head -20
-```
-
-발견된 외부 네임스페이스·패키지를 SDK 목록에 `처리방법: 확인 필요`, `상태: ⬜ fallback 식별`로 추가. 미해결 항목으로 분류.
+> Zero-Hit Fallback(전 SDK grep 0건 시 의존성 메타데이터 탐색)은 sdk-list-analyzer 에이전트로 이관됐다 — 산출물에 `처리 방법: 확인 필요`, `상태: fallback 식별`로 표기되어 돌아온다.
 
 ---
 
@@ -792,10 +773,16 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 아래 4파일을 저장한다 (형식은 "출력 문서 형식" 1~3 + VOCAB 참조):
 
-1. `NATIVE_BASELINE.md` — 불변 스냅샷
+1. `NATIVE_BASELINE.md` — 불변 스냅샷 (`## 외부 SDK 목록`은 STEP 1 수용본 기재)
 2. `PORTING_VOCAB.md` — 위치 사전 (신규 또는 기존 갱신)
 3. `pureweb-checklist.md` — 기반 작업목록 (STEP 2·3·6에서 발견한 이슈 포함)
 4. `toss-checklist.md` — 플랫폼 작업목록
+
+저장 성공 확인 후 임시 산출물을 삭제한다 (이중 진실 방지 — 정본은 NATIVE_BASELINE):
+
+```bash
+ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
+```
 
 ---
 
