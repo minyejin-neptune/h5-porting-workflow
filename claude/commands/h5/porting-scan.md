@@ -1,10 +1,14 @@
 ---
-description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분석해 PORTING_ANALYSIS.md·PORTING_VOCAB.md 생성
+description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분석해 NATIVE_BASELINE.md·PORTING_VOCAB.md·체크리스트 2종 생성
 ---
 
 # 포팅 사전 분석 스캔
 
-프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/PORTING_ANALYSIS.md`와 `Docs/porting/PORTING_VOCAB.md`를 생성한다.
+프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/` 아래 4파일을 생성한다:
+- `NATIVE_BASELINE.md` — 포팅 전 네이티브 불변 스냅샷 (프로젝트 정보·SDK 인벤토리·게임 구조)
+- `PORTING_VOCAB.md` — 위치 사전 (기능→파일:라인)
+- `pureweb-checklist.md` — 기반 작업목록 (이슈·확인 필요의 단일 기록처)
+- `toss-checklist.md` — 플랫폼 작업목록
 
 `$ARGUMENTS`로 포팅 플랫폼을 지정할 수 있다 (`toss` / `pureweb`). 지정하지 않으면 사전 감지 후 AskUserQuestion으로 확인한다.
 
@@ -15,7 +19,21 @@ description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분
 
 ## 사전 감지
 
-아래 항목을 자동 파악한다. 파악 불가 시 사용자에게 질문.
+**구버전 문서 감지 (시점 분리 마이그레이션)**
+
+```bash
+ls Docs/porting/NATIVE_BASELINE.md 2>/dev/null && echo "BASELINE: EXISTS"
+ls Docs/porting/PORTING_ANALYSIS.md 2>/dev/null && echo "OLD_ANALYSIS: EXISTS"
+```
+
+- `BASELINE: EXISTS` → 신 구조 — 그대로 진행
+- 둘 다 없음 → 신규 프로젝트 — 그대로 진행
+- BASELINE 없고 `OLD_ANALYSIS: EXISTS`만 → 시점 분리 이전 프로젝트. AskUserQuestion으로 이관을 제안한다:
+  > "구 형식 문서(PORTING_ANALYSIS.md)가 있습니다. 새 구조(NATIVE_BASELINE + 체크리스트)로 이관할까요?"
+  > - 이관 — 파일을 `NATIVE_BASELINE.md`로 개명하고, 가변 섹션(컴파일·런타임·공백 이슈, 확인 필요, 빌드 기록, 처리 현황류)을 체크리스트로 이동한다. 기존 상태·커밋 해시는 보존.
+  > - 유지 — 이관하지 않고 스캔을 중단한다 (구 구조 그대로 사용)
+
+**항목 자동 파악** — 아래 항목을 자동 파악한다. 파악 불가 시 사용자에게 질문.
 
 ```bash
 # SCRIPTS_PATH
@@ -137,7 +155,7 @@ grep -rln "using {D_SDK_네임스페이스}" {SCRIPTS_PATH} --include="*.cs" 2>/
   | xargs -I{} sh -c 'grep -l "UNITY_WEBGL" {} 2>/dev/null || echo "A_MISSING: {}"'
 ```
 
-- `A_MISSING:` 로 출력된 파일 → A 처리 누락. 컴파일 이슈 테이블에 반드시 포함
+- `A_MISSING:` 로 출력된 파일 → A 처리 누락. pureweb-checklist.md `## 이슈`에 `[컴파일]` 항목으로 반드시 포함
 - D 대상이지만 `using` 0건인 SDK (예: Parse) → 코드 가드 불필요, meta만 처리로 충분. "코드 사용 없음 — D만 적용" 으로 명시
 
 #### 래퍼 호출부 역추적 [D→A 교차 검증 직후]
@@ -166,7 +184,7 @@ python3 Docs/porting/h5-port-verify.py \
 | 결과 | 처리 |
 |---|---|
 | `CALLER_MISSING` 건수 0 | 래퍼 호출부 이상 없음 |
-| `CALLER_MISSING` 건수 1 이상 | 컴파일 이슈 테이블에 추가. 이슈: `CALLER_MISSING: {클래스}.{메서드}() 호출 — 가드 없음` / 처리방법: A |
+| `CALLER_MISSING` 건수 1 이상 | pureweb-checklist.md `## 이슈`에 `[컴파일]` 항목으로 추가. 이슈: `CALLER_MISSING: {클래스}.{메서드}() 호출 — 가드 없음` / 처리방법: A |
 
 **내부 미가드 SDK 호출 확인 (INTERNAL_UNGUARDED)**
 
@@ -174,7 +192,7 @@ python3 Docs/porting/h5-port-verify.py \
 
 A 처리 파일을 Read한 후:
 - `#if` WEBGL 가드 **바깥**에 있는 메서드(Init\*, Initialize\*, Start, Awake 포함)에서 SDK 직접 호출이 있으면
-- → 컴파일 이슈 테이블에 추가. 이슈: `INTERNAL_UNGUARDED: {메서드명}() — 가드 없이 SDK 호출` / 처리방법: A
+- → pureweb-checklist.md `## 이슈`에 `[컴파일]` 항목으로 추가. 이슈: `INTERNAL_UNGUARDED: {메서드명}() — 가드 없이 SDK 호출` / 처리방법: A
 
 > grep 결과만으로 판정하지 않는다. 파일 Read 후 `#if` 블록 경계를 직접 확인한다.
 
@@ -232,7 +250,7 @@ grep -rln "using System\.IO\|using System\.Net\|using System\.Threading" \
 ```
 
 히트 파일 상위 5개를 Read해 실제 API 호출(파일:라인)을 확인한다.
-근거 있으면 런타임 이슈 테이블에 `(fallback)` 표기로 추가. 근거 없으면 "코드에서 근거를 찾지 못했습니다"로 기록.
+근거 있으면 pureweb-checklist.md `## 이슈`에 `[런타임]` 항목으로 `(fallback)` 표기로 추가. 근거 없으면 "코드에서 근거를 찾지 못했습니다"로 기록.
 
 ---
 
@@ -259,11 +277,11 @@ python3 Docs/porting/h5-port-verify.py \
 
 | Severity | 의미 | 처리 |
 |---|---|---|
-| `CONTROL_FLOW` | 루프 내 yield 없음 → 무한루프·프레임 정지 위험 | 파일:라인 Read 후 런타임 이슈 테이블에 추가 |
-| `STATE_UNDEF` | UI/상태 미정의 → 씬 기본값 의존 | 파일:라인 Read 후 런타임 이슈 테이블에 추가 |
+| `CONTROL_FLOW` | 루프 내 yield 없음 → 무한루프·프레임 정지 위험 | 파일:라인 Read 후 pureweb-checklist.md `## 이슈`에 `[런타임]` 항목으로 추가 |
+| `STATE_UNDEF` | UI/상태 미정의 → 씬 기본값 의존 | 파일:라인 Read 후 pureweb-checklist.md `## 이슈`에 `[런타임]` 항목으로 추가 |
 | `BEHAVIOR_GAP` | 동작 누락 — 의도된 공백 가능성 있음 | Read 확인 후 이슈 여부 판정. 네이티브 전용(GPGS·AndroidConnect 등)이면 기록 생략 |
 
-`CONTROL_FLOW` · `STATE_UNDEF` 건수가 0이면 `PORTING_ANALYSIS.md`에 `## WebGL 공백 이슈` 테이블을 "이상 없음"으로 기록한다.
+`CONTROL_FLOW` · `STATE_UNDEF` 건수가 0이면 pureweb-checklist.md `## 이슈`에 `- [x] WebGL 공백 스캔 — 이상 없음 (CONTROL_FLOW·STATE_UNDEF 0건)` 한 줄을 기록한다.
 
 ---
 
@@ -649,7 +667,7 @@ Base64 인코딩: 있음 (메서드명) / 없음 — 포팅 시 추가 필요
 
 사전 감지에서 찾은 `BuildPlayer|BuildPipeline|IPreprocessBuildWithReport|IPostprocessBuildWithReport` 파일을 분석한다.
 
-**파일이 있는 경우**: Read해서 아래 항목을 확인하고 PORTING_ANALYSIS.md `자체 빌드 스크립트` 항목에 파일:라인으로 기록한다.
+**파일이 있는 경우**: Read해서 아래 항목을 확인하고 NATIVE_BASELINE.md `자체 빌드 스크립트` 항목에 파일:라인으로 기록한다.
 - PreBuild 단계 목록 (폰트 베이크, 아틀라스, 오디오 세팅, Addressables 빌드 등)
 - H5Builder가 이미 처리하는 항목 vs. 이 프로젝트에서만 추가로 필요한 항목
 - WebGL 빌드 메서드 존재 여부
@@ -728,6 +746,8 @@ Base64 인코딩: 있음 (메서드명) / 없음 — 포팅 시 추가 필요
 
 ## 포터 기록
 
+> 위치(파일:라인) 기록 전용 — 상태·완료 여부는 체크리스트(pureweb/toss-checklist.md)에 기록한다.
+
 | 시스템 | 파일:라인 | 플레이스홀더 | 비고 |
 |---|---|---|---|
 ```
@@ -770,16 +790,25 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 ### STEP 5 — 문서 저장
 
-`Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 저장.
+`Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 아래 4파일을 저장한다 (형식은 "출력 문서 형식" 1~3 + VOCAB 참조):
+
+1. `NATIVE_BASELINE.md` — 불변 스냅샷
+2. `PORTING_VOCAB.md` — 위치 사전 (신규 또는 기존 갱신)
+3. `pureweb-checklist.md` — 기반 작업목록 (STEP 2·3·6에서 발견한 이슈 포함)
+4. `toss-checklist.md` — 플랫폼 작업목록
 
 ---
 
-## 출력 문서 형식 (`Docs/porting/PORTING_ANALYSIS.md`)
+## 출력 문서 형식 1 (`Docs/porting/NATIVE_BASELINE.md`)
+
+포팅 전 네이티브 상태의 **불변 스냅샷**. porting-scan-verify 완료 후 동결 — 이후 갱신하지 않는다.
+이슈·상태·진행은 여기 기록하지 않는다 (체크리스트 담당).
 
 ```markdown
-# 포팅 분석 — {프로젝트 루트 폴더명}
+# 네이티브 베이스라인 — {프로젝트 루트 폴더명}
 
 > 생성일: {날짜} | 스크립트 경로: {SCRIPTS_PATH}
+> 포팅 전 네이티브 스냅샷 — scan-verify 후 동결. 이슈·진행 상태는 pureweb/toss-checklist.md 참조.
 
 ## 프로젝트 정보
 
@@ -793,30 +822,9 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 ## 외부 SDK 목록
 
-| SDK | 용도 (추론) | 폴더 | jslib | 영향 파일 수 | 처리 방법 | 상태 |
-|---|---|---|---|---|---|---|
-| Firebase | 인증·분석·푸시 | Assets/Firebase | 없음 | 12 | A | ⬜ 미처리 |
-
----
-
-## 컴파일 타임 이슈
-
-| 파일 | 라인 | SDK | 이슈 | 처리 방법 |
-|---|---|---|---|---|
-
----
-
-## 런타임 이슈
-
-| 파일 | 라인 | 이슈 | 처리 방법 |
-|---|---|---|---|
-
----
-
-## WebGL 공백 이슈
-
-| 파일 | 라인 | Severity | 분기 조건 | 처리 방법 |
-|---|---|---|---|---|
+| SDK | 용도 (추론) | 폴더 | jslib | 영향 파일 수 | 처리 방법 |
+|---|---|---|---|---|---|
+| Firebase | 인증·분석·푸시 | Assets/Firebase | 없음 | 12 | A |
 
 ---
 
@@ -824,12 +832,64 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 | 시스템 | 메서드/클래스명 | 파일:라인 |
 |---|---|---|
+```
 
 ---
 
-## 확인 필요 항목
+## 출력 문서 형식 2 (`Docs/porting/pureweb-checklist.md` — 기반 작업목록)
 
-코드에서 직접 확인하지 못한 항목 목록.
+이슈(컴파일/런타임/공백)·확인 필요의 **단일 기록처**. toss-checklist에는 이슈를 기록하지 않는다.
+단계 진행 표는 여기 만들지 않는다 — pureweb-porter가 0-B에서 추가한다 (소유 분리).
+상태 표기는 마크다운 체크박스: 완료 = `[x]` + `(commit 해시)` / 스킵 = `[x]` + `⏭️ 스킵: 사유` (사유 없는 스킵 금지).
+
+```markdown
+# PureWeb 포팅 체크리스트 — {프로젝트 루트 폴더명}
+
+> 생성: {날짜} (porting-scan) | 단계 진행 표는 pureweb-porter가 추가
+
+## 이슈
+
+- [ ] {파일}:{라인} — [컴파일] {이슈} — {처리 방법}
+- [ ] {파일}:{라인} — [런타임] {이슈} — {처리 방법}
+- [ ] {파일}:{라인} — [공백:{Severity}] {분기 조건} — {처리 방법}
+
+## 확인 필요
+
+- [ ] {코드에서 직접 확인하지 못한 항목}
+
+## 기획자 보고
+
+- [ ] {포팅 시작 전·완료 후 기획자에게 전달할 항목}
+
+## 교정 기록
+
+(append-only — 스캔 오진·처리 실수와 교정 내용)
+
+## 빌드 기록
+
+| 날짜 | 빌드 타겟 | 파일 | 용량 | 비고 |
+|---|---|---|---|---|
+```
+
+---
+
+## 출력 문서 형식 3 (`Docs/porting/toss-checklist.md` — 플랫폼 작업목록)
+
+이슈 표 없음 — 기반 이슈는 pureweb-checklist를 읽기 참조한다.
+단계 진행 표는 toss-porter가 0-B에서 추가한다.
+
+```markdown
+# Toss 포팅 체크리스트 — {프로젝트 루트 폴더명}
+
+> 생성: {날짜} (porting-scan) | 단계 진행 표는 toss-porter가 추가 | 기반 이슈: pureweb-checklist.md 참조
+
+## 기획자 보고
+
+- [ ] {항목}
+
+## 교정 기록
+
+(append-only)
 
 ## 빌드 기록
 
@@ -855,8 +915,10 @@ fallback에서 `확인 필요` 또는 `근거 없음`으로 기록된 항목이 
 ---
 
 ```
-✅ Docs/porting/PORTING_ANALYSIS.md 생성 완료
+✅ Docs/porting/NATIVE_BASELINE.md 생성 완료
 ✅ Docs/porting/PORTING_VOCAB.md 생성 완료  (신규 / 기존 파일 사용)
+✅ Docs/porting/pureweb-checklist.md 생성 완료  (이슈 N건 기록)
+✅ Docs/porting/toss-checklist.md 생성 완료
 
 📊 요약
 - 외부 SDK: N개 (jslib N개 포함)
@@ -872,10 +934,11 @@ fallback에서 `확인 필요` 또는 `근거 없음`으로 기록된 항목이 
   * 미사용: H5Builder 개선 불필요
 
 📋 포팅 전 확인 필요 (사용자 직접 검토)
-아래 두 파일을 열어 내용을 확인하고, 수정이 필요한 항목은 직접 수정한 뒤 포팅을 시작해 주세요:
+아래 파일을 열어 내용을 확인하고, 수정이 필요한 항목은 직접 수정한 뒤 포팅을 시작해 주세요:
 
-  Docs/porting/PORTING_ANALYSIS.md  — SDK 목록·컴파일·런타임 이슈
-  Docs/porting/PORTING_VOCAB.md     — 포터가 참조할 메서드·파일명 어휘 사전
+  Docs/porting/NATIVE_BASELINE.md     — 프로젝트 정보·SDK 목록 (불변 스냅샷)
+  Docs/porting/pureweb-checklist.md   — 컴파일·런타임·공백 이슈 (작업목록)
+  Docs/porting/PORTING_VOCAB.md       — 포터가 참조할 메서드·파일명 어휘 사전
 
 확인 완료 후:
 - 스캔 결과 검증: /porting-scan-verify
