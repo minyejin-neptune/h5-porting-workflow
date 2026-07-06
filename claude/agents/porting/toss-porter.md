@@ -399,7 +399,7 @@ echo "TOSS" > .porting-context
 
 **1단계 — 파일 읽기**
 
-- NATIVE_BASELINE.md → 외부 SDK 목록 확인 (불변 인벤토리)
+- NATIVE_BASELINE.md → 외부 SDK 목록 확인 (불변)
 - pureweb-checklist.md `## 이슈` → 기반 컴파일/런타임 이슈 중 이미 처리된 항목 확인 (읽기 참조만)
 - PORTING_VOCAB.md → 광고·IAP·저장·로그인·사운드 파일명·메서드명 확보
 

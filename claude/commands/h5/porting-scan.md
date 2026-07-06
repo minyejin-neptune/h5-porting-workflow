@@ -5,7 +5,7 @@ description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분
 # 포팅 사전 분석 스캔
 
 프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/` 아래 4파일을 생성한다:
-- `NATIVE_BASELINE.md` — 포팅 전 네이티브 불변 스냅샷 (프로젝트 정보·SDK 인벤토리·게임 구조)
+- `NATIVE_BASELINE.md` — 포팅 전 네이티브 불변 스냅샷 (프로젝트 정보·외부 SDK 목록·게임 구조)
 - `PORTING_VOCAB.md` — 위치 사전 (기능→파일:라인)
 - `pureweb-checklist.md` — 기반 작업목록 (pureweb-porter가 처리하는 기반 포팅 이슈·확인 필요)
 - `toss-checklist.md` — 플랫폼 작업목록
@@ -187,7 +187,7 @@ A 처리 파일을 Read한 후:
 
 > grep 결과만으로 판정하지 않는다. 파일 Read 후 `#if` 블록 경계를 직접 확인한다.
 
-> Zero-Hit Fallback(전 SDK grep 0건 시 의존성 메타데이터 탐색)은 sdk-list-analyzer 에이전트로 이관됐다 — 산출물에 `처리 방법: 확인 필요`, `상태: fallback 식별`로 표기되어 돌아온다.
+> 전 SDK grep 0건이어도 sdk-list-analyzer가 Zero-Hit Fallback(의존성 메타데이터 탐색)을 수행한다 — 산출물에 `처리 방법: 확인 필요`, `상태: fallback 식별`로 표기되어 돌아온다.
 
 ---
 

@@ -1036,7 +1036,7 @@ Data + wasm 합산 50MB 이하 확인.
 
 ## 체크리스트 상태 갱신
 
-각 태스크 완료 후 `Docs/porting/pureweb-checklist.md`를 갱신한다. SDK 인벤토리 자체(NATIVE_BASELINE.md `## 외부 SDK 목록`)는 불변이므로 수정하지 않는다 — SDK 비활성화(태스크 7) 완료는 pureweb-checklist 단계 표의 "7. SDK 비활성화" 행으로만 추적한다.
+각 태스크 완료 후 `Docs/porting/pureweb-checklist.md`를 갱신한다. NATIVE_BASELINE.md `## 외부 SDK 목록`은 불변이므로 수정하지 않는다 — SDK 비활성화(태스크 7) 완료는 pureweb-checklist 단계 표의 "7. SDK 비활성화" 행으로만 추적한다.
 
 ### 업데이트 대상
 
