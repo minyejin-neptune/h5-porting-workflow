@@ -51,7 +51,7 @@ ls Docs/porting/toss-checklist.md Docs/porting/pureweb-checklist.md 2>/dev/null
 ls Docs/porting/PORTING_ANALYSIS.md 2>/dev/null
 ```
 
-- **체크리스트 있음**: 해당 체크리스트의 `## 이슈` 표에 기록(섹션 없으면 생성). 광고 이슈가 플랫폼 공통(WEBGL)이면 양쪽 체크리스트에 동일 행을 추가한다. 이미 기록된 항목이 있으면 해당 행에 연결해 업데이트한다.
+- **체크리스트 있음**: 이슈의 단일 기록처인 **pureweb-checklist.md**의 `## 이슈` 표에 기록한다(섹션 없으면 생성). toss-checklist에는 이슈를 기록하지 않는다. 이미 기록된 항목이 있으면 해당 행에 연결해 업데이트한다.
 - **체크리스트 없고 구 `PORTING_ANALYSIS.md`만 있음** (시점 분리 이전 프로젝트): 기존 방식대로 PORTING_ANALYSIS.md 이슈 테이블에 기록한다.
 - **둘 다 없음**: 기록하지 않고 사용자에게 포팅 산출 문서가 없다고 알린다.
 
