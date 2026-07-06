@@ -95,6 +95,18 @@ grep을 **첫 번째** 수단으로 쓰지 않는다 — VOCAB에 답이 있으�
 
 ---
 
+## Task Workflow (Plan → Issue → Resolve)
+
+Progress large tasks in the following order.
+
+1. `/common:feature-breakdown <problem>` — break the task down into executable subtasks.
+2. `/common:create-issue <content>` — turn the subtasks into GitHub issues.
+3. `/common:resolve-issue <issue-number>` — fetch the issue, plan the fix, and resolve it.
+
+- **Required**: If any change arises before the issue is resolved (scope change, design change, etc.), you MUST update the plan document or the issue FIRST, then proceed. Never proceed while the code and the plan/issue are out of sync.
+
+---
+
 ## Git Branch Workflow
 
 ### worktree — required for parallel work on branches sharing the same HEAD
