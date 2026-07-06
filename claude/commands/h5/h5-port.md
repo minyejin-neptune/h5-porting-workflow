@@ -170,6 +170,8 @@ iconv -f EUC-KR -t UTF-8 "{파일경로}" -o "{파일경로}.utf8" \
 포팅 전 Android 빌드 타겟 기준으로 컴파일이 정상인지 확인한다.
 **오류가 있으면 사용자 결정 없이 STEP 1-B로 넘어가지 않는다.**
 
+컴파일 실행과 **같은 응답에서** `Agent 도구(subagent_type: "sdk-list-analyzer")`를 백그라운드로 실행한다 — 아래 오류 분류에서 외부 SDK 목록이 필요하다. 에이전트는 BASELINE 존재·기존 산출물 신선도를 스스로 판정하므로(에이전트 STEP 0) 조건 분기 없이 항상 호출한다.
+
 ```bash
 UNITY_VERSION=$(grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt 2>/dev/null | awk '{print $2}')
 UNITY_BIN="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
@@ -196,15 +198,25 @@ fi
 출력이 `⛔ STOP`이면 batchmode 미실행이므로, 그 안내대로 조치될 때까지 STEP 1-B로 넘어가지 않는다.
 그 외에는 `grep` 결과로 판정한다 — 오류가 없으면 "✅ Android 컴파일 정상" 출력 후 STEP 1-B로 진행한다.
 
-오류가 있으면 아래 기준으로 분류해서 사용자에게 보고한다:
+오류가 있으면 분류해서 사용자에게 보고한다.
 
-**분류 기준**
+**분류 시작 조건**: 컴파일 로그와 `Docs/porting/.sdk-list.md`(BASELINE 존재 케이스면 NATIVE_BASELINE.md `## 외부 SDK 목록`)가 **모두 준비된 후** 시작한다 — 에이전트가 아직 실행 중이면 완료를 기다린다. 에이전트가 실패했으면 소속 판별 없이 임의 분류하지 말고 사용자에게 보고 후 대기한다.
 
-| 분류 | 판단 조건 |
+**분류 절차 — 못 찾은 심볼의 소속 판별** (에러 코드는 1차 필터일 뿐, 소속이 분류를 결정한다)
+
+1. 오류 라인에서 못 찾은 심볼(타입·네임스페이스)을 추출한다 (`CS0246`/`CS0234` 등).
+2. 프로젝트 코드에서 정의를 검색한다:
+   ```bash
+   grep -rnE "(class|struct|interface|enum) {심볼}\b" Assets --include="*.cs" 2>/dev/null | grep -v "Assets/HyperLane/"
+   ```
+3. 판별해 분류한다 — 오류 1건은 정확히 한 분류로 귀결한다:
+
+| 판별 결과 | 분류 |
 |---|---|
-| 파일 누락 | `error CS0246` / `CS0234` — 타입·네임스페이스를 찾지 못함. 스크립트 파일 자체가 없거나 경로 불일치 |
-| SDK 문제 | `Assets/Plugins`, `Assets/Firebase`, `Assets/GoogleMobileAds` 등 외부 SDK 경로에서 발생하는 오류, 또는 알 수 없는 DLL 참조 |
-| 기타 컴파일 오류 | 위에 해당하지 않는 문법 오류, 메서드 누락 등 |
+| 정의가 프로젝트 `.cs`에 있음 | 기타 — 참조·전처리(define) 문제 (파일은 있음) |
+| 정의 없음 + 심볼이 외부 SDK 목록의 SDK·네임스페이스·폴더 소속 | SDK 문제 |
+| 정의 없음 + SDK 목록에도 없음 | 파일 누락 — 정의했어야 할 스크립트 부재 |
+| `CS0246`/`CS0234` 외 (문법 오류 등) | 기타 |
 
 보고 형식:
 
@@ -212,11 +224,11 @@ fi
 ⚠️ Android 컴파일 오류 발견
 
 [파일 누락 (N건)]
-- Assets/Scripts/Foo.cs:12 — error CS0246: 'BarClass' not found
+- Assets/Scripts/Shop.cs:20 — error CS0246: 'InventoryManager' not found — 프로젝트 정의·SDK 목록 모두 없음
 ...
 
 [SDK 문제 (N건)]
-- Assets/Plugins/Firebase/... — error CS0234: ...
+- Assets/Scripts/AdManager.cs:12 — error CS0246: 'GoogleMobileAds' not found — SDK 목록 대조: 광고 SDK 소속
 ...
 
 [기타 (N건)]
