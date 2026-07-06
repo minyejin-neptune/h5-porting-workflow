@@ -501,9 +501,7 @@ grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLangua
   {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
 
-결과가 있으면 파일을 Read해서 발동 조건(카운트 N회, 특정 플래그, 특정 이벤트 등)을 파악한다.
-
-결과를 PORTING_VOCAB.md Toss 전용 `리뷰 팝업 조건` 행에 기록한다.
+리뷰 팝업은 grep 결과의 **위치(파일:라인)만** 메인 표 `리뷰 팝업` 행에 기록한다. 발동조건은 여기서 분석하지 않는다 — toss-porter가 제거 직전에 파악해 toss-checklist에 테스트 항목으로 기록한다.
 결과가 없으면 → "없음"으로 기록.
 
 #### 4-C. 게임 진입점 분석
@@ -719,7 +717,6 @@ Base64 인코딩: 있음 (메서드명) / 없음 — 포팅 시 추가 필요
 | 랭킹 연동 | ... | `{RANKING_FILE}` | 없으면 "없음" |
 | 공유하기 | ... | `{SHARE_FILE}` | 없으면 "없음" |
 | 프로모션 방식 | ... | `{PROMOTION_TYPE}` | Managed / V1 / 없음 |
-| 리뷰 팝업 조건 | ... | — | 없음 / 발동조건: 카운트 N회·플래그·이벤트 등 |
 | SafeArea 클래스 | ... | `{SAFEAREA_CLASS}` | 있음(파일명) / 없음-신규필요 |
 | UID/version 표시 | ... | `{UID_VERSION_FILE}` | 있음(파일명) / 없음 |
 | 불필요 UI 목록 | ... | `{REMOVE_UI_LIST}` | 파일:라인 목록 (복수 가능) / 없음 |
