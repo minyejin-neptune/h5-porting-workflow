@@ -38,8 +38,9 @@ Do not re-analyze content already documented there.
 | File | Purpose |
 |---|---|
 | `Docs/FRAMEWORK_REFERENCE.md` | Entry points, systems, utilities, helpers, reusable APIs — read before any code exploration |
-| `Docs/porting/PORTING_ANALYSIS.md` | SDK list, compile/runtime issues |
-| `Docs/porting/PORTING_VOCAB.md` | Method/class vocabulary — check before grepping |
+| `Docs/porting/NATIVE_BASELINE.md` | Pre-porting native snapshot (immutable) — SDK inventory, project info, game structure |
+| `Docs/porting/pureweb-checklist.md` | Work list (mutable) — compile/runtime/void issues, status |
+| `Docs/porting/PORTING_VOCAB.md` | Method/class vocabulary (location index) — check before grepping |
 
 After completing analysis of any game system, check the relevant doc in `Docs/`.
 If the doc is outdated or contradicts the code — update it and report what changed.
@@ -79,7 +80,7 @@ If the doc is outdated or contradicts the code — update it and report what cha
 
 - Do not delete existing code — wrap it in preprocessor directives (`#if`) instead. Existing code without a preprocessor directive should be wrapped in `#if !UNITY_WEBGL` by default.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
-- After completing porting-related code changes (WebGL preprocessors, SDK handling, compile/runtime issue fixes): update `Docs/porting/PORTING_ANALYSIS.md` status columns. If a method name or file path was newly confirmed, add it to `Docs/porting/PORTING_VOCAB.md` as well.
+- After completing porting-related code changes (WebGL preprocessors, SDK handling, compile/runtime issue fixes): check off the corresponding item in the checklist (`Docs/porting/pureweb-checklist.md` `## 이슈` or the step table) with the commit hash. If a method name or file path was newly confirmed, add it to `Docs/porting/PORTING_VOCAB.md` as well. Do not edit `NATIVE_BASELINE.md` (frozen after scan-verify).
 - After completing each porting task, run compile check before committing (Unity menu **Tools/H5/Compile Check**, or batch mode `CompileChecker.Run`).
 
 ---
@@ -172,7 +173,7 @@ If changes are already mixed on the same branch — before committing:
 |---|---|---|---|
 | 역기획서 (design doc) | `Docs/design/` (per-system subfolders) | Planner | No raw code dumps. Explain mechanics in plain language only. |
 | 개발 작업 가이드 (dev guide) | `Docs/FRAMEWORK_REFERENCE.md` | Developer | Implementation notes allowed (e.g., 0-based index, API names). |
-| Porting artifacts | `Docs/porting/` | Workflow | PORTING_ANALYSIS, VOCAB, checklist, logs, porting notes |
+| Porting artifacts | `Docs/porting/` | Workflow | NATIVE_BASELINE, VOCAB, pureweb/toss-checklist, logs, porting notes |
 | Content definitions | `Docs/design/contents/` | Planner | Unlock conditions, values |
 
 - Never mix types: index/API notes belong in the dev guide, not the 역기획서.

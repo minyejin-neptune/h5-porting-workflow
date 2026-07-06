@@ -253,7 +253,7 @@ grep -rln "SomeManager" Assets --include="*.unity" --include="*.prefab" 2>/dev/n
 <!-- ======================================================
      여기서부터 포터 전용 내용 작성
      - 플랫폼 정의
-     - 진입점 (PORTING_ANALYSIS.md 읽기)
+     - 진입점 (NATIVE_BASELINE.md + pureweb-checklist.md 읽기)
      - 의존성 파악 및 병렬 작업 계획
      - 작업 순서
      - 검증
