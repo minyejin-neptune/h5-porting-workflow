@@ -409,10 +409,15 @@ git branch --show-current
 포터 실행 직전에 WebGL 컴파일 상태를 확인한다. 포팅 대상 플랫폼(TOSS / PUREWEB)에 맞춰 실행.
 
 ```bash
-pgrep -x Unity && echo "UNITY_OPEN" || echo "UNITY_CLOSED"
+# 이 프로젝트의 락 점유 기준으로만 판정 — 다른 프로젝트가 열린 건 무관
+if [ -f Temp/UnityLockfile ] && lsof Temp/UnityLockfile >/dev/null 2>&1; then
+  echo "⛔ STOP: 이 프로젝트가 에디터에서 열려 있어 batchmode 불가 — 에디터를 닫은 뒤 다시 진행하거나, Tools/H5/Compile Check 메뉴를 직접 실행하고 결과를 알려주세요."
+else
+  echo "UNITY_CLOSED"
+fi
 ```
 
-- `UNITY_OPEN` → "⚠️ Unity가 열려 있어 batchmode 실행 불가. Unity를 닫은 뒤 진행하거나, Tools/H5/Compile Check 메뉴를 직접 실행하고 결과를 알려주세요." 출력 후 대기.
+- `⛔ STOP` → 출력된 안내대로 조치될 때까지 대기.
 - `UNITY_CLOSED` → 아래 명령 실행:
 
 ```bash
