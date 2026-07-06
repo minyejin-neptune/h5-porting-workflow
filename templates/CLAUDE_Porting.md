@@ -47,13 +47,13 @@ If the doc is outdated or contradicts the code — update it and report what cha
 
 ### Code Search Rule — VOCAB first
 
-파일·클래스·메서드를 찾을 때는 반드시 아래 순서를 따른다. VOCAB(위치 인덱스)을 적극 활용한다.
+When looking for a file, class, or method, always follow this order. Actively use VOCAB (the location index).
 
-1. `Docs/porting/PORTING_VOCAB.md`에서 해당 항목의 파일:라인을 먼저 확인 — 있으면 바로 Read (grep 금지).
-2. 없거나 "확인 필요"이면 → grep/find fallback.
-3. grep fallback으로 새로 확정한 파일:라인은 VOCAB `## 포터 기록`에 추가해 다음부터 재탐색을 없앤다.
+1. Check the item's file:line in `Docs/porting/PORTING_VOCAB.md` first — if present, Read it directly (no grep).
+2. If the row is missing or marked "확인 필요" → grep/find fallback.
+3. Add any file:line newly confirmed via grep fallback to VOCAB `## 포터 기록`, so it is never re-searched.
 
-grep을 **첫 번째** 수단으로 쓰지 않는다 — VOCAB에 답이 있으면 그것을 쓴다. (존재하지 않는다는 결론 전 전수조사는 아래 Verification Rules를 따른다.)
+Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Verification Rules below.)
 
 ---
 
