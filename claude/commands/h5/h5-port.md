@@ -79,15 +79,18 @@ grep -q "com.unity.addressables" Packages/manifest.json \
 STEP 0에서 생성·수정된 파일을 커밋한다.
 
 ```bash
-git add CLAUDE.md Docs/README.md Docs/FRAMEWORK_REFERENCE.md \
-        Assets/Editor/CompileChecker.cs Assets/Editor/CompileChecker.cs.meta \
-        Assets/Editor/CompileResultWindow.cs Assets/Editor/CompileResultWindow.cs.meta \
-        Assets/Editor/TextureFormatSetter.cs Assets/Editor/TextureFormatSetter.cs.meta \
-        Assets/Editor/HLAddressableTool.cs Assets/Editor/HLAddressableTool.cs.meta
+# 존재하는 파일만 스테이징한다 (없는 .meta·미생성 문서는 건너뜀)
+for path in CLAUDE.md Docs/README.md Docs/FRAMEWORK_REFERENCE.md \
+    Assets/Editor/CompileChecker.cs Assets/Editor/CompileChecker.cs.meta \
+    Assets/Editor/CompileResultWindow.cs Assets/Editor/CompileResultWindow.cs.meta \
+    Assets/Editor/TextureFormatSetter.cs Assets/Editor/TextureFormatSetter.cs.meta \
+    Assets/Editor/HLAddressableTool.cs Assets/Editor/HLAddressableTool.cs.meta; do
+  [ -e "$path" ] && git add "$path"
+done
 git status --short
 ```
 
-`.meta` 파일이 없는 항목은 `--ignore-unmatch`로 넘어간다. `git status`로 스테이징 목록을 확인한 뒤 커밋한다:
+`git status`로 스테이징 목록을 확인한 뒤 커밋한다:
 
 ```bash
 git commit -m "[문서] 포팅 초기 설정 — CLAUDE.md·FRAMEWORK_REFERENCE.md·Editor 툴 추가"
@@ -157,7 +160,7 @@ for p in problems:
 iconv -f EUC-KR -t UTF-8 "{파일경로}" -o "{파일경로}.utf8" \
   && mv "{파일경로}.utf8" "{파일경로}" \
   && echo "✓ {파일경로}" \
-  || echo "✗ 변환 실패: {파일경로}"
+  || { echo "✗ 변환 실패: {파일경로}"; rm -f "{파일경로}.utf8"; }
 ```
 
 ---
@@ -168,21 +171,30 @@ iconv -f EUC-KR -t UTF-8 "{파일경로}" -o "{파일경로}.utf8" \
 **오류가 있으면 사용자 결정 없이 STEP 1-B로 넘어가지 않는다.**
 
 ```bash
-UNITY_VERSION=$(grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt | awk '{print $2}')
+UNITY_VERSION=$(grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt 2>/dev/null | awk '{print $2}')
 UNITY_BIN="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
 LOG_FILE="/tmp/unity_android_compile.log"
 
-${UNITY_BIN} \
-  -batchmode -quit \
-  -projectPath "$(pwd)" \
-  -buildTarget Android \
-  -logFile "${LOG_FILE}" \
-  || true
-
-grep -E "error CS|^error " "${LOG_FILE}"
+# 사전 점검 — 하나라도 걸리면 batchmode를 돌리지 않고 안내만 출력한다 (조용한 오탐 방지)
+if [ -z "$UNITY_VERSION" ]; then
+  echo "⛔ STOP: ProjectVersion.txt에서 Unity 버전을 읽지 못했습니다. 파일을 확인해주세요."
+elif [ ! -x "$UNITY_BIN" ]; then
+  echo "⛔ STOP: 프로젝트 Unity 버전 $UNITY_VERSION 미설치 — Unity Hub에서 설치 후 다시 진행하세요."
+  echo "        (없는 경로: $UNITY_BIN)"
+elif [ -f Temp/UnityLockfile ] && lsof Temp/UnityLockfile >/dev/null 2>&1; then
+  echo "⛔ STOP: 이 프로젝트가 에디터에서 열려 있어 batchmode 불가 — 에디터를 닫은 뒤 다시 진행하세요."
+  echo "        (다른 프로젝트가 열린 건 무관 — 이 프로젝트 락 기준으로만 판정)"
+else
+  "${UNITY_BIN}" -batchmode -quit \
+    -projectPath "$(pwd)" \
+    -buildTarget Android \
+    -logFile "${LOG_FILE}"
+  grep -E "error CS|^error " "${LOG_FILE}"
+fi
 ```
 
-오류가 없으면 "✅ Android 컴파일 정상" 출력 후 STEP 1-B로 진행한다.
+출력이 `⛔ STOP`이면 batchmode 미실행이므로, 그 안내대로 조치될 때까지 STEP 1-B로 넘어가지 않는다.
+그 외에는 `grep` 결과로 판정한다 — 오류가 없으면 "✅ Android 컴파일 정상" 출력 후 STEP 1-B로 진행한다.
 
 오류가 있으면 아래 기준으로 분류해서 사용자에게 보고한다:
 
