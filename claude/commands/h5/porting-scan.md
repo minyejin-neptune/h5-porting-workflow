@@ -7,7 +7,7 @@ description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분
 프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/` 아래 4파일을 생성한다:
 - `NATIVE_BASELINE.md` — 포팅 전 네이티브 불변 스냅샷 (프로젝트 정보·SDK 인벤토리·게임 구조)
 - `PORTING_VOCAB.md` — 위치 사전 (기능→파일:라인)
-- `pureweb-checklist.md` — 기반 작업목록 (이슈·확인 필요의 단일 기록처)
+- `pureweb-checklist.md` — 기반 작업목록 (pureweb-porter가 처리하는 기반 포팅 이슈·확인 필요)
 - `toss-checklist.md` — 플랫폼 작업목록
 
 `$ARGUMENTS`로 포팅 플랫폼을 지정할 수 있다 (`toss` / `pureweb`). 지정하지 않으면 사전 감지 후 AskUserQuestion으로 확인한다.
@@ -838,7 +838,10 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 ## 출력 문서 형식 2 (`Docs/porting/pureweb-checklist.md` — 기반 작업목록)
 
-이슈(컴파일/런타임/공백)·확인 필요의 **단일 기록처**. toss-checklist에는 이슈를 기록하지 않는다.
+**pureweb-porter가 처리하는 기반 포팅 이슈**(컴파일/런타임/공백)와 확인 필요를 기록한다. "WebGL에서 일단 돌게 만들기"에 해당하는 기반 작업이다.
+- 발견한 이슈가 `WEBGL_TOSS` 전용 분기에만 해당하는 toss 전용 이슈이면 → toss-checklist로 보낸다 (여기 적지 않음). 판별 불가·공통이면 여기(기본).
+- toss-checklist에는 기반 이슈를 기록하지 않는다 — toss-porter가 필요 시 이 `## 이슈`를 읽기 참조한다.
+
 단계 진행 표는 여기 만들지 않는다 — pureweb-porter가 0-B에서 추가한다 (소유 분리).
 상태 표기는 마크다운 체크박스: 완료 = `[x]` + `(commit 해시)` / 스킵 = `[x]` + `⏭️ 스킵: 사유` (사유 없는 스킵 금지).
 
