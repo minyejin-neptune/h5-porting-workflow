@@ -107,8 +107,11 @@ git commit -m "[{prefix}] {단계명}"
 | 15. 로컬라이제이션 | ⬜ | | |
 | 16. 용량 최적화 | ⬜ | | |
 | 검증 | ⬜ | | |
-| PORTING_ANALYSIS.md 업데이트 | ⬜ | | |
 ```
+
+> scan이 이 파일을 미리 생성한 경우(`## 기획자 보고`·`## 교정 기록`·`## 빌드 기록` 섹션 포함) 위 단계 표만 이어서 추가한다. 파일이 아예 없으면 이 형식 그대로 신규 생성(fallback).
+>
+> 단계 표는 상태/커밋/비고 3항목을 함께 표기해야 해 마크다운 체크박스 대신 표 형식을 유지한다 (신규 섹션인 이슈·확인필요·기획자보고는 체크박스 — `## 체크리스트 상태 갱신` 참조).
 
 ### 업데이트 규칙
 
@@ -335,7 +338,7 @@ TossHandler 전용 호출(배너·Managed 프로모션) 로그에만 `[TOSS]` pr
 
 ```
 [진입] 플랫폼 컨텍스트 기록 (.porting-context)
-       PORTING_ANALYSIS.md + PORTING_VOCAB.md 읽기
+       NATIVE_BASELINE.md + PORTING_VOCAB.md 읽기
       ↓
 [계획] 기존 WEBGL 분기 현황 파악 + Toss 연동 기능 존재 여부(2-B) 파악
        작업 계획 테이블 출력 → 사용자 확인
@@ -396,7 +399,8 @@ echo "TOSS" > .porting-context
 
 **1단계 — 파일 읽기**
 
-- PORTING_ANALYSIS.md → 외부 SDK 목록, 컴파일 이슈 이미 처리된 항목 확인
+- NATIVE_BASELINE.md → 외부 SDK 목록 확인 (불변 인벤토리)
+- pureweb-checklist.md `## 이슈` → 기반 컴파일/런타임 이슈 중 이미 처리된 항목 확인 (읽기 참조만)
 - PORTING_VOCAB.md → 광고·IAP·저장·로그인·사운드 파일명·메서드명 확보
 
 **1-V단계 — VOCAB 완전성 게이트 (필수, 건너뛰기 금지)**
@@ -440,7 +444,7 @@ done
 
 **1-A단계 — 기획자 보고 필요 항목 확인**
 
-PORTING_VOCAB.md `## 기획자 보고 필요 항목` 섹션을 읽어 항목이 있으면 작업 시작 전 사용자에게 반드시 알린다.
+toss-checklist.md `## 기획자 보고` 섹션을 읽어 항목이 있으면 작업 시작 전 사용자에게 반드시 알린다.
 
 ```
 ⚠️ 기획자 보고 필요 항목이 있습니다. 포팅 시작 전 기획자에게 확인하세요:
@@ -2201,25 +2205,17 @@ Unity Editor `Tools > Addressables > HL Addressable Tool` 실행.
 ---
 
 
-## PORTING_ANALYSIS.md 업데이트
+## 체크리스트 상태 갱신
 
-각 태스크 완료 후 `Docs/porting/PORTING_ANALYSIS.md`를 업데이트한다.
+각 태스크 완료 후 `Docs/porting/toss-checklist.md` 해당 단계 행을 갱신한다 (`## 체크리스트 관리` 규칙 참조 — `⬜` → `✅ commit xxxxxxxx` / `⏭️` + 사유).
 
-### 업데이트 대상
+기반 이슈(컴파일/런타임/공백)는 `pureweb-checklist.md`가 단일 기록처다. toss 작업 중 아래 상황이 생기면:
 
-| 섹션 | 업데이트 조건 | 업데이트 내용 |
-|---|---|---|
-| 외부 SDK 목록 — 상태 | SDK 관련 단계 완료 | `⬜ 미처리` → `✅ 완료 (commit xxxxxxxx)` |
-| 컴파일 타임 이슈 — 상태 | 해당 파일 처리 완료 | `⬜` → `✅ 완료 (commit xxxxxxxx)` |
-| 런타임 이슈 — 상태 | 해당 파일 처리 완료 | `⬜` → `✅ 완료 (commit xxxxxxxx)` |
-| 런타임 이슈 — 처리 방법 | 계획과 다른 방법으로 처리한 경우 | 실제 처리 방법으로 수정 |
-| 확인 필요 항목 | 해당 항목 해소됨 | 항목 제거 |
-
-### 처리 방법 변경 주의
-
-`C (파일 전체 래핑)` 대신 **메서드 단위 분기**로 처리한 경우 반드시 처리 방법 컬럼을 수정한다.
-
-예: `Script/TimeServer.cs` — `C: 파일 전체 래핑` → `메서드 단위 분기 (WebGL 스텁, TODO 주석)`
+| 상황 | 처리 |
+|---|---|
+| 작업 중 기존 pureweb-checklist `## 이슈` 항목을 참고해야 함 | pureweb-checklist.md `## 이슈`를 **읽기 참조**만 한다 (수정하지 않음) |
+| toss 작업 중 새로운 공통(WEBGL) 이슈를 발견함 | pureweb-checklist.md `## 이슈`에 `- [ ] {파일}:{라인} — [발견:toss] {이슈} — {처리 방법}` 추가 |
+| toss 전용 이슈(플랫폼 연동 문제)를 발견·처리함 | 해당 단계 행 비고 또는 toss-checklist `## 교정 기록`에 기록 |
 
 ---
 

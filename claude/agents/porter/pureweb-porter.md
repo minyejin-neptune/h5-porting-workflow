@@ -98,8 +98,13 @@ git commit -m "[{prefix}] {단계명}"
 | 8-B. Base64 인코딩 래핑 | ⬜ | | VOCAB `저장 인코딩` Base64 없음이면 필수 — 스킵 불가 |
 | 9. 앱 이름 및 Favicon 설정 | ⬜ | | |
 | 검증 | ⬜ | | |
-| PORTING_ANALYSIS.md 업데이트 | ⬜ | | |
 ```
+
+> scan이 이 파일을 미리 생성한 경우 위 단계 표 아래에 `## 이슈`·`## 확인 필요`·`## 기획자 보고`·`## 교정 기록`·`## 빌드 기록` 섹션이 이미 있다 — 그 섹션은 유지하고 위 단계 표만 이어서 추가한다. 파일이 아예 없으면 이 형식 그대로 신규 생성(fallback).
+>
+> **`## 이슈`는 이 프로젝트의 컴파일/런타임/공백 이슈 단일 기록처다.** 아래 9개 단계 외에 `## 이슈`에 미해결 항목(`- [ ]`)이 있으면 해당 단계(주로 3-B·7·8) 작업 시 함께 처리하고, 처리 완료 시 그 체크박스를 `- [x]`로 바꾸며 커밋 해시를 남긴다.
+>
+> 단계 표는 상태/커밋/비고 3항목을 함께 표기해야 해 마크다운 체크박스 대신 표 형식을 유지한다.
 
 ### 업데이트 규칙
 
@@ -224,7 +229,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 
 ```
 [진입] 플랫폼 컨텍스트 기록 (.porting-context)
-       PORTING_ANALYSIS.md + PORTING_VOCAB.md 읽기
+       NATIVE_BASELINE.md + pureweb-checklist.md + PORTING_VOCAB.md 읽기
       ↓
 [선택] 사전 빌드 용량 기록 (AskUserQuestion)
       ↓
@@ -259,7 +264,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 
 ---
 
-## 진입점 — PORTING_ANALYSIS.md 읽기
+## 진입점 — NATIVE_BASELINE.md 읽기
 
 **심볼 섹션 최신 여부 확인**
 
@@ -278,10 +283,10 @@ echo "PUREWEB" > .porting-context
 `Docs/porting/pureweb-checklist.md`가 없으면 위 `## 체크리스트 관리` 형식으로 생성한다.
 이미 있으면 그대로 유지(이어서 작업).
 
-`Docs/porting/PORTING_ANALYSIS.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 작업 범위를 확정한다.
+`Docs/porting/NATIVE_BASELINE.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 작업 범위를 확정한다.
 
-- 외부 SDK 목록(D 타입) → SDK 비활성화 대상 확정
-- 컴파일 이슈 목록 → 이미 처리된 항목 확인
+- NATIVE_BASELINE.md 외부 SDK 목록(D 타입) → SDK 비활성화 대상 확정
+- pureweb-checklist.md `## 이슈` → 이미 처리된(`[x]`) 항목 확인, 미해결 항목을 작업 범위에 포함
 - PORTING_VOCAB.md → 광고·IAP·저장 메서드명 확인
 
 ---
@@ -310,18 +315,18 @@ Unity -batchmode \
 빌드 완료 후 용량 측정 및 로그 기록:
 
 ```bash
-# .wasm, .data.br, .data 파일 크기 측정 후 PORTING_ANALYSIS.md 빌드 기록 섹션에 추가
+# .wasm, .data.br, .data 파일 크기 측정 후 pureweb-checklist.md 빌드 기록 섹션에 추가
 TODAY=$(date '+%Y-%m-%d')
 find Build/PureWeb -name "*.wasm" -o -name "*.data.br" -o -name "*.data" 2>/dev/null \
   | while read f; do
       SIZE=$(du -sh "$f" | cut -f1)
       NAME=$(basename "$f")
       echo "| $TODAY | pureweb-live | $NAME | $SIZE | 포팅 전 기준 |" \
-        >> Docs/porting/PORTING_ANALYSIS.md
+        >> Docs/porting/pureweb-checklist.md
     done
 
 echo "✅ 용량 기록 완료"
-grep -A5 "## 빌드 기록" Docs/porting/PORTING_ANALYSIS.md
+grep -A5 "## 빌드 기록" Docs/porting/pureweb-checklist.md
 ```
 
 기록 후 사용자에게 용량을 보여주고 다음 단계로 진행한다.
@@ -575,7 +580,7 @@ grep -rn "{IAP_METHOD}" Assets/Scripts --include="*.cs" 2>/dev/null \
 
 ### 7. SDK 비활성화
 
-PORTING_ANALYSIS.md의 D 타입 SDK 목록을 기준으로 처리한다.
+NATIVE_BASELINE.md의 D 타입 SDK 목록을 기준으로 처리한다.
 
 #### 7-0. 사전 체크 — MonoBehaviour 씬/프리팹 첨부 여부 **[7-1~7-5 착수 전 필수]**
 
@@ -1029,25 +1034,24 @@ Data + wasm 합산 50MB 이하 확인.
 
 ---
 
-## PORTING_ANALYSIS.md 업데이트
+## 체크리스트 상태 갱신
 
-각 태스크 완료 후 `Docs/porting/PORTING_ANALYSIS.md`를 업데이트한다.
+각 태스크 완료 후 `Docs/porting/pureweb-checklist.md`를 갱신한다. SDK 인벤토리 자체(NATIVE_BASELINE.md `## 외부 SDK 목록`)는 불변이므로 수정하지 않는다 — SDK 비활성화(태스크 7) 완료는 pureweb-checklist 단계 표의 "7. SDK 비활성화" 행으로만 추적한다.
 
 ### 업데이트 대상
 
 | 섹션 | 업데이트 조건 | 업데이트 내용 |
 |---|---|---|
-| 외부 SDK 목록 — 상태 | SDK 비활성화(태스크 7) 완료 | `⬜ 미처리` → `✅ 완료 (commit xxxxxxxx)` |
-| 컴파일 타임 이슈 — 상태 | 해당 파일 처리 완료 | `⬜` → `✅ 완료 (commit xxxxxxxx)` |
-| 런타임 이슈 — 상태 | 해당 파일 처리 완료 | `⬜` → `✅ 완료 (commit xxxxxxxx)` |
-| 런타임 이슈 — 처리 방법 | 계획과 다른 방법으로 처리한 경우 | 실제 처리 방법으로 수정 |
-| 확인 필요 항목 | 해당 항목 해소됨 | 항목 제거 |
+| 단계 표 (해당 단계) | 태스크 완료 | `⬜` → `✅ commit xxxxxxxx` (`## 체크리스트 관리` 규칙) |
+| `## 이슈` 항목 | 해당 파일 처리 완료 | `- [ ]` → `- [x]` + 문장 끝에 `(commit xxxxxxxx)` 추가 |
+| `## 이슈` 항목 — 처리 방법 | 계획과 다른 방법으로 처리한 경우 | 항목 문장의 처리 방법 부분을 실제 방법으로 수정 |
+| `## 확인 필요` 항목 | 해당 항목 해소됨 | 항목 제거 |
 
 ### 처리 방법 변경 주의
 
-`C (파일 전체 래핑)` 대신 **메서드 단위 분기**로 처리한 경우 반드시 처리 방법 컬럼을 수정한다.
+`C (파일 전체 래핑)` 대신 **메서드 단위 분기**로 처리한 경우 반드시 `## 이슈` 항목의 처리 방법 부분을 수정한다.
 
-예: `Script/TimeServer.cs` — `C: 파일 전체 래핑` → `메서드 단위 분기 (WebGL 스텁, TODO 주석)`
+예: `- [ ] Script/TimeServer.cs:48 — [런타임] ... — C: 파일 전체 래핑` → `- [x] Script/TimeServer.cs:48 — [런타임] ... — 메서드 단위 분기 (WebGL 스텁, TODO 주석) (commit xxxxxxxx)`
 
 ---
 
