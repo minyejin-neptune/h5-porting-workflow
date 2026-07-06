@@ -13,20 +13,20 @@
 
 ---
 
-## 프로젝트별 설정 (porting-init 시 채움 — 코드에서 확인 후 확정, 해당 없으면 줄 삭제)
+## Project-Specific Settings (filled during porting-init — confirm from code; delete any line that does not apply)
 
-### 프로젝트 요약
-[한 줄 설명 — 예: Unity 모바일 게임, Toss/PureWeb WebGL 빌드 타겟]
+### Project Summary
+Fill with a one-line description (e.g. Unity mobile game, Toss/PureWeb WebGL build target).
 Details: [.md/PROJECT.md](.md/PROJECT.md)
 
-### 커스텀 빌드 진입점 (HyperLane `Hyperlane/Build/` 외 프로젝트 전용)
-- 예: `Treeplla/Build/` (`Assets/Treeplla/Editor/AutoBuild.cs`) — 없으면 삭제
+### Custom Build Entry Point (project-only, beyond HyperLane `Hyperlane/Build/`)
+- e.g. `Treeplla/Build/` (`Assets/Treeplla/Editor/AutoBuild.cs`) — delete if not present.
 
-### 배포 명령
-- 예: `cd Deploy/Toss/unity-webgl-wrapper && ./deploy-ait.sh` — 실제 경로로 교체, 없으면 삭제
+### Deploy Command
+- e.g. `cd Deploy/Toss/unity-webgl-wrapper && ./deploy-ait.sh` — replace with the actual path, or delete if none.
 
-### 프로젝트 전용 define 심볼 (플랫폼 표준 `WEBGL_*` 외)
-- 예: `AVOEX_FIREBASE` (Firebase), `AVOEX_CLOUD_ONCE` (CloudOnce) — 실제 쓰는 것만, 접두사·이름 프로젝트 확인
+### Project-Only Define Symbols (beyond the standard `WEBGL_*`)
+- e.g. `AVOEX_FIREBASE` (Firebase), `AVOEX_CLOUD_ONCE` (CloudOnce) — list only what the project actually uses; confirm prefix and name from code.
 
 ---
 
@@ -130,7 +130,7 @@ If changes are already mixed on the same branch — before committing:
 ## Build / Deploy Rules
 
 - Builds must be run only from Unity Editor menu `Hyperlane/Build/`.
-- 프로젝트 전용 빌드 메뉴·배포 명령은 상단 **"프로젝트별 설정"** 참조.
+- For project-only build menus and deploy commands, see **"Project-Specific Settings"** at the top.
 - Follow the required define combinations per platform:
 
 | Build Target | Required Define Symbols |
@@ -151,7 +151,7 @@ If changes are already mixed on the same branch — before committing:
 | `ENABLE_LOG` | Enable debug logging |
 | `WEBGL_DEBUG_CONSOLE` | Enable on-screen debug console |
 
-> 프로젝트 전용 define(Firebase·저장 SDK 등)은 상단 **"프로젝트별 설정"** 참조.
+> For project-only defines (Firebase, save SDK, etc.), see **"Project-Specific Settings"** at the top.
 
 ---
 

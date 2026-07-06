@@ -66,11 +66,11 @@ copy_template ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs
 > python ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py --platform WEBGL_PUREWEB
 > ```
 
-## Step 2 — CLAUDE.md 초기화 (프로젝트별 설정 채우기)
+## Step 2 — CLAUDE.md 초기화 (`Project-Specific Settings` 채우기)
 
 `init` 스킬을 실행하세요. 인자로 아래 지시를 전달합니다:
 
-> "CLAUDE.md와 Docs/README.md를 읽고, 프로젝트 코드를 탐색해 CLAUDE.md 상단 `## 프로젝트별 설정` 섹션을 실제 프로젝트에 맞게 채우거나 없는 항목은 삭제하세요. 추론 금지 — 코드에서 확인한 것만 기재, 확인 못 하면 '확인 필요'로 남기고 사용자에게 보고."
+> "CLAUDE.md와 Docs/README.md를 읽고, 프로젝트 코드를 탐색해 CLAUDE.md 상단 `## Project-Specific Settings` 섹션을 실제 프로젝트에 맞게 채우거나 없는 항목은 삭제하세요. 추론 금지 — 코드에서 확인한 것만 기재, 확인 못 하면 '확인 필요'로 남기고 사용자에게 보고."
 
 각 하위 항목 검증 방법 (grep의 `--include` 글롭은 반드시 따옴표 — zsh에서 unquoted면 에러):
 
