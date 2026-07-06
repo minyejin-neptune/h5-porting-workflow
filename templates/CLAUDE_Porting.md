@@ -88,6 +88,7 @@ grep을 **첫 번째** 수단으로 쓰지 않는다 — VOCAB에 답이 있으�
 
 ## General Coding Rules
 
+- **After changing code, always update the affected docs** (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
 - Do not delete existing code — wrap it in preprocessor directives (`#if`) instead. Existing code without a preprocessor directive should be wrapped in `#if !UNITY_WEBGL` by default.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
 - After completing porting-related code changes (WebGL preprocessors, SDK handling, compile/runtime issue fixes): check off the corresponding item in the checklist (`Docs/porting/pureweb-checklist.md` `## 이슈` or the step table) with the commit hash. If a method name or file path was newly confirmed, add it to `Docs/porting/PORTING_VOCAB.md` as well. Do not edit `NATIVE_BASELINE.md` (frozen after scan-verify).
