@@ -271,7 +271,7 @@ python3 Docs/porting/h5-port-verify.py \
 
 Unity 메뉴: Tools/H5/Compile Check
 또는 배치모드:
-  Unity -batchmode -projectPath . -executeMethod CompileChecker.Run -customArgs PUREWEB -quit -logFile Docs/porting/compile_result.log
+  bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh PUREWEB
 ```
 
 ---

@@ -51,22 +51,15 @@ git commit -m "[{prefix}] {단계명}"
 
 `⚠️ [COMPILE_REQUIRED]` 발생 시:
 
-1. 잠금 파일로 이 프로젝트가 Unity에 열려있는지 확인:
-   ```bash
-   ls Temp/UnityLockfile 2>/dev/null && echo "LOCKED" || echo "FREE"
-   ```
-2. `FREE` → 다른 프로젝트가 열려있어도 무관. 바로 실행:
+1. 표준 스크립트로 실행 (사전 점검·부수효과 되돌리기 내장):
    ```bash
    PLATFORM=$(cat .porting-context 2>/dev/null || echo PUREWEB)
-   Unity -batchmode -projectPath . -executeMethod CompileChecker.Run \
-     -customArgs "$PLATFORM" -quit -logFile /tmp/compile_result.log
-   git checkout -- ProjectSettings/ProjectSettings.asset 2>/dev/null || true
-   git diff --name-only | grep '\.spriteatlas$' | xargs git checkout -- 2>/dev/null || true
-   grep -E "error CS" /tmp/compile_result.log | head -10
+   bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh "$PLATFORM"
    ```
-3. `LOCKED` → AskUserQuestion: "이 프로젝트가 Unity에 열려 있습니다. 닫아주세요. 닫으셨나요?"
-   - 닫음 → 위 명령 실행
-   - 아직 열려있음 → 닫은 후 알려달라고 안내. 그 전까지 `.cs` 수정 없이 대기.
+2. 출력 판정:
+   - `✅` → 계속 진행
+   - `❌` → 출력된 에러 목록 수정 후 재실행
+   - `⛔ STOP`(에디터 열림) → AskUserQuestion: "이 프로젝트가 Unity에 열려 있습니다. 닫아주세요. 닫으셨나요?" — 닫음 → 재실행 / 아직 열려있음 → 닫은 후 알려달라고 안내. 그 전까지 `.cs` 수정 없이 대기.
 
 > hook 미설정 시 → Unity 메뉴 **Tools/H5/Compile Check (PUREWEB)** 수동 실행
 

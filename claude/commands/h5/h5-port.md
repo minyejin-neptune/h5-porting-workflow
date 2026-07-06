@@ -173,30 +173,13 @@ iconv -f EUC-KR -t UTF-8 "{파일경로}" -o "{파일경로}.utf8" \
 컴파일 실행과 **같은 응답에서** `Agent 도구(subagent_type: "sdk-list-analyzer")`를 백그라운드로 실행한다 — 아래 오류 분류에서 외부 SDK 목록이 필요하다. 에이전트는 BASELINE 존재·기존 산출물 신선도를 스스로 판정하므로(에이전트 STEP 0) 조건 분기 없이 항상 호출한다.
 
 ```bash
-UNITY_VERSION=$(grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt 2>/dev/null | awk '{print $2}')
-UNITY_BIN="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
-LOG_FILE="/tmp/unity_android_compile.log"
-
-# 사전 점검 — 하나라도 걸리면 batchmode를 돌리지 않고 안내만 출력한다 (조용한 오탐 방지)
-if [ -z "$UNITY_VERSION" ]; then
-  echo "⛔ STOP: ProjectVersion.txt에서 Unity 버전을 읽지 못했습니다. 파일을 확인해주세요."
-elif [ ! -x "$UNITY_BIN" ]; then
-  echo "⛔ STOP: 프로젝트 Unity 버전 $UNITY_VERSION 미설치 — Unity Hub에서 설치 후 다시 진행하세요."
-  echo "        (없는 경로: $UNITY_BIN)"
-elif [ -f Temp/UnityLockfile ] && lsof Temp/UnityLockfile >/dev/null 2>&1; then
-  echo "⛔ STOP: 이 프로젝트가 에디터에서 열려 있어 batchmode 불가 — 에디터를 닫은 뒤 다시 진행하세요."
-  echo "        (다른 프로젝트가 열린 건 무관 — 이 프로젝트 락 기준으로만 판정)"
-else
-  "${UNITY_BIN}" -batchmode -quit \
-    -projectPath "$(pwd)" \
-    -buildTarget Android \
-    -logFile "${LOG_FILE}"
-  grep -E "error CS|^error " "${LOG_FILE}"
-fi
+bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh ANDROID
 ```
 
-출력이 `⛔ STOP`이면 batchmode 미실행이므로, 그 안내대로 조치될 때까지 STEP 1-B로 넘어가지 않는다.
-그 외에는 `grep` 결과로 판정한다 — 오류가 없으면 "✅ Android 컴파일 정상" 출력 후 STEP 1-B로 진행한다.
+사전 점검(버전 미판독·미설치·이 프로젝트 에디터 열림)과 판정은 스크립트에 내장되어 있다.
+
+출력이 `⛔ STOP`이면 미실행·판정 불가이므로, 안내대로 조치될 때까지 STEP 1-B로 넘어가지 않는다.
+`✅`면 STEP 1-B로 진행하고, `❌`(에러 목록 출력)면 아래 분류로 진행한다.
 
 오류가 있으면 분류해서 사용자에게 보고한다.
 
@@ -409,31 +392,12 @@ git branch --show-current
 포터 실행 직전에 WebGL 컴파일 상태를 확인한다. 포팅 대상 플랫폼(TOSS / PUREWEB)에 맞춰 실행.
 
 ```bash
-# 이 프로젝트의 락 점유 기준으로만 판정 — 다른 프로젝트가 열린 건 무관
-if [ -f Temp/UnityLockfile ] && lsof Temp/UnityLockfile >/dev/null 2>&1; then
-  echo "⛔ STOP: 이 프로젝트가 에디터에서 열려 있어 batchmode 불가 — 에디터를 닫은 뒤 다시 진행하거나, Tools/H5/Compile Check 메뉴를 직접 실행하고 결과를 알려주세요."
-else
-  echo "UNITY_CLOSED"
-fi
-```
-
-- `⛔ STOP` → 출력된 안내대로 조치될 때까지 대기.
-- `UNITY_CLOSED` → 아래 명령 실행:
-
-```bash
-UNITY_VERSION=$(grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt | awk '{print $2}')
-UNITY_BIN="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
-
 # TOSS 또는 PUREWEB — 포팅 대상 플랫폼 선택
-"${UNITY_BIN}" -batchmode -quit \
-  -projectPath "$(pwd)" \
-  -buildTarget WebGL \
-  -executeMethod CompileChecker.Run \
-  -customArgs TOSS \
-  -logFile Docs/porting/compile_result.log 2>/dev/null
-
-grep -E "error CS" Docs/porting/compile_result.log | sort -u
+bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh TOSS
 ```
+
+사전 점검(버전·설치·이 프로젝트 에디터 열림)은 스크립트에 내장되어 있다.
+`⛔ STOP`이면 출력된 안내대로 조치될 때까지 대기하고, `✅`/`❌`면 아래 결과 처리로 진행한다.
 
 **결과 처리**:
 
