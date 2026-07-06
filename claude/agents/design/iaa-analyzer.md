@@ -40,16 +40,20 @@ PORTING_VOCAB.md가 없으면 아래 프로젝트 경로 자동 감지에서 직
 
 ---
 
-## PORTING_ANALYSIS.md 연동
+## 포팅 이슈 기록 연동
 
 분석 중 포팅 이슈가 발견된 경우에만 실행한다.
 
+포팅 이슈는 가변 정보(예측→검증→처리로 진화)이므로 작업목록(체크리스트)에 기록한다. 불변 스냅샷(NATIVE_BASELINE.md)에는 기록하지 않는다.
+
 ```bash
-ls Docs/porting/PORTING_ANALYSIS.md 2>/dev/null && echo "EXISTS" || echo "NONE"
+ls Docs/porting/toss-checklist.md Docs/porting/pureweb-checklist.md 2>/dev/null
+ls Docs/porting/PORTING_ANALYSIS.md 2>/dev/null
 ```
 
-- **EXISTS**: 파일을 읽어 기존 항목 확인. 이슈가 이미 기록된 항목이 있으면 해당 항목에 연결해 업데이트한다. 기존 항목이 없으면 신규 항목으로 추가한다.
-- **NONE**: 포팅 이슈를 기록하지 않고 사용자에게 PORTING_ANALYSIS.md가 없다고 알린다.
+- **체크리스트 있음**: 해당 체크리스트의 `## 이슈` 표에 기록(섹션 없으면 생성). 광고 이슈가 플랫폼 공통(WEBGL)이면 양쪽 체크리스트에 동일 행을 추가한다. 이미 기록된 항목이 있으면 해당 행에 연결해 업데이트한다.
+- **체크리스트 없고 구 `PORTING_ANALYSIS.md`만 있음** (시점 분리 이전 프로젝트): 기존 방식대로 PORTING_ANALYSIS.md 이슈 테이블에 기록한다.
+- **둘 다 없음**: 기록하지 않고 사용자에게 포팅 산출 문서가 없다고 알린다.
 
 IAA.md에는 포팅 관련 내용을 일절 남기지 않는다.
 
@@ -320,7 +324,7 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - 광고 그룹 ID는 코드에서 grep으로 확인한다. 네이티브 SDK 내부에만 존재해 코드에서 찾을 수 없는 경우 "코드에서 근거를 찾지 못했습니다"로 명시한다.
 - 기본 규칙의 세 번째 항목("로드 실패 시 자동 재시도 금지")은 기획 원칙이므로 코드 확인 없이 그대로 출력한다.
 - "동상" 같은 약어 사용 금지 — 반복 조건도 전체를 다시 기재한다.
-- **포팅 주의사항(`⚠️ WebGL 포팅 주의사항` 등 개발 관련 내용)은 IAA.md에 기재하지 않는다.** 포팅 이슈 발견 시 처리 방법은 `## PORTING_ANALYSIS.md 연동` 섹션을 따른다.
+- **포팅 주의사항(`⚠️ WebGL 포팅 주의사항` 등 개발 관련 내용)은 IAA.md에 기재하지 않는다.** 포팅 이슈 발견 시 처리 방법은 `## 포팅 이슈 기록 연동` 섹션을 따른다.
 
 ---
 
