@@ -12,8 +12,10 @@
 | 문서 / 폴더 | 생성 시점 | 용도 |
 |---|---|---|
 | `FRAMEWORK_REFERENCE.md` | project-init | 개발 전 필수 참고. 진입점·시스템·유틸·헬퍼·재사용 API 요약(개조식) |
-| `porting/PORTING_ANALYSIS.md` | porting-scan | SDK 목록·컴파일·런타임 이슈 분석 결과 |
-| `porting/PORTING_VOCAB.md` | porting-scan | 포터 에이전트가 참조하는 메서드·클래스 어휘 사전 |
+| `porting/NATIVE_BASELINE.md` | porting-scan | 포팅 전 네이티브 불변 스냅샷 — SDK 인벤토리·프로젝트 정보·게임 구조 (scan-verify 후 동결) |
+| `porting/pureweb-checklist.md` | porting-scan | 기반 작업목록(가변) — 컴파일·런타임·공백 이슈 단일 기록처 + 단계 진행 |
+| `porting/toss-checklist.md` | porting-scan | 토스 플랫폼 작업목록(가변) — 단계 진행·기획자 보고·교정 기록 |
+| `porting/PORTING_VOCAB.md` | porting-scan | 포터 에이전트가 참조하는 메서드·클래스 어휘 사전(위치 인덱스) |
 | `porting/compile_result.log` | CompileChecker | 플랫폼별 컴파일 체크 결과 |
 | `porting/.stats/agent-stats.md` | 각 analyzer | 에이전트 실행별 히트/Zero-Hit 패턴 누적 기록 |
 | `design/IAP.md` | iap-analyzer | IAP 상품 구성·PID·보상 역추적 |
