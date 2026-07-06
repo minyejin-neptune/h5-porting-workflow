@@ -1,26 +1,30 @@
 ---
-description: 포팅 스캔 검증 — PORTING_ANALYSIS·VOCAB가 실제 코드와 일치하는지 7종 병렬 검증
+description: 포팅 스캔 검증 — NATIVE_BASELINE·pureweb-checklist·VOCAB가 실제 코드와 일치하는지 7종 병렬 검증
 ---
 
 # 포팅 스캔 검증
 
-`Docs/porting/PORTING_ANALYSIS.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 porting-scan 결과가 실제 코드와 일치하는지 검증한다.
+`Docs/porting/NATIVE_BASELINE.md`·`pureweb-checklist.md`·`PORTING_VOCAB.md`를 읽어 porting-scan 결과가 실제 코드와 일치하는지 검증한다.
 
-추론 금지. 코드에서 직접 확인한 사실만 기재. 불일치 발견 시 PORTING_ANALYSIS.md를 직접 수정한다.
+> **verify = NATIVE_BASELINE 동결 전 마지막 교정 단계.** 여기서 불변 사실(SDK 인벤토리·프로젝트 정보·게임 구조·빌드 씬)의 오류를 바로잡고, 이후 baseline은 동결한다.
+
+추론 금지. 코드에서 직접 확인한 사실만 기재. 불일치 발견 시:
+- 불변 사실(SDK 인벤토리·프로젝트 정보·게임 구조·빌드 씬) → `NATIVE_BASELINE.md` 직접 수정
+- 이슈(컴파일/런타임/공백)의 발견·처리 상태 → `pureweb-checklist.md` `## 이슈` 체크박스 (`- [ ]`/`- [x]`)
 
 ---
 
 ## 사전 확인
 
 ```bash
-# PORTING_ANALYSIS.md 존재 여부
-ls Docs/porting/PORTING_ANALYSIS.md 2>/dev/null && echo "EXISTS" || echo "NONE"
+# NATIVE_BASELINE.md 존재 여부
+ls Docs/porting/NATIVE_BASELINE.md 2>/dev/null && echo "EXISTS" || echo "NONE"
 
-# SCRIPTS_PATH (PORTING_ANALYSIS.md 상단에서 읽기)
-head -5 Docs/porting/PORTING_ANALYSIS.md
+# SCRIPTS_PATH (NATIVE_BASELINE.md 상단에서 읽기)
+head -5 Docs/porting/NATIVE_BASELINE.md
 ```
 
-PORTING_ANALYSIS.md가 없으면 "먼저 /porting-scan을 실행하세요"라고 안내하고 종료.
+NATIVE_BASELINE.md가 없으면 "먼저 /porting-scan을 실행하세요"라고 안내하고 종료.
 
 ---
 
@@ -31,14 +35,14 @@ PORTING_ANALYSIS.md가 없으면 "먼저 /porting-scan을 실행하세요"라고
       ↓
 [순차] VERIFY-COMPILE 안내
       ↓
-[순차] 결과 요약 + PORTING_ANALYSIS.md 불일치 항목 수정
+[순차] 결과 요약 + 불일치 항목 수정 (불변→NATIVE_BASELINE / 이슈→pureweb-checklist)
 ```
 
 ---
 
 ### VERIFY-A — A 처리 누락 파일 검증
 
-PORTING_ANALYSIS.md의 외부 SDK 목록에서 처리방법이 **A**인 SDK를 추출한다.
+NATIVE_BASELINE.md의 외부 SDK 목록에서 처리방법이 **A**인 SDK를 추출한다.
 각 SDK의 네임스페이스로 `UNITY_WEBGL` 가드 없는 파일을 재탐색한다.
 
 ```bash
@@ -47,12 +51,12 @@ grep -rln "using {SDK네임스페이스}" {SCRIPTS_PATH} --include="*.cs" 2>/dev
   | xargs -I{} sh -c 'grep -l "UNITY_WEBGL" {} 2>/dev/null || echo "A_MISSING: {}"'
 ```
 
-- `A_MISSING:` 파일이 있으면 → scan 누락. PORTING_ANALYSIS.md 컴파일 이슈 테이블에 추가
+- `A_MISSING:` 파일이 있으면 → scan 누락. pureweb-checklist.md `## 이슈`에 `- [ ] {파일} — [컴파일] A_MISSING: UNITY_WEBGL 가드 없음 — A` 추가
 - 없으면 → A 처리 완전
 
 **CALLER_MISSING · INTERNAL_UNGUARDED 재탐지**
 
-PORTING_ANALYSIS.md 컴파일 이슈 테이블에 `CALLER_MISSING` 또는 `INTERNAL_UNGUARDED` 항목이 있으면 scan-callers로 재탐지한다.
+pureweb-checklist.md `## 이슈`에 `CALLER_MISSING` 또는 `INTERNAL_UNGUARDED` 항목이 있으면 scan-callers로 재탐지한다.
 
 ```bash
 python3 Docs/porting/h5-port-verify.py \
@@ -66,9 +70,9 @@ python3 Docs/porting/h5-port-verify.py \
 
 | 결과 | 처리 |
 |---|---|
-| 동일 파일:라인이 여전히 출력됨 | 처리 방법 컬럼 "⬜ 미처리" 유지 |
-| 출력에서 사라짐 | 처리 방법 컬럼 "✅ 처리됨"으로 업데이트 |
-| 신규 `CALLER_MISSING` 발견 | 테이블에 추가 |
+| 동일 파일:라인이 여전히 출력됨 | 해당 `## 이슈` 항목 `- [ ]` 유지 |
+| 출력에서 사라짐 | 해당 `## 이슈` 항목 `- [x]`로 체크 |
+| 신규 `CALLER_MISSING` 발견 | pureweb-checklist `## 이슈`에 `- [ ]` 추가 |
 
 `CALLER_MISSING`·`INTERNAL_UNGUARDED` 항목이 없으면 → porting-scan 래퍼 역추적이 실행되지 않은 것. 이 자리에서 직접 실행한다.
 
@@ -76,7 +80,7 @@ python3 Docs/porting/h5-port-verify.py \
 
 ### VERIFY-D — D 처리 meta 파일 전수 검사
 
-PORTING_ANALYSIS.md에서 처리방법이 **D**인 SDK 폴더를 추출한다.
+NATIVE_BASELINE.md에서 처리방법이 **D**인 SDK 폴더를 추출한다.
 해당 폴더의 `.dll`, `.aar`, `.framework` meta 파일에서 `WebGL: enabled: 1` 잔존 여부를 확인한다.
 
 ```bash
@@ -85,7 +89,7 @@ find {SDK_FOLDER} \( -name "*.dll.meta" -o -name "*.aar.meta" -o -name "*.framew
   | xargs grep -l "WebGL: enabled: 1" 2>/dev/null
 ```
 
-- 결과가 있으면 → WebGL 비활성화 미처리. PORTING_ANALYSIS.md 상태 컬럼 "⬜ 미처리"로 표시
+- 결과가 있으면 → WebGL 비활성화 미처리. pureweb-checklist.md `## 이슈`에 `- [ ] {SDK 폴더}/{meta} — [SDK] WebGL 비활성화 미처리 — .meta WebGL: enabled: 0` 추가
 - 없으면 → D 처리 완전
 
 ---
@@ -101,7 +105,7 @@ grep -rln "BuildPlayer\|BuildPipeline\|IPreprocessBuildWithReport\|IPostprocessB
 ```
 
 scan 결과와 비교:
-- 새로 발견된 파일 → Read해서 내용 분석 후 PORTING_ANALYSIS.md 프로젝트 정보 테이블 업데이트
+- 새로 발견된 파일 → Read해서 내용 분석 후 NATIVE_BASELINE.md 프로젝트 정보 테이블 업데이트
 - 동일하면 → 이상 없음
 
 ---
@@ -167,10 +171,10 @@ grep -A20 "## Toss 전용" Docs/porting/PORTING_VOCAB.md | grep "\.\.\."
 
 **5단계 — 빌드 씬 파일 누락 확인**
 
-PORTING_ANALYSIS.md의 빌드 씬 행에 `❌ 파일 없음` 항목이 있으면 사용자에게 보고한다.
+NATIVE_BASELINE.md의 빌드 씬 행에 `❌ 파일 없음` 항목이 있으면 사용자에게 보고한다.
 
 ```bash
-grep "빌드 씬" Docs/porting/PORTING_ANALYSIS.md
+grep "빌드 씬" Docs/porting/NATIVE_BASELINE.md
 ```
 
 `❌`이 포함되어 있으면:
@@ -189,7 +193,7 @@ grep -rn "File\.WriteAllBytes\|File\.WriteAllText\|StreamWriter\|BinaryWriter" \
 ```
 
 - 결과 없음 → 이상 없음
-- 결과 있음 → 해당 파일을 Read해서 실제로 WebGL에서 실행 가능한 경로인지 확인 후 PORTING_ANALYSIS.md 컴파일 이슈 테이블에 추가
+- 결과 있음 → 해당 파일을 Read해서 실제로 WebGL에서 실행 가능한 경로인지 확인 후 pureweb-checklist.md `## 이슈`에 `- [ ]` 항목으로 추가
 
 **보강 — File.Write 래퍼 케이스**
 
@@ -201,7 +205,7 @@ grep -rln "using System\.IO" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 ```
 
 히트 파일이 있으면 상위 5개를 Read해 File.Write/Read 계열 실제 호출(파일:라인)이 있는지 확인한다.
-- 직접 호출 확인 → PORTING_ANALYSIS.md 컴파일 이슈 테이블에 추가
+- 직접 호출 확인 → pureweb-checklist.md `## 이슈`에 `- [ ]` 항목으로 추가
 - 호출 없음(import만) → 이상 없음
 
 > 저장 키 충돌 위험(PlayerPrefs 키 패턴) 판단은 scan 결과를 보고 사용자가 직접 판단한다.
@@ -210,10 +214,10 @@ grep -rln "using System\.IO" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 ### VERIFY-RUNTIME — 런타임 이슈 기록 정확성 검증
 
-PORTING_ANALYSIS.md 런타임 이슈 테이블에서 파일:라인을 추출해 실제 코드와 1:1 대조한다.
+pureweb-checklist.md `## 이슈`의 `[런타임]` 항목에서 파일:라인을 추출해 실제 코드와 1:1 대조한다.
 재스캔이 아니라 **기록된 주장이 실제 코드와 일치하는지** 검증한다.
 
-런타임 이슈 테이블에서 파일:라인이 기록된 행을 읽어 해당 라인을 확인한다:
+`## 이슈`의 `[런타임]` 항목에서 파일:라인이 기록된 것을 읽어 해당 라인을 확인한다:
 
 ```bash
 # 각 런타임 이슈 행에 대해 실행
@@ -225,10 +229,10 @@ sed -n '{라인}p' {파일경로} 2>/dev/null
 | 결과 | 의미 | 처리 |
 |---|---|---|
 | 기록된 패턴(UnityWebRequest 등)이 있고 UNITY_WEBGL 가드 없음 | ✅ 기록 정확 | 그대로 유지 |
-| 라인 내용이 전혀 다름 | ❌ 라인 참조 오류 | PORTING_ANALYSIS.md 해당 행 파일:라인 수정 |
-| 이미 `#if !UNITY_WEBGL` 가드가 붙어있음 | ℹ️ 이미 처리됨 | PORTING_ANALYSIS.md 처리 방법 컬럼 업데이트 |
+| 라인 내용이 전혀 다름 | ❌ 라인 참조 오류 | pureweb-checklist `## 이슈` 해당 항목의 파일:라인 수정 |
+| 이미 `#if !UNITY_WEBGL` 가드가 붙어있음 | ℹ️ 이미 처리됨 | 해당 `## 이슈` 항목을 `- [x]`로 체크 |
 
-런타임 이슈 테이블이 비어있으면:
+`[런타임]` 이슈 항목이 비어있으면:
 - SDK가 5개 이상 있는데 런타임 이슈 0건 → 스캔 누락 가능성. 사용자에게 보고한다.
 - SDK가 없거나 적으면 → 정상으로 간주
 
@@ -236,7 +240,7 @@ sed -n '{라인}p' {파일경로} 2>/dev/null
 
 ### VERIFY-VOID — WebGL 공백 처리 검증
 
-`PORTING_ANALYSIS.md`의 `## WebGL 공백 이슈` 테이블 각 행의 처리 여부를 재스캔으로 확인한다.
+pureweb-checklist.md `## 이슈`의 `[공백]` 항목 각각의 처리 여부를 재스캔으로 확인한다.
 
 ```bash
 python3 Docs/porting/h5-port-verify.py \
@@ -250,9 +254,9 @@ python3 Docs/porting/h5-port-verify.py \
 
 | 결과 | 의미 | 처리 |
 |---|---|---|
-| 동일 파일:라인이 여전히 출력됨 | 미처리 | 처리 방법 컬럼 "⬜ 미처리" 유지 |
-| 출력에서 사라짐 | WebGL arm 추가 완료 | 처리 방법 컬럼 "✅ 처리됨"으로 업데이트 |
-| 신규 `CONTROL_FLOW`·`STATE_UNDEF` 발견 | scan 이후 신규 발생 또는 scan 누락 | PORTING_ANALYSIS.md 테이블에 추가 |
+| 동일 파일:라인이 여전히 출력됨 | 미처리 | 해당 `## 이슈` 항목 `- [ ]` 유지 |
+| 출력에서 사라짐 | WebGL arm 추가 완료 | 해당 `## 이슈` 항목 `- [x]`로 체크 |
+| 신규 `CONTROL_FLOW`·`STATE_UNDEF` 발견 | scan 이후 신규 발생 또는 scan 누락 | pureweb-checklist `## 이슈`에 `- [ ]` 추가 |
 
 `## WebGL 공백 이슈` 테이블이 없거나 비어있으면 → porting-scan STEP 6이 실행되지 않은 것. 이 자리에서 직접 실행한다.
 
@@ -311,7 +315,7 @@ Unity 메뉴: Tools/H5/Compile Check
 - VERIFY-RUNTIME: 기록 정확 N건 / 라인 오류 N건 / 이미 처리됨 N건
 - VERIFY-VOID: CONTROL_FLOW N건 / STATE_UNDEF N건 / 신규 발견 N건 / 이상 없음
 
-PORTING_ANALYSIS.md 업데이트: N건
+NATIVE_BASELINE.md 교정: N건 | pureweb-checklist.md `## 이슈` 업데이트: N건
 
 다음 단계: Tools/H5/Compile Check 실행
 ```

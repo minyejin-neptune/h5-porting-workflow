@@ -255,7 +255,7 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 
 > "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
 > - 설치하겠습니다 → Unity Editor에서 HyperLane 패키지를 임포트한 뒤 완료되면 알려달라고 안내. 확인 후 STEP 2로.
-> - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. PORTING_ANALYSIS.md에 "⚠️ HyperLane 미설치" 기록.
+> - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
 
 ---
 
@@ -279,14 +279,15 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 2-A~2-B에서 생성·수정된 분석 파일을 커밋한다.
 
 ```bash
-git add Docs/porting/PORTING_VOCAB.md Docs/porting/PORTING_ANALYSIS.md
+git add Docs/porting/NATIVE_BASELINE.md Docs/porting/PORTING_VOCAB.md \
+        Docs/porting/pureweb-checklist.md Docs/porting/toss-checklist.md
 git status --short
 ```
 
 스테이징 확인 후 커밋한다:
 
 ```bash
-git commit -m "[문서] 포팅 분석 완료 — PORTING_VOCAB·PORTING_ANALYSIS 생성"
+git commit -m "[문서] 포팅 분석 완료 — NATIVE_BASELINE·VOCAB·체크리스트 2종 생성"
 ```
 
 ### 2-C. 기획 문서 생성 [2-B-commit 완료 후 — Agent 병렬 실행]
@@ -362,7 +363,7 @@ git branch --show-current
 프로젝트 분석  정상 작동 테스트                   👤 직접 확인 필요 (크래시·오류 없는지)
 
 프로젝트 분석  빌드 씬 확인                       ✅ N개 씬 확인 / ⚠️ 씬 누락 가능성
-               근거: PORTING_ANALYSIS.md 빌드 씬 목록
+               근거: NATIVE_BASELINE.md 빌드 씬 목록
 
 프로젝트 분석  자체 빌드 스크립트 및 H5Builder     ✅ BuildPlayer 없음 / ✅ H5Builder 반영
                근거: porting-scan BuildPlayer 탐색 결과
@@ -410,12 +411,12 @@ grep -E "error CS" Docs/porting/compile_result.log | sort -u
 - 에러 0건 → "✅ WebGL 컴파일 정상" — STEP 3으로 진행
 - 에러 있음 → 아래 순서로 처리한다. **오케스트레이터가 .cs·.meta 등 코드 파일을 직접 수정하지 않는다. 코드 수정은 포터 에이전트가 담당한다.**
   1. 에러 목록을 분류해 사용자에게 출력한다
-  2. PORTING_ANALYSIS.md 컴파일 이슈 테이블에 기록한다:
+  2. pureweb-checklist.md `## 이슈`에 기록한다:
      - porting-scan에서 "확인 필요"였던 항목은 실제 결과로 업데이트
-     - 모든 오류에 "⬜ 포터에서 처리" 상태 표시
-  3. PORTING_ANALYSIS.md를 커밋한다 (`[문서] WebGL 컴파일 체크 결과 기록`)
+     - 모든 오류를 `- [ ] {파일}:{라인} — [컴파일] {오류} — 포터에서 처리` 형식으로 추가
+  3. pureweb-checklist.md를 커밋한다 (`[문서] WebGL 컴파일 체크 결과 기록`)
   4. AskUserQuestion으로 포터 에이전트 실행을 확인한다:
-     > "WebGL 컴파일 오류 N건이 있습니다. 내용을 PORTING_ANALYSIS.md에 기록했습니다.
+     > "WebGL 컴파일 오류 N건이 있습니다. 내용을 pureweb-checklist.md `## 이슈`에 기록했습니다.
      > 포터 에이전트가 D처리(DLL 비활성화)·A처리(가드 추가)로 해결합니다.
      > 에이전트를 실행할까요?"
      > - 예 → STEP 3으로 진행
@@ -450,7 +451,7 @@ grep -E "error CS" Docs/porting/compile_result.log | sort -u
 이미 완료된 작업: {STEP 2-E에서 커밋된 내용 요약 — 없으면 "없음"}
 ```
 
-**prompt에 포함하지 않을 것**: 구체적 파일명, 라인 번호, 처리 순서, 태스크 목록. 에이전트가 PORTING_ANALYSIS.md를 읽고 스스로 판단한다.
+**prompt에 포함하지 않을 것**: 구체적 파일명, 라인 번호, 처리 순서, 태스크 목록. 에이전트가 NATIVE_BASELINE.md·pureweb-checklist.md·PORTING_VOCAB.md를 읽고 스스로 판단한다.
 
 ```
 # 나중에 선택 시 출력
