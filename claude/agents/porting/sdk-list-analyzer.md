@@ -132,6 +132,15 @@ grep -rhoE "^namespace [A-Za-z0-9_.]+" {SCRIPTS_PATH} --include="*.cs" 2>/dev/nu
 
 표 스키마는 NATIVE_BASELINE.md `## 외부 SDK 목록`과 동일하게 유지한다 (porting-scan이 그대로 수용).
 
+## STEP 4-A — 커밋 (git 설정된 경우)
+
+STEP 1에서 확인한 기준 커밋이 `NO_GIT`이면 이 단계를 건너뛴다. git repo이면 `Docs/porting/.sdk-list.md`만 커밋한다 (다른 파일은 add하지 않는다):
+
+```bash
+git add Docs/porting/.sdk-list.md
+git commit -m "[문서] 외부 SDK 목록 분석 (.sdk-list.md)"
+```
+
 ---
 
 ## Stats Logging
@@ -149,4 +158,5 @@ grep -rhoE "^namespace [A-Za-z0-9_.]+" {SCRIPTS_PATH} --include="*.cs" 2>/dev/nu
 ```
 ✅ Docs/porting/.sdk-list.md 생성 완료 — SDK N개 (jslib N개, D 대상 N개, 확인 필요 N개)
 기준 커밋: {해시 앞 7자리} ({clean|dirty})
+커밋: {새 커밋 해시 앞 7자리} | NO_GIT — 커밋 생략
 ```
