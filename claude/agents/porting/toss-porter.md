@@ -83,7 +83,6 @@ git commit -m "[{prefix}] {단계명}"
 
 | 단계 | 상태 | 커밋 | 비고 |
 |---|---|---|---|
-| 1. 리뷰 팝업 제거 | ⬜ | | |
 | 2. 서버 시간 체크 | ⬜ | | |
 | 3. 로그인 API 연동 | ⬜ | | |
 | 4. 백그라운드 사운드 처리 | ⬜ | | |
@@ -340,7 +339,7 @@ TossHandler 전용 호출(배너·Managed 프로모션) 로그에만 `[TOSS]` pr
 [순차] 사전 확인: RunInBackground | 게임 시작점 파악 (삽입 위치 기준)
       ↓
 [병렬 가능] 작업 계획 테이블에서 파일 겹침 없는 그룹 → worktree 분기
-  예상: 독립그룹(1·2·4)
+  예상: 독립그룹(2·4)
   ※ 3→3-A는 순차 필수
   실제 그룹은 작업 계획 테이블 확정 후 결정
       ↓
@@ -591,51 +590,7 @@ grep -rn "AudioListener" Assets/HyperLane --include="*.cs" | grep -v ".meta"
 
 ## 작업 순서
 
-### 1. 리뷰 팝업 제거 🤖
-
-모바일에서만 의미 있는 팝업(리뷰 요청, 앱스토어 유도 등)을 WebGL에서 차단한다.
-
-PORTING_VOCAB.md 메인 표 → `리뷰 팝업` 행(위치) 확인:
-- "없음" → 이 단계 스킵
-- 파일:라인 기록됨 → 해당 파일을 Read해서 **발동조건**(카운트 N회·플래그·이벤트 등)과 처리 범위를 파악한다
-
-파일을 Read한 뒤 아래 기준으로 처리한다.
-
-**🤖 자동 처리 — 판단 불필요**
-
-| 케이스 | 처리 |
-|---|---|
-| 조건 블록 안에 팝업 표시 호출만 있음 | 조건 블록 전체 감싸기 |
-| 조건 블록 안에 팝업 + 다른 로직 있지만 게임 변수 수정 없음 | 팝업 표시 호출만 감싸기 |
-
-**❓ 사용자 판단 필요 — 팝업과 함께 게임 변수 수정(카운트 리셋, 플래그 설정 등)이 있는 경우**
-
-해당 변수가 쓰이는 다른 위치를 grep으로 확인한 뒤 사용자에게 보여준다:
-
-```bash
-grep -rn "{변수명}" Assets/Scripts --include="*.cs" | grep -v HyperLane
-```
-
-> "리뷰 팝업 블록에 `{변수명}` 수정이 함께 있습니다. WebGL에서 이 변수가 수정되면 위 위치에도 영향을 줍니다. 어떻게 처리할까요?"
-> - 블록 전체 감싸기 — 변수 수정도 WebGL에서 실행 안 함
-> - 팝업 호출만 감싸기 — 변수 수정은 WebGL에서도 실행됨
-
-```csharp
-#if !UNITY_WEBGL
-    // 결정된 범위에 따라 감싸기
-#endif
-```
-
-**가드 처리 직후 — 테스트 항목 기록 (필수)**
-
-Read에서 파악한 발동조건을 `Docs/porting/toss-checklist.md` `## 기획자 보고`에 기록한다:
-
-```markdown
-- [ ] 리뷰 팝업 미표시 확인 — 발동: {조건 요약, 예: 스테이지 10회 클리어 시}
-```
-
-가드 후에는 이 코드가 실행되지 않으므로, 지우기 전 마지막 독자인 이 단계가 테스트 방법을 남긴다.
-**이 기록이 없으면 단계 진행 표에 이 단계를 완료(✅)로 표시하지 않는다.**
+> **리뷰 팝업 제거는 pureweb-porter가 처리한다** (모바일 전용 팝업 차단은 플랫폼 무관 WebGL 공통 처리 — 이슈 #10). `Docs/porting/pureweb-checklist.md` `## 기획자 보고`에서 처리 여부·발동조건 테스트 항목을 확인한다. toss-porter는 이 단계를 실행하지 않는다.
 
 ---
 
@@ -2255,26 +2210,22 @@ grep -rn "InappPurchase\|PurchaseProduct" Assets/Scripts --include="*.cs" | grep
 grep -rn "SaveCloud\|SetUserData" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
   | grep -v "WEBGL_TOSS\|UNITY_WEBGL"
 
-# [8] 리뷰 팝업 WebGL 가드 누락 (결과 있으면 처리 필요)
-grep -rn "RequestReview\|StoreReview" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
-# [9] 불필요한 UI WebGL 가드 누락 (결과 있으면 처리 필요)
+# [8] 불필요한 UI WebGL 가드 누락 (결과 있으면 처리 필요)
 grep -rn "RestorePurchase\|ContactUs" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
   | grep -v "UNITY_WEBGL"
 
-# [10] 햅틱 UNITY_WEBGL 가드 누락 (결과 있으면 처리 필요)
+# [9] 햅틱 UNITY_WEBGL 가드 누락 (결과 있으면 처리 필요)
 grep -rn "Vibrate\b\|\.Vibrate(" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
   | grep -v "UNITY_WEBGL"
 
-# [11] 랭킹 Submit LIVE 분기 누락 (결과 있으면 처리 필요)
+# [10] 랭킹 Submit LIVE 분기 누락 (결과 있으면 처리 필요)
 grep -rn "SubmitLeaderBoard" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
   | grep -v "WEBGL_LIVE_VER"
 
-# [12] OnApplicationPause 구독 여부 — 결과 없으면 단계 4 처리 누락
+# [11] OnApplicationPause 구독 여부 — 결과 없으면 단계 4 처리 누락
 grep -rn "OnApplicationPause" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//"
 
-# [13] 전처리문 — WEBGL_TOSS 단독 사용 감지 (결과 있으면 처리 필요)
+# [12] 전처리문 — WEBGL_TOSS 단독 사용 감지 (결과 있으면 처리 필요)
 grep -rn "#if WEBGL_TOSS\|#elif WEBGL_TOSS" Assets/Scripts --include="*.cs" | grep -v HyperLane | grep -v "//" \
   | grep -v "UNITY_WEBGL"
 ```
@@ -2290,12 +2241,11 @@ grep -rn "#if WEBGL_TOSS\|#elif WEBGL_TOSS" Assets/Scripts --include="*.cs" | gr
 | [5] OnAdVisibilityChanged | ⚠️ BGM 처리 누락 | ✅ |
 | [6] IAP | ✅ | ⚠️ 분기 누락 — 재처리 |
 | [7] 서버 저장 | ✅ | ⚠️ 분기 누락 — 재처리 |
-| [8] 리뷰 팝업 | ✅ | ⚠️ 가드 누락 — 재처리 |
-| [9] 불필요한 UI | ✅ | ⚠️ 가드 누락 — 재처리 |
-| [10] 햅틱 | ✅ | ⚠️ 가드 누락 — 재처리 |
-| [11] 랭킹 Submit | ✅ | ⚠️ LIVE 분기 누락 — 재처리 |
-| [12] OnApplicationPause | ⚠️ 백그라운드 사운드 누락 (4번 미처리) | ✅ |
-| [13] 전처리문 WEBGL_TOSS | ✅ | ⚠️ UNITY_WEBGL 누락 — 재처리 |
+| [8] 불필요한 UI | ✅ | ⚠️ 가드 누락 — 재처리 |
+| [9] 햅틱 | ✅ | ⚠️ 가드 누락 — 재처리 |
+| [10] 랭킹 Submit | ✅ | ⚠️ LIVE 분기 누락 — 재처리 |
+| [11] OnApplicationPause | ⚠️ 백그라운드 사운드 누락 (4번 미처리) | ✅ |
+| [12] 전처리문 WEBGL_TOSS | ✅ | ⚠️ UNITY_WEBGL 누락 — 재처리 |
 
 ### CompileChecker 최종 확인
 
@@ -2324,9 +2274,6 @@ grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
 ────────────────────────────────────────────────────────────────
 카테고리 항목 결과
 ────────────────────────────────────────────────────────────────
-UI 리뷰 팝업 제거 ✅ N건 처리 / ✅ 없음
-             근거: {파일명}:N → #if !UNITY_WEBGL 처리
-
 UI UID/version 추가 ✅ {파일명}:N / 👤 직접 처리 필요
              근거: HLSDK.Instance.GetUserKey() + Application.version
              👤 프리팹 위치를 직접 찾아 UI 추가 필요

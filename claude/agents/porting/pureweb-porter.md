@@ -79,6 +79,7 @@ git commit -m "[{prefix}] {단계명}"
 | 단계 | 상태 | 커밋 | 비고 |
 |---|---|---|---|
 | 1. RunInBackground 확인 | ⬜ | | |
+| 1-A. 리뷰 팝업 제거 | ⬜ | | |
 | 2. SafeArea 제거 | ⬜ | | |
 | 3. Screen.fullScreen / SetResolution 방지 | ⬜ | | |
 | 3-B. 외부 네트워크 요청 차단 | ⬜ | | |
@@ -233,7 +234,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
   worktree-immediate: 5 광고 즉시지급 + 6 IAP 즉시지급
   worktree-sdk:       7 SDK 비활성화
       ↓ (worktree merge 완료 후)
-[순차] 1 RunInBackground → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 9 앱 이름·Favicon 설정
+[순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 9 앱 이름·Favicon 설정
       ↓
 [선택] 4 토스 콘텐츠 동기화 (AskUserQuestion)
       ↓
@@ -390,6 +391,54 @@ grep -n "runInBackground\|RunInBackground" Assets/HyperLane/Editor/H5Builder.cs 
 
 - `true`로 설정되어 있으면 → 이상 없음
 - 설정이 없거나 `false`이면 → H5Builder에서 활성화 필요, 사용자에게 안내
+
+---
+
+### 1-A. 리뷰 팝업 제거 🤖
+
+모바일에서만 의미 있는 팝업(리뷰 요청, 앱스토어 유도 등)을 WebGL에서 차단한다. 플랫폼 무관 WebGL 공통 처리 — `[웹지엘]` prefix.
+
+PORTING_VOCAB.md 메인 표 → `리뷰 팝업` 행(위치) 확인:
+- "없음" → 이 단계 스킵
+- 파일:라인 기록됨 → 해당 파일을 Read해서 **발동조건**(카운트 N회·플래그·이벤트 등)과 처리 범위를 파악한다
+
+파일을 Read한 뒤 아래 기준으로 처리한다.
+
+**🤖 자동 처리 — 판단 불필요**
+
+| 케이스 | 처리 |
+|---|---|
+| 조건 블록 안에 팝업 표시 호출만 있음 | 조건 블록 전체 감싸기 |
+| 조건 블록 안에 팝업 + 다른 로직 있지만 게임 변수 수정 없음 | 팝업 표시 호출만 감싸기 |
+
+**❓ 사용자 판단 필요 — 팝업과 함께 게임 변수 수정(카운트 리셋, 플래그 설정 등)이 있는 경우**
+
+해당 변수가 쓰이는 다른 위치를 grep으로 확인한 뒤 사용자에게 보여준다:
+
+```bash
+grep -rn "{변수명}" Assets/Scripts --include="*.cs" | grep -v HyperLane
+```
+
+> "리뷰 팝업 블록에 `{변수명}` 수정이 함께 있습니다. WebGL에서 이 변수가 수정되면 위 위치에도 영향을 줍니다. 어떻게 처리할까요?"
+> - 블록 전체 감싸기 — 변수 수정도 WebGL에서 실행 안 함
+> - 팝업 호출만 감싸기 — 변수 수정은 WebGL에서도 실행됨
+
+```csharp
+#if !UNITY_WEBGL
+    // 결정된 범위에 따라 감싸기
+#endif
+```
+
+**가드 처리 직후 — 테스트 항목 기록 (필수)**
+
+Read에서 파악한 발동조건을 `Docs/porting/pureweb-checklist.md` `## 기획자 보고`에 기록한다:
+
+```markdown
+- [ ] 리뷰 팝업 미표시 확인 — 발동: {조건 요약, 예: 스테이지 10회 클리어 시}
+```
+
+가드 후에는 이 코드가 실행되지 않으므로, 지우기 전 마지막 독자인 이 단계가 테스트 방법을 남긴다.
+**이 기록이 없으면 단계 진행 표에 이 단계를 완료(✅)로 표시하지 않는다.**
 
 ---
 
@@ -983,6 +1032,10 @@ grep -rn "{SAVE_METHOD}\|Backend\." Assets/Scripts --include="*.cs" 2>/dev/null 
 grep -rln "SafeArea\|safeArea" Assets/Scripts --include="*.cs" 2>/dev/null \
   | xargs grep -L "UNITY_WEBGL" 2>/dev/null
 
+# 리뷰 팝업 WebGL 가드 누락 확인 (결과 있으면 처리 필요)
+grep -rn "RequestReview\|StoreReview" Assets/Scripts --include="*.cs" 2>/dev/null \
+  | grep -v "UNITY_WEBGL\|//"
+
 # 네트워크 — UNITY_WEBGL 가드 없는 외부 요청 확인 (CORS 유발 가능)
 grep -rn "UnityWebRequest\|new WWW\b" Assets/Scripts --include="*.cs" 2>/dev/null \
   | grep -v "UNITY_WEBGL\|HyperLane\|//"
@@ -1073,6 +1126,10 @@ UI        Screen.fullScreen 전환 방지              ✅ N건 처리 / ✅ 없
 UI        Safe Area 미적용                         ✅ N건 제거 / ✅ 코드 없음
           근거: {파일명}:N - ApplySafeArea() → #if !UNITY_WEBGL 처리
 
+UI        리뷰 팝업 제거                          ✅ N건 처리 / ✅ 없음
+          근거: {파일명}:N - RequestReview/StoreReview → #if !UNITY_WEBGL 처리
+          🔍 발동조건 재현(pureweb-checklist 기획자 보고 참조) 후 미표시 확인 필요
+
 광고      보상형 광고 즉시 지급                    ✅ N건 처리
           근거: {파일명}:N - ShowRewardAD → #if UNITY_WEBGL && WEBGL_PUREWEB OnSuccess(true)
           🔍 실제 광고 버튼 클릭 후 보상 지급 여부 확인 필요
@@ -1105,8 +1162,8 @@ SDK       외부 SDK 제거 (DLL·jslib·C# 코드)       ✅ N개 SDK 처리 / 
           👤 아이콘 파일 없는 경우: 파일 준비 후 favicon.ico로 복사 필요
           👤 앱 이름 불일치 시: Unity Editor PlayerSettings에서 직접 수정 필요
 
-배포      URL 공유 후 플레이 가능                  🔍 수동 확인 필요
-          (빌드 배포 후 브라우저에서 직접 확인)
+배포      URL 사업팀 전달 후 플레이 가능             🔍 수동 확인 필요
+          (빌드 배포 URL을 사업팀에 전달, 브라우저에서 문제 없이 플레이되는지 직접 확인)
 ────────────────────────────────────────────────────
 
 CompileChecker: 통과 / 에러 N건
