@@ -940,6 +940,22 @@ find Assets -iname "*icon*" -o -iname "*appicon*" -o -iname "*launcher*" 2>/dev/
 
 ---
 
+### 9-A. WebGL 템플릿 — persistentDataPath 자동 동기화
+
+HyperLane WebGLTemplates(Unity 기본 템플릿 계열)는 `config.autoSyncPersistentDataPath = true;` 줄이 기본 주석 처리되어 있다. 주석 상태로 두면 브라우저 콘솔에 매 빌드마다 "Manual synchronization ... JS_FileSystem_Sync() is deprecated" 경고가 뜬다(PlayerPrefs/파일 저장 자체는 정상 동작 — 콘솔 경고일 뿐이지만 매번 재발생하므로 미리 처리).
+
+```bash
+grep -n "autoSyncPersistentDataPath" Assets/WebGLTemplates/PureWeb/index.html
+```
+
+- `// config.autoSyncPersistentDataPath = true;`(주석 상태) → 주석 해제:
+  ```bash
+  sed -i '' 's|// config\.autoSyncPersistentDataPath = true;|config.autoSyncPersistentDataPath = true;|' Assets/WebGLTemplates/PureWeb/index.html
+  ```
+- 이미 주석 해제됨 또는 라인 자체가 없음(템플릿 버전에 따라 다를 수 있음) → 그대로 둔다
+
+---
+
 ### 10. CheatConsole.prefab 씬 추가 👤
 
 ```bash
