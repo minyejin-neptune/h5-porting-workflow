@@ -102,6 +102,7 @@ git commit -m "[{prefix}] {단계명}"
 - [ ] 8-A. 저장 키 분리 (VOCAB `저장 키` 판정 "게임별 구분 없음"이면 필수)
 - [ ] 8-B. Base64 인코딩 래핑 (VOCAB `저장 인코딩` Base64 없음이면 필수 — 스킵 불가)
 - [ ] 9. 앱 이름 및 Favicon 설정
+- [ ] 9-A. WebGL 템플릿 — persistentDataPath 자동 동기화
 - [ ] 검증
 ```
 
