@@ -63,7 +63,7 @@ git commit -m "[{prefix}] {단계명}"
 2. 출력 판정:
    - `✅` → 계속 진행
    - `❌` → 출력된 에러 목록 수정 후 재실행
-   - `⛔ STOP`(에디터 열림) → AskUserQuestion: "이 프로젝트가 Unity에 열려 있습니다. 닫아주세요. 닫으셨나요?" — 닫음 → 재실행 / 아직 열려있음 → 닫은 후 알려달라고 안내. 그 전까지 `.cs` 수정 없이 대기.
+   - `⛔ STOP`(에디터 열림) → 서브에이전트는 실시간으로 물어볼 수 없으므로 `Temp/UnityLockfile`을 30초 간격 최대 10회 재확인(`lsof Temp/UnityLockfile`)한다. 그 사이 `.cs` 수정 없이 대기. 사라지면 재실행 / 10회 안에도 안 사라지면 체크리스트 `## 확인 필요`에 "에디터 열림 — 컴파일 체크 불가" 기록 후 전체 작업 중단.
 
 > hook 미설정 시 → Unity 메뉴 **Tools/H5/Compile Check (PUREWEB)** 수동 실행
 
@@ -242,7 +242,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 [진입] 플랫폼 컨텍스트 기록 (.porting-context)
        NATIVE_BASELINE.md + pureweb-checklist.md + PORTING_VOCAB.md 읽기
       ↓
-[선택] 사전 빌드 용량 기록 (AskUserQuestion)
+[선택] 사전 빌드 용량 기록 (기본 스킵)
       ↓
 [의존성 파악] 태스크별 수정 파일 grep → 파일 겹침 기준으로 그룹 분류
       ↓
@@ -253,7 +253,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
       ↓ (worktree merge 완료 후)
 [순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 9 앱 이름·Favicon 설정
       ↓
-[선택] 4 토스 콘텐츠 동기화 (AskUserQuestion)
+[선택] 4 토스 콘텐츠 동기화 (grep 자동 판단)
       ↓
 [검증] grep 자동검증 → CompileChecker 최종 확인
       ↓
@@ -306,11 +306,7 @@ echo "PUREWEB" > .porting-context
 
 포팅 작업 전 기준 용량을 기록한다. 나중에 최적화 효과를 측정할 때 사용한다.
 
-AskUserQuestion으로 먼저 확인한다:
-
-> "포팅 전 기준 용량 기록을 위해 PureWeb LIVE 빌드를 실행할까요? (시간이 걸릴 수 있습니다)"
-> - 예 → 아래 빌드 실행 (Unity Editor가 닫혀 있어야 함)
-> - 아니오 → 이 단계 스킵, 작업 순서로 바로 진행
+시간이 걸리는 빌드라 확인 없이 기본값으로 스킵하고 `pureweb-checklist.md` `## 확인 필요`에 "사전 빌드 용량 측정 생략 — 필요 시 수동 실행" 기록 후 작업 순서로 바로 진행한다.
 
 **사전 조건**: 이 프로젝트가 Unity Editor에 열려 있지 않아야 한다 (아래 스크립트가 락 기준으로 판정).
 
@@ -547,11 +543,7 @@ public void GetServerTime(Action<DateTime> callback)
 
 ### 4. 토스 콘텐츠 동기화
 
-AskUserQuestion으로 먼저 확인한다:
-
-> "토스 포팅이 먼저 완료되었나요? 토스에서 제거한 콘텐츠를 퓨어웹에도 동기화합니다."
-> - 예 → 아래 탐색 실행
-> - 아니오 → 이 단계 스킵
+토스 선행 완료 여부를 물어볼 필요 없이 아래 탐색으로 바로 판단한다 — 결과가 있으면 토스 처리가 이미 있다는 뜻이므로 동기화 진행, 0건이면 스킵:
 
 ```bash
 # WEBGL_TOSS 처리는 있는데 WEBGL_PUREWEB 처리가 없는 파일
@@ -931,12 +923,7 @@ find Assets -iname "*icon*" -o -iname "*appicon*" -o -iname "*launcher*" 2>/dev/
 
 **결과 처리:**
 
-- 아이콘 파일 찾음 → 파일 목록을 사용자에게 보여주고 AskUserQuestion으로 확인:
-
-  > "아래 아이콘 파일을 찾았습니다. favicon.ico로 교체할까요?
-  > {파일 목록}
-  > - 예 → 선택한 파일로 교체
-  > - 아니오 → 👤 직접 처리 필요"
+- 아이콘 파일 찾음 → 잘못 고르면 앱 아이콘이 틀어질 수 있어 자동 교체하지 않는다. 찾은 파일 목록을 `pureweb-checklist.md` `## 확인 필요`에 기록하고 👤 직접 처리 필요로 남긴다.
 
   교체 선택 시:
   ```bash
@@ -957,11 +944,7 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 ```
 
 - 결과 있음 → ✅ 이미 추가됨
-- 결과 없음 → AskUserQuestion으로 알린다:
-
-  > "CheatConsole.prefab이 씬에 추가되지 않았습니다.
-  > Unity Editor에서 `Assets/HyperLane/Plugins/WebGL/Util/Cheat/CheatConsole.prefab`을 씬에 직접 추가해 주세요.
-  > 완료 후 계속할까요?"
+- 결과 없음 → 씬에 프리팹을 추가하는 건 Unity Editor GUI 작업이라 AI가 대신 할 수 없다. `pureweb-checklist.md` `## 확인 필요`에 "CheatConsole.prefab을 `Assets/HyperLane/Plugins/WebGL/Util/Cheat/CheatConsole.prefab`에서 씬에 직접 추가 필요" 기록하고, 블로킹 없이 나머지 파이프라인을 계속 진행한다.
 
 ---
 
