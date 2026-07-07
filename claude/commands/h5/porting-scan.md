@@ -686,27 +686,7 @@ grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLangua
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 저장.
 
-각 행은 toss-porter·pureweb-porter에서 아래 플레이스홀더로 참조된다 (h5-port.md VOCAB 변수 매핑 컨벤션):
-
-| PORTING_VOCAB 행 | 플레이스홀더 |
-|---|---|
-| 불러오기 | `{LOAD_METHOD}` |
-| 저장 | `{SAVE_METHOD}` |
-| 로컬 저장 | `{LOCAL_SAVE_METHOD}` |
-| 로컬 불러오기 | `{LOCAL_LOAD_METHOD}` |
-| 사운드 | `{SOUND_CLASS}` |
-| 광고 (보상형) | `{AD_REWARDED_METHOD}` |
-| 광고 (전면) | `{AD_INTERSTITIAL_METHOD}` |
-| 광고 전면 진입점 | `{INTERSTITIAL_ENTRY}` |
-| 전면 쿨타임 변수 | `{COOLTIME_VAR}` |
-| IAP | `{IAP_METHOD}` |
-| 게임 진입점 | `{GAME_INIT_METHOD}` |
-| 로비 진입점 | `{LOBBY_ENTRY}` |
-| SafeArea 클래스 | `{SAFEAREA_CLASS}` |
-| UID/version 표시 | `{UID_VERSION_FILE}` |
-| 불필요 UI 목록 | `{REMOVE_UI_LIST}` |
-| 로컬라이제이션 | `{LOCALIZATION_FILE}` |
-| 에셋 현황 | `{ASSET_COUNTS}` |
+각 행의 플레이스홀더는 아래 템플릿 표 자체가 유일한 정의다 — toss-porter·pureweb-porter는 생성된 `PORTING_VOCAB.md`를 직접 읽어 `플레이스홀더` 열을 참조한다. 다른 문서(h5-port.md 등)가 이 목록을 별도로 재정의하지 않는다 — 재정의하면 이 템플릿과 어긋날 수 있다(드리프트).
 
 ```markdown
 # Porting Vocabulary — {프로젝트명}

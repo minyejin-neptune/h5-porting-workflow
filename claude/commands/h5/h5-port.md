@@ -103,35 +103,15 @@ git commit -m "[문서] 포팅 초기 설정 — CLAUDE.md·FRAMEWORK_REFERENCE.
 
 ## VOCAB 변수 매핑 컨벤션
 
-porting-scan, toss-porter, pureweb-porter 등 모든 h5 에이전트는 아래 변수명을 공유한다.
-PORTING_VOCAB.md를 읽은 뒤 해당 행의 메서드/클래스명으로 플레이스홀더를 대체한다.
+플레이스홀더 전체 정의는 `porting-scan.md`의 VOCAB 템플릿(`PORTING_VOCAB.md` 생성 형식)이 유일한 소스다 — 여기서 재정의하지 않는다. toss-porter·pureweb-porter는 생성된 `PORTING_VOCAB.md`를 직접 읽어 그 파일의 `플레이스홀더` 열을 참조하므로 이 표를 보지 않는다.
 
-| 플레이스홀더 | PORTING_VOCAB.md 행 | 예시 |
+h5-port.md 본문이 직접 사용하는 플레이스홀더만 아래에 남긴다:
+
+| 플레이스홀더 | PORTING_VOCAB.md 행 | 확정 방법 |
 |---|---|---|
-| `{LOAD_METHOD}` | 불러오기 | `LoadCloud()` |
-| `{SAVE_METHOD}` | 저장 | `SaveCloud()` |
-| `{SOUND_CLASS}` | 사운드 | `SoundManager` |
-| `{AD_REWARDED_METHOD}` | 광고 (보상형) | `ShowRewardedAd()` |
-| `{AD_INTERSTITIAL_METHOD}` | 광고 (전면) | `ShowInterstitialAd()` |
-| `{IAP_METHOD}` | IAP | `InappPurchase()` |
-| `{GAME_INIT_METHOD}` | 게임 진입점 | `InitGame()` |
-| `{LOBBY_ENTRY}` | 로비 진입점 | `OnEnterLobby()` |
-| `{LOCAL_SAVE_METHOD}` | 로컬 저장 | `SaveLocal()` |
-| `{LOCAL_LOAD_METHOD}` | 로컬 불러오기 | `LoadLocal()` |
-| `{INTERSTITIAL_ENTRY}` | 광고 전면 진입점 | `ShowInterstitial()` |
-| `{COOLTIME_VAR}` | 전면 쿨타임 변수 | `interstitialCooltime` |
-| `{PRICE_UI_CLASS}` | 가격 표시 UI (Toss 전용) | `UIShopPrice` |
-| `{BANNER_FILE}` | 배너 광고 (Toss 전용) | `AdManager.cs` |
-| `{HAPTIC_FILE}` | 햅틱/진동 (Toss 전용) | `HapticManager.cs` |
-| `{RANKING_FILE}` | 랭킹 연동 (Toss 전용) | `RankManager.cs` |
-| `{SHARE_FILE}` | 공유하기 (Toss 전용) | `ShareManager.cs` |
-| `{PROMOTION_TYPE}` | 프로모션 방식 (Toss 전용) | `Managed` |
-| `{SAFEAREA_CLASS}` | SafeArea 처리 클래스 (Toss 전용) | `SafeAreaAdjuster` |
-| `{UID_VERSION_FILE}` | UID/version 표시 UI 클래스 (Toss 전용) | `DebugInfoUI` |
-| `{REMOVE_UI_LIST}` | 불필요 UI 후보 파일:라인 목록 (Toss 전용) | `UIShop.cs:42, UIMenu.cs:88` |
-| `{LOCALIZATION_FILE}` | 로컬라이제이션 클래스 (Toss 전용) | `LocalizationManager.cs` |
-| `{ASSET_COUNTS}` | 에셋 현황 (오디오·텍스쳐 수·Addressables) | `오디오: 30개 / 텍스쳐: 800개 / Addressables: 사용중` |
-| `{SCRIPTS_PATH}` | — | porting-scan 사전 감지로 확정, NATIVE_BASELINE.md 헤더 `스크립트 경로:`에 기록 |
+| `{GAME_INIT_METHOD}` | 게임 진입점 | PORTING_VOCAB.md 게임 진입점 행 |
+| `{ASSET_COUNTS}` | 에셋 현황 | PORTING_VOCAB.md 에셋 현황 행 |
+| `{SCRIPTS_PATH}` | — | NATIVE_BASELINE.md 헤더 `스크립트 경로:` |
 
 ---
 
