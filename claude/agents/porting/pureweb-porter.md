@@ -1128,73 +1128,25 @@ Data + wasm 합산 50MB 이하 확인.
 
 ## 완료 후 채팅 출력
 
-작업 완료 후 아래 형식으로 리포트를 출력한다. 각 항목마다 판단 근거를 함께 기재한다.
+상세 항목별 처리 내역(✅/⚠️/⏭️, 근거 파일:라인)은 `pureweb-checklist.md`에 이미 기록돼 있다 — 채팅에 다시 나열하지 않는다.
+채팅에는 체크리스트에 남지 않는 2가지만 출력한다: **CompileChecker 결과**, **🔍 수동 테스트 필요 항목**(리뷰 팝업 제외 — `pureweb-checklist.md` `## 기획자 보고`에 이미 기록됨).
+해당 없는 항목(예: IAP 미사용 프로젝트의 구매 테스트)은 생략한다.
 
 ```
-✅ pureweb-porter 완료 — 포팅 체크리스트 리포트
-
-범례: ✅ 코드 처리 완료 | 🔍 수동 테스트 필요 | ⚠️ 주의 필요 | ⏭️ 스킵
-
-────────────────────────────────────────────────────
-카테고리  항목                                    결과
-────────────────────────────────────────────────────
-빌드      data.br + wasm 50MB 이하               ✅ / ⚠️ N MB (기준 초과)
-          근거: Build/PureWeb/*.wasm=NMB, *.data.br=NMB → 합산 NMB
-
-설정      RunInBackground 활성화                  ✅ / ⚠️ 설정 필요
-          근거: H5Builder.cs:N - runInBackground = true/false
-
-UI        Screen.fullScreen 전환 방지              ✅ N건 처리 / ✅ 없음
-          근거: {파일명}:N - #if UNITY_WEBGL 분기 추가
-          🔍 실제 클릭 후 전체화면 전환 없는지 브라우저에서 확인 필요
-
-UI        Safe Area 미적용                         ✅ N건 제거 / ✅ 코드 없음
-          근거: {파일명}:N - ApplySafeArea() → #if !UNITY_WEBGL 처리
-
-UI        리뷰 팝업 제거                          ✅ N건 처리 / ✅ 없음
-          근거: {파일명}:N - RequestReview/StoreReview → #if !UNITY_WEBGL 처리
-          🔍 발동조건 재현(pureweb-checklist 기획자 보고 참조) 후 미표시 확인 필요
-
-광고      보상형 광고 즉시 지급                    ✅ N건 처리
-          근거: {파일명}:N - ShowRewardAD → #if UNITY_WEBGL && WEBGL_PUREWEB OnSuccess(true)
-          🔍 실제 광고 버튼 클릭 후 보상 지급 여부 확인 필요
-
-결제      IAP 즉시 지급                            ✅ N건 처리
-          근거: {파일명}:N - InappPurchase → #if UNITY_WEBGL && WEBGL_PUREWEB onResult(true)
-          🔍 실제 구매 버튼 클릭 후 상품 지급 여부 확인 필요
-
-SDK       외부 SDK 제거 (DLL·jslib·C# 코드)       ✅ N개 SDK 처리 / ⚠️ N건 잔존
-          근거: {SDK명} - .dll.meta WebGL:0, using → #if !UNITY_WEBGL
-                StreamingAssets html: 외부 스크립트 태그 없음 / N건 제거
-
-네트워크  외부 네트워크 요청 차단                   ✅ N건 처리 / ⚠️ N건 미처리
-          근거: {파일명}:N - UnityWebRequest → #if UNITY_WEBGL 분기 (서버시간 등)
-                {파일명}:N - Application.OpenURL → #if !UNITY_WEBGL 차단
-          🔍 브라우저 네트워크 탭에서 외부 도메인 요청 없는지 확인 필요
-
-데이터    서버 저장 차단 / PlayerPrefs(IndexedDB)만 사용  ✅ N건 처리
-          근거: {파일명}:N - SaveToServer → #if UNITY_WEBGL PlayerPrefs 대체
-          ⚠️ 저장 키 게임별 구분: 있음 / 없음(키 분리 필요) / 확인 필요
-          ⚠️ 암호화·Base64 인코딩: 있음(VOCAB 저장 인코딩 확인) / 없음(Base64 래핑 추가 완료)
-          🔍 실제 플레이 후 브라우저 개발자도구 → Application → IndexedDB에서 저장 확인 필요
-
-콘텐츠    토스 제거 콘텐츠 퓨어웹 동기화           ✅ N건 처리 / ⏭️ 스킵(토스 미완료)
-          근거: {파일명}:N - WEBGL_TOSS → WEBGL_PUREWEB 동기화
-
-기타      앱 이름 및 Favicon 설정                  ✅ favicon 교체 완료 / 👤 직접 처리 필요
-          근거: ProjectSettings - productName: {게임명}
-                Assets/WebGLTemplates/PureWeb/TemplateData/favicon.ico ← {원본 파일 경로}
-          👤 아이콘 파일 없는 경우: 파일 준비 후 favicon.ico로 복사 필요
-          👤 앱 이름 불일치 시: Unity Editor PlayerSettings에서 직접 수정 필요
-
-배포      URL 사업팀 전달 후 플레이 가능             🔍 수동 확인 필요
-          (빌드 배포 URL을 사업팀에 전달, 브라우저에서 문제 없이 플레이되는지 직접 확인)
-────────────────────────────────────────────────────
+✅ pureweb-porter 완료 — 상세: Docs/porting/pureweb-checklist.md
 
 CompileChecker: 통과 / 에러 N건
 → Unity 메뉴: Tools/H5/Compile Check (PUREWEB) 로 확인
 
-다음 단계: 빌드 배포 후 🔍 항목 수동 테스트
+🔍 수동 테스트 필요 (리뷰 팝업은 pureweb-checklist.md `## 기획자 보고` 참조):
+- Screen.fullScreen 전환 방지 — 실제 클릭 후 전체화면 전환 없는지 브라우저에서 확인
+- 보상형 광고 즉시 지급 — 실제 광고 버튼 클릭 후 보상 지급 여부 확인
+- IAP 즉시 지급 — 실제 구매 버튼 클릭 후 상품 지급 여부 확인
+- 외부 네트워크 요청 차단 — 브라우저 네트워크 탭에서 외부 도메인 요청 없는지 확인
+- 서버 저장 차단 — 실제 플레이 후 브라우저 개발자도구 → Application → IndexedDB에서 저장 확인
+- 배포 URL — 사업팀 전달 후 플레이 가능 여부 수동 확인
+
+다음 단계: 빌드 배포 후 위 🔍 항목 수동 테스트
 ```
 
 `$ARGUMENTS`에 `--orchestrated`가 없으면 검증 스크립트를 직접 실행하세요.
