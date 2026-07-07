@@ -48,6 +48,12 @@ gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
 
 ---
 
+## 커밋 원칙
+
+**각 STEP이 파일을 생성·수정했으면 완료 후 반드시 커밋한다.** 커밋 없이 다음 STEP으로 넘어가지 않는다 — 다음 STEP 시작 전 `git status`로 미커밋 변경사항이 없는지 확인한다. STEP별 커밋 대상·메시지는 각 STEP 본문에 명시돼 있다(STEP 0-C, STEP 1, STEP 1-A, STEP 1-C, STEP 2-B-commit 등). 포터(toss-porter/pureweb-porter) 실행 중 커밋은 포터 자체 지침(`## 체크리스트 관리`)을 따른다.
+
+---
+
 ## STEP 0 — 프로젝트 초기 설정
 
 `~/.claude/commands/project/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
@@ -184,6 +190,13 @@ grep -n "[가-힣]" "{파일경로}" | head -5
 
 출력된 한글이 정상적으로 읽히는지 사용자에게 확인하고, 깨진 문자가 보이면 원본 인코딩을 재확인한다(예: `file -i "{파일경로}"` 또는 `iconv -f CP949`로 재시도).
 
+**변환 완료 후 커밋 (필수)** — 변환한 파일만 스테이징한다:
+
+```bash
+git add {변환한 .cs 파일 목록}
+git commit -m "[공통] EUC-KR → UTF-8 인코딩 변환"
+```
+
 ---
 
 ## STEP 1-A — Android 플랫폼 컴파일 확인
@@ -248,6 +261,13 @@ bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh ANDROID
 사용자가 수정을 선택하면 조치 완료 후 컴파일을 재실행해 오류가 사라졌는지 확인한다.
 모든 분류에서 처리가 완료(수정 또는 의도적 제외 결정)된 후 STEP 1-B로 진행한다.
 
+**수정한 내용이 있으면 STEP 1-B로 넘어가기 전 커밋한다** — `git status`로 변경 파일을 확인 후:
+
+```bash
+git add {수정한 파일 목록}
+git commit -m "[수정] Android 컴파일 오류 수정"
+```
+
 ---
 
 ## STEP 1-B — PostToolUse Hook 설정 확인
@@ -308,6 +328,15 @@ npx hyperlane update                                              # Assets/Hyper
 
 - `HyperlaneConfig.asset`, `granite.config.ts`, wrapper의 `package.json`/`node_modules`, 사용자 추가 파일은 `update`가 덮어쓰지 않음.
 - 특정 버전 고정: `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0` (태그) 또는 `#커밋해시`.
+
+**설치/업데이트 완료 후 커밋 (필수)** — `git status`로 SDK가 추가·수정한 파일을 확인 후 스테이징한다(`node_modules/`·`Build/`는 `.gitignore` 처리되어 제외됨):
+
+```bash
+git status
+git add Assets/HyperLane Packages/manifest.json package.json package-lock.json
+# 토스 wrapper setup을 실행한 경우 wrapper 디렉토리도 함께 add
+git commit -m "[공통] HyperLane SDK 설치"
+```
 
 ---
 

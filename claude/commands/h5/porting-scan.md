@@ -702,6 +702,11 @@ grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLangua
 
 각 행의 플레이스홀더는 아래 템플릿 표 자체가 유일한 정의다 — toss-porter·pureweb-porter는 생성된 `PORTING_VOCAB.md`를 직접 읽어 `플레이스홀더` 열을 참조한다. 다른 문서(h5-port.md 등)가 이 목록을 별도로 재정의하지 않는다 — 재정의하면 이 템플릿과 어긋날 수 있다(드리프트).
 
+> **`메서드/클래스명` 열은 실제 메서드명을 반드시 백틱으로 감싸 적는다** — `h5-port-verify.py`(`extract_methods`)가 정규식 `` `([^`]+)` ``로 백틱 안의 값만 추출한다. 백틱 없이 일반 텍스트로 적으면 STEP 4 검증 스크립트가 메서드명을 찾지 못해 조용히 통과(0건)로 오판한다.
+> - 형식: `` `ClassName.MethodName()` `` (클래스명 없이 `` `MethodName()` ``도 가능)
+> - 오버로드·유사 메서드 여러 개: `` `Class.ShowVideo_Continue/BossMode/Gem()` `` → `ShowVideo_Continue`·`ShowVideo_BossMode`·`ShowVideo_Gem` 3개로 분리 추출됨
+> - 상속 선언(`` `Class : Interface` ``처럼 `:` 포함)은 파서가 자동 제외 — 메서드명 대신 상속 관계를 적는 용도로 쓰지 않는다
+
 ```markdown
 # Porting Vocabulary — {프로젝트명}
 
