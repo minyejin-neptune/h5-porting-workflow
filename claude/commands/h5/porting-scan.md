@@ -46,13 +46,8 @@ ls Docs/porting/PORTING_VOCAB.md 2>/dev/null && echo "EXISTS" || echo "NONE"
 find Assets -maxdepth 3 \( -name "*.dll" -o -name "*.aar" -o -name "*.framework" \) 2>/dev/null \
   | sed 's|/[^/]*$||' | sort -u
 
-# EXTRA_PATHS — .cs 있는 폴더 중 SCRIPTS_PATH·SDK 폴더·HyperLane 제외
-# SDK 폴더 목록 감지 직후 실행해 겹치는 항목도 제외
-find Assets -maxdepth 2 -name "*.cs" 2>/dev/null \
-  | sed 's|/[^/]*$||' | sort -u \
-  | grep -vE "HyperLane|/Scripts$"
-# → 위 결과에서 SDK 폴더 목록(위 감지 결과)과 겹치는 경로 추가 제외
-# → SCAN_PATHS = SCRIPTS_PATH + EXTRA_PATHS (비어 있으면 SCRIPTS_PATH만)
+# EXTRA_PATHS — .cs 깊이 분포 (SDK 폴더 목록 감지 직후 실행, 판단 기준은 아래 블록 참고)
+find Assets -name "*.cs" 2>/dev/null | awk -F/ '{print NF-1}' | sort -n | uniq -c
 
 # jslib 파일 목록
 find Assets -name "*.jslib" 2>/dev/null
@@ -79,6 +74,25 @@ find Assets/Scenes -name "*.unity" 2>/dev/null | head -20
 # 자체 빌드 스크립트
 grep -rln "BuildPlayer\|BuildPipeline" Assets --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
+
+> **EXTRA_PATHS 판단**: `.cs` 깊이 분포에서 최다빈도 깊이(mode)를 기준으로 잡는다. mode보다 **3단계 이상 깊은** 깊이에 파일이 있으면 이상치 후보(단일 벤더 폴더·자동생성 코드 가능성 — SDK 폴더 감지(위 46행)·Scripts 탐지(위 40행)와 동일한 `3` 기준 사용) — 실제 경로를 확인한다:
+> ```bash
+> find Assets -name "*.cs" 2>/dev/null | awk -F/ -v min={mode+3} 'NF-1 >= min {print}'
+> ```
+> - 이상치 경로가 SDK 폴더 목록(위 46행 감지 결과)과 겹치면 **자동 제외** → SCAN_DEPTH = mode+2.
+> - 안 겹치면 EXTRA_PATHS 포함 여부를 사용자에게 확인 → 승인 시 SCAN_DEPTH = 실측 최대 깊이, 미승인·미확인 시 안전하게 SCAN_DEPTH = mode+2.
+> - 이상치가 처음부터 없으면(전부 mode+2 이내) 확인 없이 SCAN_DEPTH = 실측 최대 깊이.
+>
+> SCAN_DEPTH가 정해지면 EXTRA_PATHS 최종 목록을 만든다. **SCRIPTS_PATH(위 40행 감지 결과) 자신과 그 하위 전체를 제외**한다 — 이름 패턴(`/Scripts$`)만으로는 `Scripts/UI` 같은 하위 폴더가 걸러지지 않아 SCRIPTS_PATH와 중복 스캔되므로, 감지된 실제 경로로 제외 패턴을 만든다:
+> ```bash
+> SCRIPTS_PATH_PATTERN=$(find Assets -maxdepth 3 -type d -name "Scripts" 2>/dev/null | awk '{printf "^%s(/|$)|", $0}' | sed 's/|$//')
+> find Assets -maxdepth {SCAN_DEPTH} -name "*.cs" 2>/dev/null \
+>   | sed 's|/[^/]*$||' | sort -u \
+>   | grep -vE "HyperLane" \
+>   | grep -vE "$SCRIPTS_PATH_PATTERN"
+> # → 위 결과에서 SDK 폴더 목록과 겹치는 경로 추가 제외
+> # → SCAN_PATHS = SCRIPTS_PATH + EXTRA_PATHS (비어 있으면 SCRIPTS_PATH만)
+> ```
 
 > **탐색 경로 원칙**: STEP 2·3·4 grep은 `{SCAN_PATHS}`(= SCRIPTS_PATH + EXTRA_PATHS)를 사용한다.
 > STEP 1 SDK 영향 파일 수 카운트만 `{SCRIPTS_PATH}` 단독 사용 (SDK 자체 코드 오염 방지).
