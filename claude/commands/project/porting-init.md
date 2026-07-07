@@ -55,6 +55,7 @@ copy_template() {
 copy_template ~/github/h5-porting-workflow/templates/Editor/CompileChecker.cs      ./Assets/Editor/CompileChecker.cs
 copy_template ~/github/h5-porting-workflow/templates/Editor/CompileResultWindow.cs ./Assets/Editor/CompileResultWindow.cs
 copy_template ~/github/h5-porting-workflow/templates/Editor/TextureFormatSetter.cs ./Assets/Editor/TextureFormatSetter.cs
+copy_template ~/github/h5-porting-workflow/templates/Editor/FontReplaceTool.cs     ./Assets/Editor/FontReplaceTool.cs
 
 # HLAddressableTool.cs는 Addressables 패키지가 없으면 컴파일 오류가 나므로, 패키지가 있을 때만 복사한다.
 if grep -q "com.unity.addressables" Packages/manifest.json 2>/dev/null; then
