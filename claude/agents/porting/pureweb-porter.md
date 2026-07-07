@@ -27,6 +27,13 @@ tools: Read, Bash, Edit, Write, Agent
 >
 > **VOCAB 업데이트 원칙**: grep fallback으로 발견한 파일:라인은 작업 완료 후 `Docs/porting/PORTING_VOCAB.md` `## 포터 기록` 섹션에 추가한다. 다음 포터 실행 시 재탐색 없이 바로 Read할 수 있도록.
 
+> **결정 필요 라우팅 — 사람 결정이 필요한 지점의 공통 처리**: 이 에이전트는 서브에이전트라 실행 중 사용자에게 질문할 수 없다. 본문에서 "→ 결정 필요 라우팅({항목})"을 만나면:
+> 1. 포팅 이슈(prompt로 받은 번호)의 `## 확인 필요 / 미확정`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 추가 (`gh issue edit`). 이슈 번호가 없으면 생략.
+> 2. `pureweb-checklist.md` `## 확인 필요`에 같은 항목 기록.
+> 3. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
+>
+> 확정 답변은 h5-port 후속 모드(재실행 시 미확정 재질문 → 부분 수정 재호출)가 수집·반영한다.
+
 ---
 
 ## 컴파일 체크 자동화
@@ -41,7 +48,7 @@ tools: Read, Bash, Edit, Write, Agent
 
 **단계 커밋 기준** — 아래 조건을 모두 충족하면 즉시 커밋:
 1. `✅ [COMPILE_OK]` 확인
-2. 해당 단계에 AskUserQuestion이 없었거나 모든 질문이 완료됨
+2. 해당 단계에 결정 필요 항목이 없거나 모두 라우팅(포팅 이슈·체크리스트 기록) 완료됨
 3. 👤 수동 작업 항목은 사용자가 완료 확인 후
 
 ```bash
@@ -896,11 +903,9 @@ public void LoadGameData()
 }
 ```
 
-**완료 확인 [필수]**
+**완료 확인 [필수 — 비차단 인수 테스트]**
 
-AskUserQuestion:
-> "8-B: Base64 래핑을 추가했습니다. 테스트 빌드에서 저장 후 재시작 시 정상 불러오기가 되는지 확인해주세요."
-> - 확인 완료 → 체크리스트 8-B `✅` 업데이트 후 다음 단계
+결정이 아니라 사람이 수행할 인수 테스트다 — 차단하지 않고 `pureweb-checklist.md` `## 확인 필요`에 "🔍 8-B: 테스트 빌드에서 저장 후 재시작 시 정상 불러오기 확인 필요 (Base64 왕복)"을 기록하고 다음 단계로 진행한다. 체크리스트 8-B 행은 코드 반영 기준으로 `✅` 처리하되 비고에 "왕복 테스트 대기"를 남긴다.
 
 ---
 
@@ -1002,17 +1007,13 @@ git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
 | `#elif UNITY_WEBGL` 분기 | DataController.cs:167 | PlayerPrefs 처리 → PUREWEB 전용 분기 가능성 |
 | 진짜 미처리 | 가드 없이 직접 SDK 호출 | 수정 필요 |
 
-**2단계 — AskUserQuestion으로 패턴별 판단 요청**
+**2단계 — 패턴별 판단을 결정 필요 라우팅으로 기록**
 
-항목마다 하나씩 묻지 않고 **패턴 단위**로 묶어서 질문한다:
-
-> "다음 28건은 모두 `DataController.Instance.SaveGameData()` 위임 호출입니다.
-> DataController.SaveGameData() 정의에 PUREWEB 가드가 확인됩니다.
-> 이 28건을 안전(safe)으로 처리할까요?"
+항목마다 하나씩이 아니라 **패턴 단위**로 묶어 라우팅한다. 잘못 "안전" 처리하면 실제 버그가 검증을 통과해 숨겨지므로 에이전트가 임의로 safe 판정하지 않는다 → 결정 필요 라우팅(verify ❌/⚠️ 패턴별 safe 판정 — 패턴 요약과 건수, 근거 파일:라인 첨부. 예: "28건 전부 `DataController.Instance.SaveGameData()` 위임 호출, 정의에 PUREWEB 가드 확인됨 — safe 처리 여부"). 판정 전까지 해당 항목들은 미처리 상태로 둔다.
 
 **3단계 — 에이전트가 verify-exceptions.json 생성·기록**
 
-사용자가 "안전"으로 답한 패턴을 `Docs/porting/verify-exceptions.json`에 기록한다:
+사람이 "안전"으로 확정한 패턴을 `Docs/porting/verify-exceptions.json`에 기록한다:
 
 ```json
 [
