@@ -876,18 +876,27 @@ grep -n "PlayerPrefs\.GetString\|JsonUtility\.FromJson\|FromJson\b" {SAVE_FILE} 
 
 저장 시 `Convert.ToBase64String`, 불러오기 시 `Convert.FromBase64String` 삽입:
 
+인코딩·디코딩은 실패 가능성이 있는 지점(JSON 직렬화, Base64 변환)이므로 반드시 try-catch로 감싼다 — 저장 실패는 로그만 남기고, 불러오기 실패(손상된 데이터 등)는 기본값으로 폴백해 크래시를 막는다:
+
 ```csharp
 // 저장 (예시 — 실제 구조에 맞게 조정)
 public void SaveGameData()
 {
-    string json = JsonUtility.ToJson(data);
+    try
+    {
+        string json = JsonUtility.ToJson(data);
 #if UNITY_WEBGL
-    string encoded = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
-    PlayerPrefs.SetString(SAVE_KEY, encoded);
+        string encoded = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
+        PlayerPrefs.SetString(SAVE_KEY, encoded);
 #else
-    PlayerPrefs.SetString(SAVE_KEY, json);
+        PlayerPrefs.SetString(SAVE_KEY, json);
 #endif
-    PlayerPrefs.Save();
+        PlayerPrefs.Save();
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError($"[Save] 저장 실패 (JSON 직렬화/Base64 인코딩): {e.Message}");
+    }
 }
 
 // 불러오기 (예시)
@@ -895,12 +904,20 @@ public void LoadGameData()
 {
     string stored = PlayerPrefs.GetString(SAVE_KEY, "");
     if (string.IsNullOrEmpty(stored)) return;
+    try
+    {
 #if UNITY_WEBGL
-    string json = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(stored));
-    data = JsonUtility.FromJson<GameData>(json);
+        string json = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(stored));
+        data = JsonUtility.FromJson<GameData>(json);
 #else
-    data = JsonUtility.FromJson<GameData>(stored);
+        data = JsonUtility.FromJson<GameData>(stored);
 #endif
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError($"[Load] 불러오기 실패 (저장 데이터 손상 가능 — Base64 디코딩/JSON 역직렬화): {e.Message}");
+        data = new GameData(); // 기본값 폴백 — 손상된 저장 데이터로 크래시 방지
+    }
 }
 ```
 
