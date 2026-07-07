@@ -115,6 +115,11 @@ PORTING_VOCAB.md를 읽은 뒤 해당 행의 메서드/클래스명으로 플레
 | `{AD_INTERSTITIAL_METHOD}` | 광고 (전면) | `ShowInterstitialAd()` |
 | `{IAP_METHOD}` | IAP | `InappPurchase()` |
 | `{GAME_INIT_METHOD}` | 게임 진입점 | `InitGame()` |
+| `{LOBBY_ENTRY}` | 로비 진입점 | `OnEnterLobby()` |
+| `{LOCAL_SAVE_METHOD}` | 로컬 저장 | `SaveLocal()` |
+| `{LOCAL_LOAD_METHOD}` | 로컬 불러오기 | `LoadLocal()` |
+| `{INTERSTITIAL_ENTRY}` | 광고 전면 진입점 | `ShowInterstitial()` |
+| `{COOLTIME_VAR}` | 전면 쿨타임 변수 | `interstitialCooltime` |
 | `{PRICE_UI_CLASS}` | 가격 표시 UI (Toss 전용) | `UIShopPrice` |
 | `{BANNER_FILE}` | 배너 광고 (Toss 전용) | `AdManager.cs` |
 | `{HAPTIC_FILE}` | 햅틱/진동 (Toss 전용) | `HapticManager.cs` |
