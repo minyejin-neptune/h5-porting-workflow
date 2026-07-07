@@ -57,6 +57,9 @@ find Assets -maxdepth 2 -name "*.cs" 2>/dev/null \
 # jslib 파일 목록
 find Assets -name "*.jslib" 2>/dev/null
 
+# Unity 버전
+grep "m_EditorVersion:" ProjectSettings/ProjectVersion.txt 2>/dev/null | awk '{print $2}'
+
 # HyperLane 설치 여부
 ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 
@@ -654,6 +657,17 @@ Base64 인코딩: 있음 (메서드명) / 없음 — 포팅 시 추가 필요
 **파일이 없거나 SDK 폴더(`Assets/GoogleMobileAds/Editor/`, `Assets/GooglePlayGames/Editor/` 등)에만 있는 경우**: 게임 직접 작성 빌드 스크립트 없음으로 판정. `자체 빌드 스크립트 | 없음` 으로 기록.
 - SDK 내장 에디터 훅은 H5Builder 결정과 무관하므로 "있음"으로 처리하지 않는다.
 
+#### 4-G. 기존 치트 코드 탐색
+
+toss-porter 7-0(치트 — 서버/로컬 초기화)이 매번 처음부터 grep하지 않도록, 프로젝트에 이미 있는 치트/디버그 시스템을 미리 찾아둔다.
+
+```bash
+grep -rln "Cheat\|DebugConsole\|DevMenu\|GMMode\|CheatConsole" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+
+- 결과 있음 → 파일:라인을 VOCAB `## 포터 기록`에 기록 (toss-porter 7-0이 읽기 참조)
+- 결과 없음 → "없음"으로 기록
+
 #### 4-F. PORTING_VOCAB.md 저장
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 저장.
@@ -798,6 +812,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 | 항목 | 값 |
 |---|---|
+| Unity 버전 | {ProjectSettings/ProjectVersion.txt의 m_EditorVersion} |
 | HyperLane SDK | 설치됨 / 미설치 |
 | 빌드 씬 | ON N개 / OFF N개 / ❌ 누락 N개 |
 | 자체 빌드 스크립트 | 파일:라인 또는 없음 |

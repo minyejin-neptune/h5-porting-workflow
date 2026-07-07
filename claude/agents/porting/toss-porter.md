@@ -1501,6 +1501,8 @@ DEV 분기에서 결제창 뒤로가기 시 강제 지급하는 코드가 없으
 
 > ⚠️ 서버 연동 테스트(6번) 전 반드시 선행 완료해야 한다.
 
+**기존 치트 코드 확인**: PORTING_VOCAB.md `## 포터 기록`에서 scan이 찾은 기존 치트/디버그 시스템 파일:라인을 먼저 확인한다(재탐색 없이). "없음"이면 스킵.
+
 **씬 설정 (👤 수동):**
 
 `Assets/HyperLane/Plugins/WebGL/Util/Cheat/CheatConsole.prefab`을 씬에 추가한다.
