@@ -18,6 +18,7 @@ tools: Read, Bash, Edit, Write, Agent
 > 1. `Docs/porting/PORTING_VOCAB.md`에서 해당 플레이스홀더 행의 파일:라인 확인
 > 2. 파일:라인이 있으면 → 바로 Read
 > 3. 없거나 "확인 필요"이면 → grep fallback
+> 4. grep fallback도 0건이고 이 단계에 이미 명시된 처리(스킵 등)가 없으면 — 추측으로 진행하지 않는다. `pureweb-checklist.md` `## 확인 필요`에 `- [ ] {대상} — grep fallback 0건, 수동 확인 필요` 형식으로 기록하고 이 단계는 스킵, 다음 단계로 진행한다.
 
 > **`{SCRIPTS_PATH}` 확정**: 작업 시작 시 `head -5 Docs/porting/NATIVE_BASELINE.md`로 헤더의 `스크립트 경로:` 값을 읽어 본문의 모든 `{SCRIPTS_PATH}`를 대체한다. 헤더에 없으면 사용자에게 확인 — `Assets/Scripts`로 임의 가정하지 않는다.
 > 같은 헤더의 `부속 경로:`(EXTRA_PATHS)가 "없음"이 아니면, 본문의 모든 grep 탐색을 그 경로들에도 반복 실행한다 — SCRIPTS_PATH만 검색하면 부속 코드 폴더의 SDK 참조·이슈를 놓친다.

@@ -885,13 +885,21 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 ## 출력 문서 형식 3 (`Docs/porting/toss-checklist.md` — 플랫폼 작업목록)
 
-이슈 표 없음 — 기반 이슈는 pureweb-checklist를 읽기 참조한다.
+`## 이슈`는 **toss 전용**(WEBGL_TOSS 분기에만 해당하는) 이슈만 담는다 — 기반(공통) 이슈는 여전히 pureweb-checklist가 정본이며 이 파일에 기록하지 않는다. 판별 불가·공통이면 pureweb-checklist로 보낸다(기본).
 단계 진행 표는 toss-porter가 0-B에서 추가한다.
 
 ```markdown
 # Toss 포팅 체크리스트 — {프로젝트 루트 폴더명}
 
 > 생성: {날짜} (porting-scan) | 단계 진행 표는 toss-porter가 추가 | 기반 이슈: pureweb-checklist.md 참조
+
+## 이슈
+
+- [ ] {파일}:{라인} — [Toss전용] {이슈} — {처리 방법}
+
+## 확인 필요
+
+- [ ] {코드에서 직접 확인하지 못한 항목}
 
 ## 기획자 보고
 

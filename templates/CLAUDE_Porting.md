@@ -51,7 +51,8 @@ When looking for a file, class, or method, always follow this order. Actively us
 
 1. Check the item's file:line in `Docs/porting/PORTING_VOCAB.md` first — if present, Read it directly (no grep).
 2. If the row is missing or marked "확인 필요" → grep/find fallback.
-3. Add any file:line newly confirmed via grep fallback to VOCAB `## 포터 기록`, so it is never re-searched.
+3. If the grep/find fallback also finds nothing and this step has no already-specified handling (e.g., skip) — do not guess. Record it in the project's checklist `## 확인 필요` section for human review, and move to the next step.
+4. Add any file:line newly confirmed via grep fallback to VOCAB `## 포터 기록`, so it is never re-searched.
 
 Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Verification Rules below.)
 
