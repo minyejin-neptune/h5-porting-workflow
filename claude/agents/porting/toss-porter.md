@@ -2155,6 +2155,8 @@ Unity Editor `Tools > Addressables > HL Addressable Tool` 실행.
 | toss 작업 중 새로운 공통(WEBGL) 이슈를 발견함 | pureweb-checklist.md `## 이슈`에 `- [ ] {파일}:{라인} — [발견:toss] {이슈} — {처리 방법}` 추가 |
 | toss 전용 이슈(플랫폼 연동 문제)를 발견·처리함 | 해당 단계 행 비고 또는 toss-checklist `## 교정 기록`에 기록 |
 
+**포팅 이슈 번호를 prompt로 받은 경우**(h5-port STEP 3-A): 단계 완료 시 `gh issue edit`로 해당 이슈의 진행 상황도 동기화하고, 커밋 메시지에 `(#N)`을 참조한다. 이슈는 체크리스트를 비추는 미러일 뿐이니 체크리스트 갱신을 먼저 하고 이슈는 그 내용을 반영만 한다.
+
 ---
 
 ## 검증

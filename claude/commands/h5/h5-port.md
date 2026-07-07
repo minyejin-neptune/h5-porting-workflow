@@ -263,8 +263,32 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 - NOT_INSTALLED → AskUserQuestion으로 확인:
 
 > "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
-> - 설치하겠습니다 → Unity Editor에서 HyperLane 패키지를 임포트한 뒤(https://github.com/neptunez-dev/hyperlane-sdk), **init 시 반드시 Web View로 선택**하라고 안내. 완료되면 알려달라고 안내. 확인 후 STEP 2로.
+> - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 STEP 2로.
 > - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
+
+**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md)):
+
+```bash
+# 1. 프로젝트 루트(Assets/가 있는 위치)에서 실행
+npm install https://github.com/neptunez-dev/hyperlane-sdk.git
+
+# 2. 엔진(Unity) 자동 감지 후 공통 템플릿 복사 — Assets/HyperLane/, Packages/manifest.json UPM 의존성 등
+npx hyperlane init
+```
+
+- 토스처럼 게임 외부 wrapper 프로젝트가 필요한 플랫폼은 추가로 `npx hyperlane setup toss` 실행 (대화형은 `npx hyperlane setup`). 셋업 중 `npm create vite@latest`의 `Install with npm and start now?` 질문에는 **반드시 `No`** 선택 — `Yes` 선택 시 dev server가 떠서 셋업이 멈춘다.
+- PureWeb만 쓰는 경우 `init`까지로 끝.
+- `npm install` 산출물(`node_modules/`, `package-lock.json`, `package.json`)은 SDK CLI 자체가 요구하는 정상 산출물이다 — Unity 프로젝트라고 지우지 않는다(`init`이 `.gitignore`에 `node_modules/`, `Build/`를 자동 추가).
+
+**업데이트 절차** (이미 셋업된 프로젝트에서 SDK 코드만 최신화 — `init`/`setup` 재실행 불필요):
+
+```bash
+npm install https://github.com/neptunez-dev/hyperlane-sdk.git   # 최신 커밋 재설치 (URL 명시 필수 — 생략 시 package-lock 고정본 유지됨)
+npx hyperlane update                                              # Assets/HyperLane/, WebGLTemplates/, wrapper 파일 등 SDK 관리 파일 갱신
+```
+
+- `HyperlaneConfig.asset`, `granite.config.ts`, wrapper의 `package.json`/`node_modules`, 사용자 추가 파일은 `update`가 덮어쓰지 않음.
+- 특정 버전 고정: `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0` (태그) 또는 `#커밋해시`.
 
 ---
 
@@ -418,6 +442,40 @@ bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh TOSS
 > - 둘 다 → 퓨어웹 먼저 완료 후 토스 순서로 실행
 > - 나중에 → 안내 메시지 출력 후 종료
 
+### STEP 3-A. 포팅 이슈 생성 (게임 repo에 gh remote 있는 경우만)
+
+포터를 실제로 실행하기 직전에 확인한다:
+
+```bash
+gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null && echo "REPO_OK" || echo "NO_REMOTE"
+```
+
+- `NO_REMOTE` → 이슈 생성 생략, STEP 3-B(포터 실행)로 바로 진행.
+- `REPO_OK` → 아래 형식으로 이 게임 repo에 포팅 이슈를 생성한다:
+
+```bash
+BODY_FILE="$(mktemp)"
+cat > "$BODY_FILE" <<'EOF'
+## 진행 상황
+정본: `Docs/porting/{PLATFORM}-checklist.md` (이 이슈는 진행 미러 — 상세 상태는 정본 파일 참조)
+
+{체크리스트 단계 표 스냅샷}
+
+## 확인 필요 / 미확정
+(포터 실행 중 항목이 추가되면 여기 기록됨)
+EOF
+
+gh issue create \
+  --title "[포팅] {PLATFORM} — {프로젝트명}" \
+  --body-file "$BODY_FILE"
+
+rm -f "$BODY_FILE"
+```
+
+생성된 이슈 번호를 기억해 STEP 3-B의 포터 prompt에 전달한다.
+
+### STEP 3-B. 포터 실행
+
 포터 실행 시 Agent 도구의 `prompt`에는 **현재 상태 컨텍스트만** 전달한다. 태스크 목록·처리 순서·수정 방법을 직접 기술하지 않는다. 포터의 파이프라인은 에이전트 자체 지침을 따른다.
 
 **prompt에 포함할 내용 (이것만)**:
@@ -427,6 +485,7 @@ bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh TOSS
 프로젝트 경로: {worktree 절대경로 또는 현재 경로}
 브랜치: {현재 브랜치명}
 이미 완료된 작업: {STEP 2-E에서 커밋된 내용 요약 — 없으면 "없음"}
+포팅 이슈: #{STEP 3-A에서 생성한 이슈 번호 — 없으면 "없음"}
 ```
 
 **prompt에 포함하지 않을 것**: 구체적 파일명, 라인 번호, 처리 순서, 태스크 목록. 에이전트가 NATIVE_BASELINE.md·pureweb-checklist.md·PORTING_VOCAB.md를 읽고 스스로 판단한다.
@@ -469,3 +528,12 @@ python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
 | `✅ 이상 없음` | 포팅 완료 |
 | `❌ 미처리` | 해당 파일 수정 후 재실행 |
 | `⚠️ 확인 필요` | 포터 에이전트 검증 섹션의 verify-exceptions 절차 참조 |
+
+### STEP 4-A. 포팅 이슈 종료 처리
+
+STEP 3-A에서 이슈를 생성했으면(없으면 이 단계 생략):
+
+- 검증 `✅ 이상 없음` **+** 이슈 본문 `## 확인 필요 / 미확정`에 남은 항목 없음 → `gh issue close`로 검증 결과 코멘트와 함께 종료.
+- 위 조건을 만족하지 않으면(미확정 항목 남음 등) 이슈를 **open으로 유지**하고 남은 항목을 코멘트로 남긴다.
+
+체크리스트(`Docs/porting/{platform}-checklist.md`)가 작업 진행의 정본이고, 이 이슈는 진행 상황을 비추는 미러다 — 상태가 어긋나면 체크리스트를 기준으로 이슈를 갱신한다.
