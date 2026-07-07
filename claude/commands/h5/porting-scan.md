@@ -89,10 +89,10 @@ grep -rln "BuildPlayer\|BuildPipeline" Assets --include="*.cs" 2>/dev/null | gre
 
 지정되지 않은 경우 → AskUserQuestion:
 
-> "어떤 플랫폼으로 포팅하나요? 플랫폼별 전용 스캔 구간(4-B-T / 4-B-P)에 반영됩니다."
+> "어떤 플랫폼으로 포팅하나요? Toss는 플랫폼 전용 스캔 구간(4-B-T)이 반영됩니다. PureWeb은 WebGL 공통 스캔만으로 충분합니다(PureWeb 고유 스캔 항목 없음 — pureweb-porter가 H5Builder 설정 등을 자체 확인)."
 > - Toss — 4-B-T 실행
-> - PureWeb — 4-B-P 실행
-> - 전체 — 모든 플랫폼 전용 구간 실행
+> - PureWeb — 공통 스캔만 진행 (4-B-T 스킵)
+> - 전체 — 4-B-T 포함 전체 실행
 
 선택한 플랫폼을 이후 스캔 전체에 반영한다.
 
@@ -791,7 +791,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 ```markdown
 # 네이티브 베이스라인 — {프로젝트 루트 폴더명}
 
-> 생성일: {날짜} | 스크립트 경로: {SCRIPTS_PATH}
+> 생성일: {날짜} | 스크립트 경로: {SCRIPTS_PATH} | 부속 경로: {EXTRA_PATHS 또는 "없음"}
 > 포팅 전 네이티브 스냅샷 — scan-verify 후 동결. 이슈·진행 상태는 pureweb/toss-checklist.md 참조.
 
 ## 프로젝트 정보

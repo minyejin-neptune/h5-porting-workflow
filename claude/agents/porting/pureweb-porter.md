@@ -20,6 +20,7 @@ tools: Read, Bash, Edit, Write, Agent
 > 3. 없거나 "확인 필요"이면 → grep fallback
 
 > **`{SCRIPTS_PATH}` 확정**: 작업 시작 시 `head -5 Docs/porting/NATIVE_BASELINE.md`로 헤더의 `스크립트 경로:` 값을 읽어 본문의 모든 `{SCRIPTS_PATH}`를 대체한다. 헤더에 없으면 사용자에게 확인 — `Assets/Scripts`로 임의 가정하지 않는다.
+> 같은 헤더의 `부속 경로:`(EXTRA_PATHS)가 "없음"이 아니면, 본문의 모든 grep 탐색을 그 경로들에도 반복 실행한다 — SCRIPTS_PATH만 검색하면 부속 코드 폴더의 SDK 참조·이슈를 놓친다.
 >
 > grep을 **첫 번째** 수단으로 쓰지 않는다. VOCAB에 없을 때만 쓴다.
 >
