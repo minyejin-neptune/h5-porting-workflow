@@ -164,7 +164,7 @@ grep -A20 "## Toss 전용" Docs/porting/PORTING_VOCAB.md | grep "\.\.\."
 `없음`은 정상. `...`만 미채움으로 처리한다.
 
 미채움 행이 있으면:
-> "Toss 전용 VOCAB 행이 비어있습니다. porting-scan 4-B-T를 재실행하거나 직접 입력해주세요:"
+> "Toss 전용 VOCAB 행이 비어있습니다. porting-scan 4-I를 재실행하거나 직접 입력해주세요:"
 > - `{BANNER_FILE}` ← 배너 광고 행 미채움
 > *(해당 항목만 나열)*
 

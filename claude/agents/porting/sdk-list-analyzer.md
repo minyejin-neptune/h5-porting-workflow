@@ -92,7 +92,7 @@ git status --porcelain --untracked-files=no 2>/dev/null | grep -q . && echo "dir
 - **C (파일 전체 래핑)** — WebGL에서 완전히 불필요한 파일
 - **D (.meta WebGL 비활성화)** — `.dll` / `.jslib` / `.aar` 등 플러그인 파일의 `.meta`에서 `WebGL: enabled: 1` → `0` 으로 변경. C# 코드 가드만으로는 차단되지 않으므로 반드시 별도 처리
 
-> **타이머/트위닝 라이브러리 메모**: DOTween·UniTask·LeanTween 등이 목록에 있으면 산출물 `## 메모`에 별도 기록한다 (porting-scan 4-B 광고 중 게임 중지 탐색이 소비).
+> **타이머/트위닝 라이브러리 메모**: DOTween·UniTask·LeanTween 등이 목록에 있으면 산출물 `## 메모`에 별도 기록한다 (porting-scan 4-C 광고 중 게임 중지 탐색이 소비).
 
 ---
 
