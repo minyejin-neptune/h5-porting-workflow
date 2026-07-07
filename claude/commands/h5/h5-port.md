@@ -397,6 +397,7 @@ PORTING_VOCAB에 `게임중지: 확인 필요`로 기록된 항목이 있으면 
 ### 2-D. 포팅 전 준비 체크리스트 보고 [2-B-commit 완료 후]
 
 아래 명령으로 브랜치 현황을 확인한 뒤, STEP 0~2에서 확인된 사실을 기반으로 보고를 출력한다.
+HyperLane SDK 설치·빌드 씬·자체 빌드 스크립트·게임 진입점·Addressable 로드 시점은 이미 `NATIVE_BASELINE.md`·`PORTING_VOCAB.md`에 기록돼 있으므로 여기서 다시 나열하지 않는다 — 필요하면 두 파일을 직접 참조한다.
 
 ```bash
 git branch --show-current
@@ -405,7 +406,7 @@ git branch --show-current
 ```
 포팅 전 준비 체크리스트
 
-범례: ✅ 완료 | 👤 직접 처리 필요 | ⚠️ 주의 필요 | ⏭️ 스킵
+범례: ✅ 완료 | 👤 직접 처리 필요 | ⚠️ 주의 필요
 
 ────────────────────────────────────────────────────────
 카테고리       항목                              결과
@@ -418,26 +419,13 @@ git branch --show-current
 프로젝트 준비  EUC-KR → UTF-8 디코딩            ✅ N개 변환 완료 / ✅ 이상 없음 / ⚠️ 미처리
                근거: STEP 1 결과
 
-프로젝트 준비  HyperLane SDK 추가                ✅ Assets/HyperLane/ 확인 / ⚠️ 미설치
-               근거: STEP 1-C 결과
-
 환경 검증      Android 플랫폼 컴파일 확인         ✅ 이상 없음 / ⚠️ N건 오류 (처리됨/미처리)
                근거: STEP 1-A 결과
 
 프로젝트 분석  정상 작동 테스트                   👤 직접 확인 필요 (크래시·오류 없는지)
-
-프로젝트 분석  빌드 씬 확인                       ✅ N개 씬 확인 / ⚠️ 씬 누락 가능성
-               근거: NATIVE_BASELINE.md 빌드 씬 목록
-
-프로젝트 분석  자체 빌드 스크립트 및 H5Builder     ✅ BuildPlayer 없음 / ✅ H5Builder 반영
-               근거: porting-scan BuildPlayer 탐색 결과
-
-프로젝트 분석  게임 진입점 분석                   ✅ {GAME_INIT_METHOD} 확인
-               근거: PORTING_VOCAB.md 게임 진입점 행
-
-프로젝트 분석  Addressable 로드 시점 분석         ✅ 사용 중 ({ASSET_COUNTS}) / ⏭️ 미사용
-               근거: PORTING_VOCAB.md {ASSET_COUNTS} 행
 ────────────────────────────────────────────────────────
+
+상세: NATIVE_BASELINE.md(HyperLane SDK·빌드 씬·자체 빌드 스크립트) · PORTING_VOCAB.md(게임 진입점·Addressable 로드 시점) 참조.
 
 👤 직접 처리 항목 완료 후 STEP 3(포터 선택)으로 진행하세요.
 ```
