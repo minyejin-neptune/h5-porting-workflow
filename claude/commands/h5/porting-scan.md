@@ -719,7 +719,7 @@ Base64 인코딩: 있음 (메서드명) / 없음 — 포팅 시 추가 필요
 | 프로모션 방식 | ... | `{PROMOTION_TYPE}` | Managed / V1 / 없음 |
 | SafeArea 클래스 | ... | `{SAFEAREA_CLASS}` | 있음(파일명) / 없음-신규필요 |
 | UID/version 표시 | ... | `{UID_VERSION_FILE}` | 있음(파일명) / 없음 |
-| 불필요 UI 목록 | ... | `{REMOVE_UI_LIST}` | 파일:라인 목록 (복수 가능) / 없음 |
+| 불필요 UI 목록 | ... | `{REMOVE_UI_LIST}` | **후보** 파일:라인 목록 (복수 가능) / 없음 — 제거 확정은 포터가 사용자에게 확인 |
 | 로컬라이제이션 | ... | `{LOCALIZATION_FILE}` | 있음(파일명) / 없음 |
 
 ## 포터 기록

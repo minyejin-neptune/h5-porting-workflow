@@ -2001,6 +2001,15 @@ V1 레거시 코드가 있으면 AskUserQuestion으로 방식 확인. 없으면 
 > - 기존 클래스에 추가 → 해당 클래스 파일:라인 확인 후 삽입
 > - 전용 클래스 신규 작성 → `PromotionManager.cs` 등 신규 생성 (파일명은 사용자 결정)
 
+**중복 수령 방지 확인 (필수)** — 트리거가 반복 실행 가능한 지점(예: 매 스테이지 클리어, 매 로그인)이면, 이미 수령했는지 로컬/서버 플래그로 먼저 확인한 뒤에만 `Claim*` 호출을 실행해야 한다. 트리거 파일을 Read해서 기존에 유사한 1회성 보상(첫 승리 보상, 첫 결제 보상 등)을 처리하는 플래그 패턴이 있는지 확인한다:
+
+```bash
+grep -n "isClaimed\|hasClaimed\|IsRewarded\|alreadyReceived\|PlayerPrefs.*[Cc]laim" <트리거파일>.cs
+```
+
+- 기존 패턴 있음 → 동일 패턴으로 프로모션 수령 여부 플래그 추가
+- 기존 패턴 없음 → AskUserQuestion으로 확인: "이 프로모션이 반복 트리거될 수 있는 지점입니다. 중복 수령을 막을 로컬 플래그를 추가할까요?"
+
 **Managed 모드 패턴:**
 
 ```csharp
@@ -2079,7 +2088,7 @@ grep -rn "uid\|userId\|UserID\|GetUserKey\|userKey" Assets/Scripts --include="*.
 
 WebGL에서 의미 없는 네이티브 전용 UI를 비활성화한다.
 
-**탐색:** VOCAB `{REMOVE_UI_LIST}` → 목록을 사용자에게 보고
+**탐색:** VOCAB `{REMOVE_UI_LIST}` → scan이 찾은 **후보** 목록을 사용자에게 보고 (scan은 확정하지 않는다 — 제거 여부는 아래 AskUserQuestion으로 이 단계에서 확정)
 
 `{REMOVE_UI_LIST}` 가 "없음"이면 이 단계 스킵.
 
