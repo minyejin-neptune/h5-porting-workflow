@@ -7,8 +7,8 @@ description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분
 프로젝트를 **코드 수정 없이** 분석해 `Docs/porting/` 아래 4파일을 생성한다:
 - `NATIVE_BASELINE.md` — 포팅 전 네이티브 불변 스냅샷 (프로젝트 정보·외부 SDK 목록·게임 구조)
 - `PORTING_VOCAB.md` — 위치 사전 (기능→파일:라인)
-- `pureweb-checklist.md` — 기반 작업목록 (pureweb-porter가 처리하는 기반 포팅 이슈·확인 필요)
-- `toss-checklist.md` — 플랫폼 작업목록
+- `pureweb-checklist.md` — 기반 작업목록 (퓨어웹 포팅 작업이 소비 — 컴파일/런타임/공백 이슈·확인 필요)
+- `toss-checklist.md` — 플랫폼 작업목록 (플랫폼 포팅 작업이 소비 — toss 전용 이슈 + 광고·IAP 실동작 확인 필요)
 
 `$ARGUMENTS`로 포팅 플랫폼을 지정할 수 있다 (`toss` / `pureweb`). 지정하지 않으면 사전 감지 후 AskUserQuestion으로 확인한다.
 
@@ -846,8 +846,13 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 ## 출력 문서 형식 2 (`Docs/porting/pureweb-checklist.md` — 기반 작업목록)
 
 **pureweb-porter가 처리하는 기반 포팅 이슈**(컴파일/런타임/공백)와 확인 필요를 기록한다. "WebGL에서 일단 돌게 만들기"에 해당하는 기반 작업이다.
-- 발견한 이슈가 `WEBGL_TOSS` 전용 분기에만 해당하는 toss 전용 이슈이면 → toss-checklist로 보낸다 (여기 적지 않음). 판별 불가·공통이면 여기(기본).
-- toss-checklist에는 기반 이슈를 기록하지 않는다 — toss-porter가 필요 시 이 `## 이슈`를 읽기 참조한다.
+
+> **라우팅 기준 — 어느 포팅 작업이 그 항목을 소비하는가** (분기 코드 존재 여부가 아니다):
+> - **퓨어웹 포팅 작업이 소비** → 여기(pureweb-checklist). 컴파일/런타임/공백 이슈, 즉시지급 처리·서버저장 차단·SafeArea 등 퓨어웹 작업에 필요한 확인 필요.
+> - **플랫폼(Toss) 포팅 작업이 소비** → toss-checklist. `WEBGL_TOSS` 전용 분기 이슈뿐 아니라 **광고·IAP 실동작 관련 확인 필요·기획자 보고**(로드 패턴·실패재로드·광고 중 게임중지·초기화 플래그·가격 UI·PID 매핑 등)도 포함 — 퓨어웹에서는 광고·IAP가 즉시지급으로 대체되어 이 항목들을 소비하지 않는다.
+> - 판별 불가·양쪽 모두 소비 → 여기(기본).
+>
+> toss-checklist에는 기반 이슈를 기록하지 않는다 — toss-porter가 필요 시 이 `## 이슈`를 읽기 참조한다.
 
 단계 진행 표는 여기 만들지 않는다 — pureweb-porter가 0-B에서 추가한다 (소유 분리).
 상태 표기는 마크다운 체크박스: 완료 = `[x]` + `(commit 해시)` / 스킵 = `[x]` + `⏭️ 스킵: 사유` (사유 없는 스킵 금지).
@@ -885,7 +890,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 ## 출력 문서 형식 3 (`Docs/porting/toss-checklist.md` — 플랫폼 작업목록)
 
-`## 이슈`는 **toss 전용**(WEBGL_TOSS 분기에만 해당하는) 이슈만 담는다 — 기반(공통) 이슈는 여전히 pureweb-checklist가 정본이며 이 파일에 기록하지 않는다. 판별 불가·공통이면 pureweb-checklist로 보낸다(기본).
+**플랫폼(Toss) 포팅 작업이 소비하는 항목**을 담는다 (형식 2의 라우팅 기준 참조): `## 이슈`는 toss 전용(WEBGL_TOSS 분기) 이슈, `## 확인 필요`·`## 기획자 보고`는 광고·IAP 실동작 관련 항목(실패재로드·게임중지·가격 UI·PID 매핑 등) 포함. 기반(공통) 이슈는 여전히 pureweb-checklist가 정본이며 이 파일에 기록하지 않는다.
 단계 진행 표는 toss-porter가 0-B에서 추가한다.
 
 ```markdown
