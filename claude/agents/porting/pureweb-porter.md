@@ -198,6 +198,19 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 //    iOS와 Android 로직이 하나의 블록으로 뭉개짐
 ```
 
+> **에디터 섀도잉 금지 (불변식)**: 포팅은 기존 define 조합이 타던 분기를 바꾸지 않는다 — 새 분기는 WebGL 런타임에서만 활성화돼야 한다.
+> 에디터(WebGL 빌드타겟)에서는 `UNITY_EDITOR`와 `UNITY_WEBGL`이 동시 정의되므로, 기존 체인에 `UNITY_EDITOR`를 언급하는 분기가 있는데 그 앞에 WebGL 분기를 삽입하면 에디터가 원래 타던 분기를 새 분기가 가로챈다. 이 경우 새 분기 조건에 `&& !UNITY_EDITOR`를 추가한다:
+>
+> ```csharp
+> #if UNITY_WEBGL && !UNITY_EDITOR
+>     // WebGL 처리
+> #elif UNITY_EDITOR || UNITY_IPHONE
+>     EditorOrIphoneLogic(); // 에디터가 원래 타던 분기 — 계속 타야 한다
+> #endif
+> ```
+>
+> 커밋 전 `--mode check-editor-shadow`로 기계 검증한다 (아래 검증 섹션).
+
 > **전처리문 3박자 규칙**: 기능을 WebGL용으로 *교체*할 때는 반드시 `#else`에 원본 코드를 보존한다. 기능을 *제거*할 때는 else 없이 가드만으로 충분하다.
 >
 > ```csharp
@@ -966,6 +979,22 @@ python ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
   --method {IAP_METHOD} \
   --method {SAVE_METHOD}
 ```
+
+### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
+
+이번 작업에서 수정·추가한 .cs 파일만 검사한다. 원본의 기존 WEBGL 체인은 불변식의 기준선이므로 검사 대상에 넣지 않는다.
+
+```bash
+git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
+  | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
+      --platform WEBGL_PUREWEB --mode check-editor-shadow
+```
+
+| 출력 | 대응 |
+|---|---|
+| `EDITOR_SHADOWED` | 지목된 분기 조건에 `&& !UNITY_EDITOR` 추가 후 재검사 (exit 1 — 통과 전 커밋 금지) |
+| `EVAL_FAILED` | 해당 라인을 Read로 직접 확인해 섀도잉 여부를 수동 판정 |
+| `✅ 섀도잉 없음` | 커밋 진행 |
 
 결과 처리:
 
