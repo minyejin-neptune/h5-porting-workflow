@@ -58,22 +58,30 @@ AskUserQuestion으로 확인 후 진행한다.
 
 ### 0-B. Addressables 패키지 확인
 
-`HLAddressableTool.cs`는 Addressables 패키지가 없으면 컴파일 오류가 난다. 패키지 설치 여부를 확인한다.
+porting-init 단계에서 `HLAddressableTool.cs`는 Addressables 패키지가 있을 때만 복사된다(없으면 컴파일 오류가 나므로 자동으로 건너뜀). 패키지 상태와 실제 파일 존재 여부가 일치하는지 확인한다.
 
 ```bash
 grep -q "com.unity.addressables" Packages/manifest.json \
   && echo "ADDRESSABLES_OK" \
   || echo "ADDRESSABLES_MISSING"
+ls Assets/Editor/HLAddressableTool.cs 2>/dev/null && echo "FILE_EXISTS" || echo "FILE_ABSENT"
 ```
 
-- `ADDRESSABLES_OK` → 0-C로 진행
-- `ADDRESSABLES_MISSING` → AskUserQuestion으로 확인:
+| 패키지 | 파일 | 판정 |
+|---|---|---|
+| OK | EXISTS | 정상 → 0-C로 진행 |
+| MISSING | ABSENT | 정상(porting-init이 건너뜀) → 0-C로 진행 |
+| MISSING | EXISTS | 과거 복사분 잔존 — 컴파일 오류 유발 가능. 아래 AskUserQuestion |
+| OK | ABSENT | porting-init 미실행/실패 추정. 아래 AskUserQuestion |
 
-> "`HLAddressableTool.cs`는 Addressables 패키지가 필요하지만 현재 미설치 상태입니다.
-> - 패키지 설치 후 계속 → Unity Editor에서 `com.unity.addressables`를 설치한 뒤 알려주세요.
-> - 커밋에서 제외하고 계속 → `HLAddressableTool.cs`를 제외하고 나머지만 커밋합니다."
-
-제외 선택 시: 0-C의 `git add` 목록에서 `HLAddressableTool.cs`와 해당 `.meta`를 빼고 진행한다.
+- `MISSING` + `EXISTS` → AskUserQuestion:
+  > "Addressables 패키지가 없는데 `HLAddressableTool.cs`가 이미 존재합니다(과거 복사분으로 추정). 컴파일 오류를 유발할 수 있습니다.
+  > - 패키지 설치 후 계속 → Unity Editor에서 `com.unity.addressables`를 설치한 뒤 알려주세요.
+  > - 파일 삭제 후 계속 → `rm -f Assets/Editor/HLAddressableTool.cs Assets/Editor/HLAddressableTool.cs.meta`"
+- `OK` + `ABSENT` → AskUserQuestion:
+  > "Addressables 패키지는 있는데 `HLAddressableTool.cs`가 없습니다. porting-init에서 복사가 누락된 것으로 보입니다.
+  > - 다시 복사 → `cp ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs ./Assets/Editor/HLAddressableTool.cs`
+  > - 건너뛰고 계속"
 
 ### 0-C. STEP 0 산출물 커밋
 

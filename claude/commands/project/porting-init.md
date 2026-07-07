@@ -55,7 +55,13 @@ copy_template() {
 copy_template ~/github/h5-porting-workflow/templates/Editor/CompileChecker.cs      ./Assets/Editor/CompileChecker.cs
 copy_template ~/github/h5-porting-workflow/templates/Editor/CompileResultWindow.cs ./Assets/Editor/CompileResultWindow.cs
 copy_template ~/github/h5-porting-workflow/templates/Editor/TextureFormatSetter.cs ./Assets/Editor/TextureFormatSetter.cs
-copy_template ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs   ./Assets/Editor/HLAddressableTool.cs
+
+# HLAddressableTool.cs는 Addressables 패키지가 없으면 컴파일 오류가 나므로, 패키지가 있을 때만 복사한다.
+if grep -q "com.unity.addressables" Packages/manifest.json 2>/dev/null; then
+  copy_template ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs ./Assets/Editor/HLAddressableTool.cs
+else
+  echo "⏭ HLAddressableTool.cs 건너뜀 — Packages/manifest.json에 com.unity.addressables 없음"
+fi
 ```
 
 > 템플릿 갱신 시 각 프로젝트에서 재복사해야 반영됩니다 (복사 방식의 트레이드오프). 자주 바뀌면 회사 SDK 병합으로 대체 예정.
