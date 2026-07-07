@@ -257,7 +257,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
   worktree-immediate: 5 광고 즉시지급 + 6 IAP 즉시지급
   worktree-sdk:       7 SDK 비활성화
       ↓ (worktree merge 완료 후)
-[순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 9 앱 이름·Favicon 설정
+[순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 8-A 저장 키 분리 → 8-B Base64 인코딩 래핑 → 9 앱 이름·Favicon 설정 → 9-A WebGL 템플릿 동기화
       ↓
 [선택] 4 토스 콘텐츠 동기화 (grep 자동 판단)
       ↓
