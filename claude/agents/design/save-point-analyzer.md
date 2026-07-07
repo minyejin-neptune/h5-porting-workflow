@@ -359,18 +359,7 @@ grep -rn "AES\|Encrypt\|Decrypt\|Cipher\|CryptoStream\|RijndaelManaged" \
 
 ## Stats Logging
 
-`Docs/design/데이터-저장-로드.md` 저장 완료 후, `Docs/porting/.stats/agent-stats.md`에 한 행을 추가한다. 디렉토리가 없으면 `mkdir -p Docs/porting/.stats`로 먼저 생성한다. 파일이 없으면 헤더와 함께 생성한다.
-
-**헤더 (최초 1회):**
-```
-| Date | Agent | Hit Patterns | Zero-Hit Patterns |
-|---|---|---|---|
-```
-
-**행 형식:**
-```
-| YYYY-MM-DD | save-point-analyzer | pattern_a(N건), pattern_b(N건) | pattern_c, pattern_d |
-```
+`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `save-point-analyzer`). `Docs/design/데이터-저장-로드.md` 저장 완료 후 기록한다.
 
 추적 대상 패턴:
 - `PlayerPrefs.Set*` — 로컬 키-값 저장
@@ -386,5 +375,3 @@ grep -rn "AES\|Encrypt\|Decrypt\|Cipher\|CryptoStream\|RijndaelManaged" \
 - `PlayerPrefs.SetString / SetInt / SetFloat` — Key-Value 직렬화
 - `Convert.ToBase64String / Base64Encode` — Base64 인코딩
 - `AES / Encrypt / Decrypt` — 암호화
-
-**패턴 정리 기준:** 같은 프로젝트에서 동일 패턴이 Zero-Hit으로 **3회 이상** 누적되면 해당 패턴을 탐색 방법 섹션에서 제거한다.

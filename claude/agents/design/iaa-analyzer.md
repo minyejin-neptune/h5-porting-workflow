@@ -330,18 +330,7 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 ## Stats Logging
 
-`Docs/design/IAA.md` 저장 완료 후, `Docs/porting/.stats/agent-stats.md`에 한 행을 추가한다. 디렉토리가 없으면 `mkdir -p Docs/porting/.stats`로 먼저 생성한다. 파일이 없으면 헤더와 함께 생성한다.
-
-**헤더 (최초 1회):**
-```
-| Date | Agent | Hit Patterns | Zero-Hit Patterns |
-|---|---|---|---|
-```
-
-**행 형식:**
-```
-| YYYY-MM-DD | iaa-analyzer | pattern_a(N건), pattern_b(N건) | pattern_c, pattern_d |
-```
+`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `iaa-analyzer`). `Docs/design/IAA.md` 저장 완료 후 기록한다.
 
 추적 대상 패턴 (보상형):
 - `enum AdRewardType / RewardAdType` — 광고 타입 enum
@@ -357,5 +346,3 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - `IsContentsOpenShowAds / isShowInterstitial` — 트리거 플래그
 - `SetAdCntValue / interstitialCount` — 카운트 누적
 - `forcedads / interstitial_cool / ad_cooltime` — 쿨타임 Define
-
-**패턴 정리 기준:** 같은 프로젝트에서 동일 패턴이 Zero-Hit으로 **3회 이상** 누적되면 해당 패턴을 탐색 방법 섹션에서 제거한다.

@@ -134,6 +134,14 @@ grep -rhoE "^namespace [A-Za-z0-9_.]+" {SCRIPTS_PATH} --include="*.cs" 2>/dev/nu
 
 ---
 
+## Stats Logging
+
+`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `sdk-list-analyzer`). STEP 4 저장 완료 후 기록한다.
+
+추적 라벨: SDK폴더탐지 · jslib존재 · SDK타입상속 · ZeroHitFallback(asmdef/manifest/link.xml/namespace휴리스틱)
+
+---
+
 ## 완료 출력
 
 최종 텍스트로 아래만 출력한다:

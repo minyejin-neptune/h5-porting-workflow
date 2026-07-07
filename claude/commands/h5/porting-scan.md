@@ -901,6 +901,22 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 ---
 
+## Stats Logging
+
+`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `porting-scan`). STEP 5 저장 완료 후 기록한다.
+
+추적 라벨(정규식은 각 STEP 본문 참조 — 여기서 재정의하지 않는다):
+
+- **STEP 3 (런타임 7종)**: 네트워크(UnityWebRequest) · 파일IO · PersistentPath · 해상도고정 · SafeArea런타임 · 스레드/비동기 · OpenURL
+- **STEP 4-B**: IAP매니저 · 광고보상형 · 광고전면 · 전면진입점 · 쿨타임변수 · 게임중지신호 · 저장패턴 · 초기화플래그
+- **STEP 4-B-T (Toss 전용)**: 배너 · 햅틱 · 가격UI · 랭킹 · 공유 · 프로모션 · SafeArea클래스 · UID표시 · 불필요UI · 로컬라이제이션
+- **STEP 4-C**: 진입점
+- **STEP 4-D**: Addressables
+- **STEP 4-E**: 저장키
+- **STEP 4-G**: 치트
+
+---
+
 ## 완료 후 채팅 출력
 
 **STEP 5 실행 전 — 미해결 항목 확인**
