@@ -136,11 +136,17 @@ sed -n '{라인}p' {파일경로} 2>/dev/null
 |---|---|
 | 불러오기 | `{LOAD_METHOD}` |
 | 저장 | `{SAVE_METHOD}` |
+| 로컬 저장 | `{LOCAL_SAVE_METHOD}` |
+| 로컬 불러오기 | `{LOCAL_LOAD_METHOD}` |
 | 사운드 | `{SOUND_CLASS}` |
 | 광고 (보상형) | `{AD_REWARDED_METHOD}` |
 | 광고 (전면) | `{AD_INTERSTITIAL_METHOD}` |
+| 광고 전면 진입점 | `{INTERSTITIAL_ENTRY}` |
+| 전면 쿨타임 변수 | `{COOLTIME_VAR}` |
 | IAP | `{IAP_METHOD}` |
 | 게임 진입점 | `{GAME_INIT_METHOD}` |
+| 로비 진입점 | `{LOBBY_ENTRY}` |
+| 에셋 현황 | `{ASSET_COUNTS}` |
 
 미채움 행이 있으면:
 > "아래 VOCAB 행이 비어있어 포터에서 플레이스홀더를 채울 수 없습니다:"
