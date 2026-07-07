@@ -434,12 +434,17 @@ git branch --show-current
 
 ## STEP 2-E — 포터 실행 전 WebGL 컴파일 체크
 
-포터 실행 직전에 WebGL 컴파일 상태를 확인한다. 포팅 대상 플랫폼(TOSS / PUREWEB)에 맞춰 실행.
+포터 실행 직전에 WebGL 컴파일 상태를 확인한다. **아래 두 명령 중 실제 포팅 대상 플랫폼에 해당하는 것만 실행한다** — 플랫폼을 고르지 않고 그대로 복사 실행하지 않는다.
 
 ```bash
-# TOSS 또는 PUREWEB — 포팅 대상 플랫폼 선택
+# 퓨어웹 포팅인 경우
+bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh PUREWEB
+
+# 토스 포팅인 경우
 bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh TOSS
 ```
+
+STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STEP 3 순서 규칙과 동일) — 퓨어웹 컴파일 체크·포터 완료 후, 토스 컴파일 체크(`compile-check.sh TOSS`)를 다시 실행하고 STEP 3-C를 토스로 재진입한다.
 
 사전 점검(버전·설치·이 프로젝트 에디터 열림)은 스크립트에 내장되어 있다.
 `⛔ STOP`이면 출력된 안내대로 조치될 때까지 대기하고, `✅`/`❌`면 아래 결과 처리로 진행한다.
