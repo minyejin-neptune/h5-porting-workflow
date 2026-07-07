@@ -42,6 +42,7 @@ git branch --show-current
 ```
 
 브랜치명이 `플랫폼/버전` 형식(예: `toss/v1.0`, `pureweb/1.2.3`)인지 확인한다.
+버전 값은 Unity Editor의 `Player Settings` → `Version`(또는 `ProjectSettings/ProjectSettings.asset`의 `bundleVersion`)에서 확인한다 — 임의로 지어내지 않는다.
 
 - 형식이 맞으면 → 0-B로 진행
 - 형식이 맞지 않으면(예: `main`, `master`, 빈 값) → 아래 메시지를 출력하고 **사용자가 확인할 때까지 대기**:
@@ -163,6 +164,14 @@ iconv -f EUC-KR -t UTF-8 "{파일경로}" -o "{파일경로}.utf8" \
   || { echo "✗ 변환 실패: {파일경로}"; rm -f "{파일경로}.utf8"; }
 ```
 
+**변환 후 — 한글 깨짐 확인 (필수)**: iconv 성공(exit 0)은 인코딩 변환 자체의 성공일 뿐, 원본이 실제로 EUC-KR이었는지는 보장하지 않는다(예: 이미 깨진 파일, CP949 등 다른 인코딩이면 문자가 다른 형태로 깨질 수 있다). 변환된 파일마다 한글이 포함된 라인을 샘플로 출력해 사용자에게 확인받는다:
+
+```bash
+grep -n "[가-힣]" "{파일경로}" | head -5
+```
+
+출력된 한글이 정상적으로 읽히는지 사용자에게 확인하고, 깨진 문자가 보이면 원본 인코딩을 재확인한다(예: `file -i "{파일경로}"` 또는 `iconv -f CP949`로 재시도).
+
 ---
 
 ## STEP 1-A — Android 플랫폼 컴파일 확인
@@ -261,7 +270,7 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 - NOT_INSTALLED → AskUserQuestion으로 확인:
 
 > "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
-> - 설치하겠습니다 → Unity Editor에서 HyperLane 패키지를 임포트한 뒤 완료되면 알려달라고 안내. 확인 후 STEP 2로.
+> - 설치하겠습니다 → Unity Editor에서 HyperLane 패키지를 임포트한 뒤(https://github.com/neptunez-dev/hyperlane-sdk), **init 시 반드시 Web View로 선택**하라고 안내. 완료되면 알려달라고 안내. 확인 후 STEP 2로.
 > - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
 
 ---
