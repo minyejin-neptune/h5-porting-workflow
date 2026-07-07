@@ -842,11 +842,13 @@ PORTING_VOCAB.md `저장 키` 판정이 **"게임별 구분 없음"** 이면 필
 grep -n "PlayerPrefs\.SetString\|PlayerPrefs\.GetString" {SAVE_FILE} 2>/dev/null
 ```
 
-하드코딩 키를 게임 고유 키로 변경한다:
+하드코딩 키를 게임 고유 키로 변경한다. **DEV/LIVE 빌드가 같은 브라우저·도메인에서 데이터를 공유하지 않도록 키 끝에 빌드 구분자도 함께 붙인다** — 형식: `{게임이름}_{키이름}_{DEV|LIVE}`.
 
 ```csharp
-#if UNITY_WEBGL
-    private const string SAVE_KEY = "{GameName}_Data"; // 게임별 고유 키
+#if UNITY_WEBGL && WEBGL_DEV_VER
+    private const string SAVE_KEY = "{GameName}_Data_DEV";
+#elif UNITY_WEBGL && WEBGL_LIVE_VER
+    private const string SAVE_KEY = "{GameName}_Data_LIVE";
 #else
     private const string SAVE_KEY = "Data"; // 기존 키 유지
 #endif
