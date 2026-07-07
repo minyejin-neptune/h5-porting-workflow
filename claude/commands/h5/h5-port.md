@@ -126,7 +126,7 @@ PORTING_VOCAB.md를 읽은 뒤 해당 행의 메서드/클래스명으로 플레
 | `{REMOVE_UI_LIST}` | 불필요 UI 후보 파일:라인 목록 (Toss 전용) | `UIShop.cs:42, UIMenu.cs:88` |
 | `{LOCALIZATION_FILE}` | 로컬라이제이션 클래스 (Toss 전용) | `LocalizationManager.cs` |
 | `{ASSET_COUNTS}` | 에셋 현황 (오디오·텍스쳐 수·Addressables) | `오디오: 30개 / 텍스쳐: 800개 / Addressables: 사용중` |
-| `{SCRIPTS_PATH}` | — | porting-scan 사전 감지로 확정 |
+| `{SCRIPTS_PATH}` | — | porting-scan 사전 감지로 확정, NATIVE_BASELINE.md 헤더 `스크립트 경로:`에 기록 |
 
 ---
 
@@ -468,7 +468,11 @@ STEP 1~2 완료. 포터는 준비되면 아래 명령으로 실행하세요:
 
 STEP 3 포터 완료 후 h5-port-verify.py로 플랫폼별 처리 누락을 최종 검증한다.
 
-PORTING_VOCAB.md에서 `{SCRIPTS_PATH}`를 확인해 `--scripts` 인자로 전달한다.
+`{SCRIPTS_PATH}`는 NATIVE_BASELINE.md 헤더의 `스크립트 경로:` 값에서 확인해 `--scripts` 인자로 전달한다:
+
+```bash
+head -5 Docs/porting/NATIVE_BASELINE.md
+```
 
 ```bash
 # 퓨어웹 포팅인 경우
