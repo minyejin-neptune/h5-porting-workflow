@@ -668,7 +668,7 @@ grep -rln "Cheat\|DebugConsole\|DevMenu\|GMMode\|CheatConsole" {SCRIPTS_PATH} --
 - 결과 있음 → 파일:라인을 VOCAB `## 포터 기록`에 기록 (toss-porter 7-0이 읽기 참조)
 - 결과 없음 → "없음"으로 기록
 
-#### 4-F. PORTING_VOCAB.md 저장
+#### 4-H. PORTING_VOCAB.md 저장
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 저장.
 
