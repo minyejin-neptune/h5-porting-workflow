@@ -97,6 +97,10 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 - **Porters (subagents) cannot ask the user mid-run — never block on a question.** Where a documented fixed policy exists, apply it without asking (e.g., encryption must be removed for SetUserData — notify, don't ask; VOCAB gate failure always stops, no risk-accepting bypass). Otherwise record the decision in the porting issue `## 확인 필요 / 미확정` (+ checklist `## 확인 필요`) and skip only the dependent sub-task — h5-port's follow-up mode collects answers and re-runs partially.
 - After completing porting-related code changes (WebGL preprocessors, SDK handling, compile/runtime issue fixes): check off the corresponding item in the checklist (`Docs/porting/pureweb-checklist.md` `## 이슈` or the step table) with the commit hash. If a method name or file path was newly confirmed, add it to `Docs/porting/PORTING_VOCAB.md` as well. Do not edit `NATIVE_BASELINE.md` (frozen after scan-verify).
 - After completing each porting task, run compile check before committing (Unity menu **Tools/H5/Compile Check**, or `bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh <TOSS|PUREWEB>`).
+- **Compress step-transition reports to 2–3 lines** (✅/⏳ markers) — put full detail in the checklist/VOCAB doc, not the chat.
+- **List-type results (e.g. compile errors): show a count + at most 3 representative items** in chat; write the full list to the checklist `## 이슈`.
+- **Skip filler progress messages** (e.g. "확인 중입니다", "잠시만 기다려주세요") — report only the result.
+- **When quoting a subagent's completion report, extract only the essentials** (scope done, error count, `## 확인 필요` items) — do not re-paste the full report.
 
 ---
 

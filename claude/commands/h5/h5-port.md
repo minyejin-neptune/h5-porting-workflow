@@ -235,20 +235,20 @@ bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh ANDROID
 | 정의 없음 + SDK 목록에도 없음 | 파일 누락 — 정의했어야 할 스크립트 부재 |
 | `CS0246`/`CS0234` 외 (문법 오류 등) | 기타 |
 
-보고 형식:
+보고 형식 — 분류별 **대표 최대 3건만 채팅에 출력**, 전체 목록은 pureweb-checklist.md `## 이슈`에 기록:
 
 ```
 ⚠️ Android 컴파일 오류 발견
 
-[파일 누락 (N건)]
+[파일 누락 (N건, 대표 3건)]
 - Assets/Scripts/Shop.cs:20 — error CS0246: 'InventoryManager' not found — 프로젝트 정의·SDK 목록 모두 없음
-...
+(나머지는 checklist 참조)
 
-[SDK 문제 (N건)]
+[SDK 문제 (N건, 대표 3건)]
 - Assets/Scripts/AdManager.cs:12 — error CS0246: 'GoogleMobileAds' not found — SDK 목록 대조: 광고 SDK 소속
-...
+(나머지는 checklist 참조)
 
-[기타 (N건)]
+[기타 (N건, 대표 3건)]
 - ...
 ```
 
