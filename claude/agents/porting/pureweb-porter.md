@@ -28,7 +28,7 @@ tools: Read, Bash, Edit, Write, Agent
 > **VOCAB 업데이트 원칙**: grep fallback으로 발견한 파일:라인은 작업 완료 후 `Docs/porting/PORTING_VOCAB.md` `## 포터 기록` 섹션에 추가한다. 다음 포터 실행 시 재탐색 없이 바로 Read할 수 있도록.
 
 > **결정 필요 라우팅 — 사람 결정이 필요한 지점의 공통 처리**: 이 에이전트는 서브에이전트라 실행 중 사용자에게 질문할 수 없다. 본문에서 "→ 결정 필요 라우팅({항목})"을 만나면:
-> 1. 포팅 이슈(prompt로 받은 번호)의 `## 확인 필요 / 미확정`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 추가 (`gh issue edit`). 이슈 번호가 없으면 생략.
+> 1. 포팅 이슈(진입점의 **포팅 이슈 확보**에서 확정한 번호)의 `## 확인 필요 / 미확정`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 추가 (`gh issue edit`). 이슈를 못 확보한 경우(NO_REMOTE)에만 생략.
 > 2. `pureweb-checklist.md` `## 확인 필요`에 같은 항목 기록.
 > 3. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
 >
@@ -299,6 +299,19 @@ echo "PUREWEB" > .porting-context
 
 `Docs/porting/pureweb-checklist.md`가 없으면 위 `## 체크리스트 관리` 형식으로 생성한다.
 이미 있으면 그대로 유지(이어서 작업).
+
+**포팅 이슈 확보** — prompt에 이슈 번호가 있으면 그대로 사용한다. 없으면(단독 실행 등) 스스로 확보한다:
+
+```bash
+gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null && echo "REPO_OK" || echo "NO_REMOTE"
+gh issue list --state open --search "[포팅]" --json number,title
+```
+
+1. `NO_REMOTE` → 이슈 없이 진행한다 (기록은 체크리스트만 — 유일하게 이슈를 생략하는 경우).
+2. open `[포팅]` 이슈 있음 → 그 번호를 재사용한다.
+3. 없음 → `~/github/h5-porting-workflow/templates/porting-issue-body.md`를 Read해 제목·본문 형식대로 직접 생성한다 (`gh issue create`). 생성 실패 시 에러 원문을 완료 리포트에 포함하고 이슈 없이 진행한다.
+
+확보한 번호는 이후 모든 이슈 갱신(`gh issue edit` — 결정 필요 라우팅·진행 상황 동기화)에 사용한다.
 
 `Docs/porting/NATIVE_BASELINE.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 작업 범위를 확정한다.
 
@@ -1152,7 +1165,7 @@ Data + wasm 합산 50MB 이하 확인.
 | `## 이슈` 항목 — 처리 방법 | 계획과 다른 방법으로 처리한 경우 | 항목 문장의 처리 방법 부분을 실제 방법으로 수정 |
 | `## 확인 필요` 항목 | 해당 항목 해소됨 | 항목 제거 |
 
-**포팅 이슈 번호를 prompt로 받은 경우**(h5-port STEP 3-B): 단계 완료 시 `gh issue edit`로 해당 이슈의 진행 상황도 동기화하고, 커밋 메시지에 `(#N)`을 참조한다. 이슈는 체크리스트를 비추는 미러일 뿐이니 체크리스트 갱신을 먼저 하고 이슈는 그 내용을 반영만 한다.
+**포팅 이슈 번호가 있는 경우**(prompt로 받았거나 진입점 **포팅 이슈 확보**에서 직접 확보): 단계 완료 시 `gh issue edit`로 해당 이슈의 진행 상황도 동기화하고, 커밋 메시지에 `(#N)`을 참조한다. 이슈는 체크리스트를 비추는 미러일 뿐이니 체크리스트 갱신을 먼저 하고 이슈는 그 내용을 반영만 한다.
 
 ### 처리 방법 변경 주의
 

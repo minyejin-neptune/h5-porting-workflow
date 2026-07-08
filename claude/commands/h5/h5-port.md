@@ -509,37 +509,18 @@ gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null && echo "REPO_OK
 ```
 
 - `NO_REMOTE` → 이슈 생성 생략, STEP 3-C(포터 실행)로 바로 진행 (STEP 3-A 답변은 포터 prompt에 실어 보낼 수 없으므로 체크리스트 `## 확인 필요`에 기록해 포터가 읽게 한다).
-- `REPO_OK` → 아래 형식으로 이 게임 repo에 포팅 이슈를 생성한다:
+- `REPO_OK` → 먼저 open 포팅 이슈가 이미 있는지 확인한다 (중복 생성 방지):
 
 ```bash
-BODY_FILE="$(mktemp)"
-cat > "$BODY_FILE" <<'EOF'
-## 진행 상황
-정본: 기반(컴파일/런타임/공백) 이슈는 항상 `Docs/porting/pureweb-checklist.md`, 플랫폼 전용 이슈는 `Docs/porting/{PLATFORM}-checklist.md` (이 이슈는 진행 미러 — 상세 상태는 두 정본 파일 참조)
-
-{체크리스트 단계 표 스냅샷}
-
-## 사람 준비 항목 (토스 포팅만 — STEP 3-A 답변)
-확정된 항목은 `[x]` + 확정값 기재, 미확정이면 `[ ]`로 남긴다. 해당 없는 항목은 줄을 지운다.
-- [ ] 배너 위치 (상단/하단):
-- [ ] IAP PID 매핑:
-- [ ] 햅틱 타입:
-- [ ] 공유하기 문구:
-- [ ] 프로모션 ID:
-- [ ] 랭킹 버튼 위치:
-
-## 확인 필요 / 미확정
-(포터 실행 중 항목이 추가되면 여기 기록됨)
-EOF
-
-gh issue create \
-  --title "[포팅] {PLATFORM} — {프로젝트명}" \
-  --body-file "$BODY_FILE"
-
-rm -f "$BODY_FILE"
+gh issue list --state open --search "[포팅]" --json number,title
 ```
 
-생성된 이슈 번호를 기억해 STEP 3-C의 포터 prompt에 전달한다.
+- 있으면 → 그 번호를 재사용하고 생성을 생략한다.
+- 없으면 → `~/github/h5-porting-workflow/templates/porting-issue-body.md`를 Read해 제목·본문 형식을 따라 이 게임 repo에 포팅 이슈를 생성한다 (형식 정의는 그 템플릿이 유일한 소스 — 여기 복사해 두지 않는다). `## 사람 준비 항목`에는 STEP 3-A 답변을 반영한다.
+
+**`gh issue create`가 실패하면** (권한·네트워크 등) 조용히 "없음"으로 넘어가지 않는다 — 에러 원문을 사용자에게 그대로 보여주고 재시도/생략을 확인받는다. 사용자가 생략을 선택한 경우에만 이슈 없이 진행한다.
+
+확보(생성 또는 재사용)한 이슈 번호를 기억해 STEP 3-C의 포터 prompt에 전달한다.
 
 ### STEP 3-C. 포터 실행
 
