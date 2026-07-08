@@ -1,7 +1,7 @@
 ---
 name: pureweb-porter
 description: 퓨어웹(WEBGL_PUREWEB) 전용 포팅 에이전트. 광고/IAP 즉시지급 처리, 서버저장 차단, SafeArea 제거, 토스 제거 콘텐츠 동기화, 퓨어웹 체크리스트 검증을 담당한다. "퓨어웹 포팅", "PUREWEB 처리", "광고 즉시지급" 같은 요청에 사용.
-tools: Read, Bash, Edit, Write, Agent
+tools: Read, Bash, Edit, Write, Agent, Skill
 ---
 
 # 퓨어웹 포터 에이전트
@@ -28,9 +28,8 @@ tools: Read, Bash, Edit, Write, Agent
 > **VOCAB 업데이트 원칙**: grep fallback으로 발견한 파일:라인은 작업 완료 후 `Docs/porting/PORTING_VOCAB.md` `## 포터 기록` 섹션에 추가한다. 다음 포터 실행 시 재탐색 없이 바로 Read할 수 있도록.
 
 > **결정 필요 라우팅 — 사람 결정이 필요한 지점의 공통 처리**: 이 에이전트는 서브에이전트라 실행 중 사용자에게 질문할 수 없다. 본문에서 "→ 결정 필요 라우팅({항목})"을 만나면:
-> 1. 포팅 이슈(진입점의 **포팅 이슈 확보**에서 확정한 번호)의 `## 확인 필요 / 미확정`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 추가 (`gh issue edit`). 이슈를 못 확보한 경우(NO_REMOTE)에만 생략.
-> 2. `pureweb-checklist.md` `## 확인 필요`에 같은 항목 기록.
-> 3. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
+> 1. `pureweb-checklist.md` `## 확인 필요`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 기록 (체크리스트가 정본 — 이슈에는 기록하지 않는다).
+> 2. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
 >
 > 확정 답변은 h5-port 후속 모드(재실행 시 미확정 재질문 → 부분 수정 재호출)가 수집·반영한다.
 
@@ -309,9 +308,9 @@ gh issue list --state open --search "[포팅]" --json number,title
 
 1. `NO_REMOTE` → 이슈 없이 진행한다 (기록은 체크리스트만 — 유일하게 이슈를 생략하는 경우).
 2. open `[포팅]` 이슈 있음 → 그 번호를 재사용한다.
-3. 없음 → `~/github/h5-porting-workflow/templates/porting-issue-body.md`를 Read해 제목·본문 형식대로 직접 생성한다 (`gh issue create`). 생성 실패 시 에러 원문을 완료 리포트에 포함하고 이슈 없이 진행한다.
+3. 없음 → `Skill` 도구로 `/common:create-issue --no-confirm`을 호출해 생성한다. 제목: `[포팅] PUREWEB — {프로젝트명}`. DoD 체크박스: 위 `## 체크리스트 관리`의 `## 단계 진행` 목록을 그대로 옮긴다. 실패·확인 처리는 그 스킬이 담당한다.
 
-확보한 번호는 이후 모든 이슈 갱신(`gh issue edit` — 결정 필요 라우팅·진행 상황 동기화)에 사용한다.
+확보한 번호는 이후 이슈 갱신(`gh issue edit` — 진행 상황 동기화)에 사용한다. 확인 필요·결정 필요 항목은 체크리스트에만 기록한다(위 결정 필요 라우팅 참조).
 
 `Docs/porting/NATIVE_BASELINE.md`와 `Docs/porting/PORTING_VOCAB.md`를 읽어 작업 범위를 확정한다.
 
