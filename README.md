@@ -83,6 +83,18 @@ cd ~/github/h5-porting-workflow && git pull
 
 개별 포터를 직접 호출할 수도 있다(`Agent 도구, subagent_type: "pureweb-porter"` 등) — 이 경우 각 포터가 선행 포터 완료 여부를 진입점에서 스스로 확인하고, 안 됐으면 대신 실행하지 않고 안내만 한 뒤 반환한다.
 
+## 상태 관리 (포팅 대상 프로젝트 안에 생성됨)
+
+포팅 작업의 진행 상황은 워크플로우 repo가 아니라 **포팅 대상 게임 프로젝트의 `Docs/porting/`** 아래에 기록·갱신된다.
+
+| 파일 | 성격 | 정본 여부 |
+|---|---|---|
+| `NATIVE_BASELINE.md` | 포팅 전 네이티브 스냅샷 (scan-verify 후 동결, 불변) | 스캔 결과 정본 |
+| `PORTING_VOCAB.md` | 포터가 참조하는 메서드·파일 위치 인덱스 — 포팅 중 계속 갱신 | 위치 정보 정본 |
+| `pureweb-checklist.md` / `platform-checklist.md` / `toss-checklist.md` | 단계 진행·이슈·확인 필요·교정 기록 (가변) | **작업 진행 정본** |
+
+GitHub 이슈를 함께 쓰는 경우(`/common:create-issue` 연동), 이슈는 위 체크리스트를 비추는 **미러**일 뿐이다 — 상태가 어긋나면 체크리스트 기준으로 이슈를 갱신한다. 전체 산출물 목록·생성 시점은 `templates/README.md`(포팅 대상 프로젝트에 `Docs/README.md`로 복사됨) 참조.
+
 ## 경로 규칙 (기여 시)
 
 repo 안 파일끼리의 참조 경로 기준:

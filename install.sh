@@ -33,13 +33,6 @@ while IFS= read -r src; do
   echo "  ✓ $dst"
 done < <(find "$REPO/claude" -type f)
 
-# 2) 구버전 정리 — 예전 방식의 ~/github/.templates 심볼릭이 있으면 제거
-OLD_LINK="$HOME/github/.templates"
-if [ -L "$OLD_LINK" ]; then
-  rm "$OLD_LINK"
-  echo "▶ 구버전 심볼릭 제거: $OLD_LINK (템플릿은 이제 repo 경로 직접 참조)"
-fi
-
 echo ""
 echo "✅ 설치 완료. Claude Code에서 /reload-plugins 또는 재시작 후 사용."
 echo "   업데이트: 이 repo에서 git pull"
