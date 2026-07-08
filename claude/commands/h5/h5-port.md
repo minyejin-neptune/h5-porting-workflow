@@ -457,17 +457,17 @@ STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STE
 
 > **중요**: 포터는 반드시 `Agent 도구`의 `subagent_type` 파라미터로 실행한다.
 > 포터 파일을 직접 읽고 오케스트레이터가 내용을 실행하지 않는다.
-> - 플랫폼 공통(HLSDK 통합) — **모든 경우에 필수 선행**: `Agent 도구, subagent_type: "platform-porter"` (광고·IAP 즉시지급이 여기로 이관됨 — 퓨어웹만 포팅해도 필요, 이슈 #41·#42)
-> - 퓨어웹: `Agent 도구, subagent_type: "pureweb-porter"` (platform-porter 완료 후에만 실행 — pureweb-porter 자체에도 진입 게이트가 있어 대신 실행하지 않고 반환한다)
+> - **항상 최우선**: `Agent 도구, subagent_type: "pureweb-porter"` (SDK 초기화·로컬 저장·광고/IAP 즉시지급 등 브라우저 테스트 가능한 기반을 완성 — 어떤 플랫폼을 최종 선택해도 항상 이 포터가 먼저 실행된다. 2026-07-08 재배치, 이슈 #44)
+> - 플랫폼 공통(HLSDK 통합) — **pureweb-porter 완료 후 모든 경우에 필수**: `Agent 도구, subagent_type: "platform-porter"` (pureweb-porter 자체에도 완료 여부와 무관하게 그대로 진행하는 구조이나, platform-porter는 pureweb-porter 완료를 진입 게이트로 확인한다)
 > - 토스: `Agent 도구, subagent_type: "toss-porter"` (platform-porter 완료 후에만 실행 — toss-porter 자체에도 진입 게이트가 있어 대신 실행하지 않고 반환한다)
 
 인자에 `toss` 또는 `pureweb`이 포함된 경우 AskUserQuestion 없이 해당 포터를 바로 실행한다.
 인자가 없으면 AskUserQuestion으로 확인한다:
 
 > "어떤 플랫폼으로 포팅하시겠어요?"
-> - 퓨어웹 → Agent 도구로 `subagent_type: "platform-porter"` 실행 후, 완료되면 `subagent_type: "pureweb-porter"` 실행
-> - 토스 → Agent 도구로 `subagent_type: "platform-porter"` 실행 후, 완료되면 `subagent_type: "toss-porter"` 실행
-> - 둘 다 → platform-porter → 퓨어웹 → 토스 순서로 실행 (platform-porter는 1회만 실행하면 됨)
+> - 퓨어웹 → Agent 도구로 `subagent_type: "pureweb-porter"` 실행 후, 완료되면 `subagent_type: "platform-porter"` 실행 (퓨어웹만 목표라도 로그인·저장·SafeArea 등 HLSDK 공통 통합까지 마쳐야 완전한 퓨어웹 빌드가 된다)
+> - 토스 → pureweb-porter → platform-porter → toss-porter 순서로 실행
+> - 둘 다 → pureweb-porter → platform-porter → toss-porter 순서로 실행 (pureweb-porter·platform-porter는 각 1회만 실행하면 됨)
 > - 나중에 → 안내 메시지 출력 후 종료
 
 ### STEP 3-A. 사람 준비 항목 확인 (토스 포팅인 경우만)
@@ -505,8 +505,8 @@ gh issue list --state open --search "[포팅]" --json number,title
 - 있으면 → 그 번호를 재사용하고 생성을 생략한다.
 - 없으면 → `/common:create-issue --no-confirm`으로 생성한다(실패·확인 처리는 그 스킬이 담당). 이슈 내용에 포함할 것:
   - 제목: `[포팅] {PLATFORM} — {프로젝트명}`
-  - DoD 체크박스: 해당 포터(`pureweb-porter.md`/`toss-porter.md`) `## 체크리스트 관리`의 `## 단계 진행` 목록을 그대로 옮긴다 — 단계 목록은 그 파일이 유일한 소스, 여기서 재정의하지 않는다. 토스 포팅이면 `platform-porter.md`의 `## 단계 진행` 목록도 함께 옮긴다(platform-porter가 선행 실행되므로).
-  - 참고: "정본: 기반(컴파일/런타임/공백) 이슈는 항상 `pureweb-checklist.md`, 플랫폼 전용 이슈는 `{PLATFORM}-checklist.md`, HLSDK 공통 이슈는 `platform-checklist.md`(토스 포팅인 경우). 확인 필요·사람 준비 항목은 이슈가 아니라 해당 체크리스트 파일 `## 확인 필요`에 기록됨."
+  - DoD 체크박스: `pureweb-porter.md`와 `platform-porter.md`의 `## 체크리스트 관리` `## 단계 진행` 목록을 항상 함께 옮긴다(둘 다 모든 경우에 선행 실행되므로) — 단계 목록은 그 파일이 유일한 소스, 여기서 재정의하지 않는다. 토스 포팅이면 `toss-porter.md`의 `## 단계 진행` 목록도 추가한다.
+  - 참고: "정본: 기반(컴파일/런타임/공백) 이슈는 항상 `pureweb-checklist.md`, HLSDK 공통 이슈는 항상 `platform-checklist.md`, 플랫폼 전용 이슈는 `{PLATFORM}-checklist.md`(토스 포팅인 경우). 확인 필요·사람 준비 항목은 이슈가 아니라 해당 체크리스트 파일 `## 확인 필요`에 기록됨."
 
 확보(생성 또는 재사용)한 이슈 번호를 기억해 STEP 3-C의 포터 prompt에 전달한다.
 
@@ -581,7 +581,7 @@ python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
 
 STEP 3-B에서 이슈를 생성했으면(없으면 이 단계 생략). 후속 모드(부분 수정 재호출)에서도 동일하게 적용한다:
 
-- 검증 `✅ 이상 없음` **+** `pureweb-checklist.md`·`{platform}-checklist.md`의 `## 확인 필요`에 미체크(`- [ ]`) 항목 없음 → `gh issue close`로 검증 결과 코멘트와 함께 종료.
+- 검증 `✅ 이상 없음` **+** `pureweb-checklist.md`·`platform-checklist.md`·(토스 포팅이면) `toss-checklist.md`의 `## 확인 필요`에 미체크(`- [ ]`) 항목 없음 → `gh issue close`로 검증 결과 코멘트와 함께 종료.
 - 위 조건을 만족하지 않으면(미확정 항목 남음 등) 이슈를 **open으로 유지**하고 남은 항목을 코멘트로 남긴다.
 
-체크리스트가 작업 진행의 정본이고, 이 이슈는 진행 상황을 비추는 미러다 — 기반(컴파일/런타임/공백) 이슈는 `pureweb-checklist.md`, 플랫폼 전용 이슈는 `Docs/porting/{platform}-checklist.md`가 각각 정본이다. 상태가 어긋나면 체크리스트를 기준으로 이슈를 갱신한다.
+체크리스트가 작업 진행의 정본이고, 이 이슈는 진행 상황을 비추는 미러다 — 기반(컴파일/런타임/공백) 이슈는 `pureweb-checklist.md`, HLSDK 공통 이슈는 `platform-checklist.md`, 플랫폼 전용 이슈는 `Docs/porting/{platform}-checklist.md`가 각각 정본이다. 상태가 어긋나면 체크리스트를 기준으로 이슈를 갱신한다.
