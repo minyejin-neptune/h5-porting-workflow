@@ -1000,6 +1000,8 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 
 **참고 — 치트 등록 방법**: 테스트용 치트가 필요해지면(예: 로컬 데이터 초기화) 아래 패턴으로 삽입한다. 이 단계에서는 방법만 알아두고, 실제 삽입은 필요하다고 판단되거나 요청받았을 때만 수행한다 — 상세 안전장치(`DeleteAll()` 금지 등)는 toss-porter 7-0 참조.
 
+`Register(이름, 설명, ...)`의 이름·설명은 **영어로 작성**한다(CheatConsole UI 표기 규칙).
+
 ```csharp
 #if WEBGL_DEBUG_CONSOLE
     RegisterCheats(); // 게임 진입점 내부, 플랫폼 분기 직전에 호출
@@ -1009,7 +1011,7 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 void RegisterCheats()
 {
     CheatRegister.ClearAll();
-    CheatRegister.Register("치트 이름", "설명", Color.yellow, () => { /* 동작 */ });
+    CheatRegister.Register("Cheat Name", "Description in English", Color.yellow, () => { /* 동작 */ });
     CheatRegister.Build();
 }
 ```

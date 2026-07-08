@@ -1546,7 +1546,7 @@ PORTING_VOCAB.md `저장 인코딩` 행 + `{SAVE_METHOD}` 파일을 Read해서 �
 
 **등록 패턴:**
 
-등록 순서: `ClearAll() → Register() × N → Build()`
+등록 순서: `ClearAll() → Register() × N → Build()`. `Register(이름, 설명, ...)`의 이름·설명은 **영어로 작성**한다(CheatConsole UI 표기 규칙).
 
 ```csharp
 void RegisterCheats()
@@ -1555,7 +1555,7 @@ void RegisterCheats()
 
     CheatRegister.Register(
         "Reset Local",
-        "로컬 데이터 초기화",
+        "Reset local data",
         Color.yellow,
         () =>
         {
@@ -1565,7 +1565,7 @@ void RegisterCheats()
 
     CheatRegister.Register(
         "Reset Local+Server",
-        "로컬 + 서버 데이터 초기화",
+        "Reset local and server data",
         Color.red,
 #if !UNITY_EDITOR
         () =>
