@@ -299,12 +299,6 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 ---
 
-### 기본 규칙 3 — 광고 로드 실패 시 자동 재시도
-
-코드 확인 없이 기획 원칙 그대로 출력한다 (출력 원칙 기존 항목 참조).
-
----
-
 ## 출력 템플릿
 
 ```markdown
@@ -312,7 +306,6 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 - 보상형/전면형 광고 동시 노출 가능 시점일 경우 우선순위 / Ad priority when rewarded and interstitial can display simultaneously: 없음 / 있음 — (있으면 보상형·전면형 중 어느 쪽이 우선인지 1줄로)
 - 보상형 광고 시청 시 전면형 광고 쿨타임 영향 여부 / Whether rewarded ad viewing affects interstitial cooldown: 없음 / 있음 — (있으면 어떤 영향인지 서술)
-- 광고(보상형 / 전면) **로드 실패 시 자동 재시도 금지**. 다음 로드는 **유저 인터랙션(광고 보기 버튼 등)이 발생한 시점에만** 트리거한다. 실패했다고 즉시/지연 후 재로드 호출하지 않는다.
 
 **보상형 광고 / Rewarded Ads**
 
@@ -347,7 +340,6 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - 일 제한이 Placement마다 다르면 본문에 `Placement | Daily Limit` 소표를 만들고, `- 일 제한 / Daily Limit:` 줄에는 값 대신 "표 참조"라고만 기재한다.
 - 기본 규칙 1·2, 쿨타임 규칙, 일 제한, 실패 시 처리는 "없음" 또는 "있음 — 서술" 형식으로 기재한다. 빈칸으로 남기지 않는다.
 - 전면형 노출 규칙의 최초 노출 조건은 말로 풀어쓰지 않고 수학 기호로 표기한다. 단, 코드 변수명이 아니라 컨텐츠 이름을 쓴다. (예) `레벨 > 4 AND 스테이지 번호 >= 4`
-- 기본 규칙의 세 번째 항목("로드 실패 시 자동 재시도 금지")은 기획 원칙이므로 코드 확인 없이 그대로 출력한다.
 - "동상" 같은 약어 사용 금지 — 반복 조건도 전체를 다시 기재한다.
 - **포팅 주의사항(`⚠️ WebGL 포팅 주의사항` 등 개발 관련 내용)은 IAA.md에 기재하지 않는다.** 포팅 이슈 발견 시 처리 방법은 `## 포팅 이슈 기록 연동` 섹션을 따른다.
 
