@@ -471,17 +471,17 @@ STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STE
 
 > **중요**: 포터는 반드시 `Agent 도구`의 `subagent_type` 파라미터로 실행한다.
 > 포터 파일을 직접 읽고 오케스트레이터가 내용을 실행하지 않는다.
-> - 퓨어웹: `Agent 도구, subagent_type: "pureweb-porter"`
-> - 플랫폼 공통(HLSDK 통합) — 토스 선택 시 필수 선행: `Agent 도구, subagent_type: "platform-porter"`
+> - 플랫폼 공통(HLSDK 통합) — **모든 경우에 필수 선행**: `Agent 도구, subagent_type: "platform-porter"` (광고·IAP 즉시지급이 여기로 이관됨 — 퓨어웹만 포팅해도 필요, 이슈 #41·#42)
+> - 퓨어웹: `Agent 도구, subagent_type: "pureweb-porter"` (platform-porter 완료 후에만 실행 — pureweb-porter 자체에도 진입 게이트가 있어 대신 실행하지 않고 반환한다)
 > - 토스: `Agent 도구, subagent_type: "toss-porter"` (platform-porter 완료 후에만 실행 — toss-porter 자체에도 진입 게이트가 있어 대신 실행하지 않고 반환한다)
 
 인자에 `toss` 또는 `pureweb`이 포함된 경우 AskUserQuestion 없이 해당 포터를 바로 실행한다.
 인자가 없으면 AskUserQuestion으로 확인한다:
 
 > "어떤 플랫폼으로 포팅하시겠어요?"
-> - 퓨어웹 → Agent 도구로 `subagent_type: "pureweb-porter"` 실행
+> - 퓨어웹 → Agent 도구로 `subagent_type: "platform-porter"` 실행 후, 완료되면 `subagent_type: "pureweb-porter"` 실행
 > - 토스 → Agent 도구로 `subagent_type: "platform-porter"` 실행 후, 완료되면 `subagent_type: "toss-porter"` 실행
-> - 둘 다 → 퓨어웹 → platform-porter → 토스 순서로 실행
+> - 둘 다 → platform-porter → 퓨어웹 → 토스 순서로 실행 (platform-porter는 1회만 실행하면 됨)
 > - 나중에 → 안내 메시지 출력 후 종료
 
 ### STEP 3-A. 사람 준비 항목 확인 (토스 포팅인 경우만)

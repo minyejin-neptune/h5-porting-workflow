@@ -1,6 +1,6 @@
 ---
 name: pureweb-porter
-description: 퓨어웹(WEBGL_PUREWEB) 전용 포팅 에이전트. 광고/IAP 즉시지급 처리, 서버저장 차단, SafeArea 제거, 토스 제거 콘텐츠 동기화, 퓨어웹 체크리스트 검증을 담당한다. "퓨어웹 포팅", "PUREWEB 처리", "광고 즉시지급" 같은 요청에 사용.
+description: 퓨어웹(WEBGL_PUREWEB) 전용 포팅 에이전트. 서버저장 차단, SafeArea 제거, 외부 SDK 비활성화, 토스 제거 콘텐츠 동기화, 퓨어웹 체크리스트 검증을 담당한다. 광고/IAP 즉시지급은 platform-porter가 담당(HLSDK Provider 자동 처리). "퓨어웹 포팅", "PUREWEB 처리" 같은 요청에 사용.
 tools: Read, Bash, Edit, Write, Agent, Skill
 ---
 
@@ -103,8 +103,6 @@ git commit -m "[{prefix}] {단계명}"
 - [ ] 3. Screen.fullScreen / SetResolution 방지
 - [ ] 3-B. 외부 네트워크 요청 차단
 - [ ] 4. 토스 콘텐츠 동기화
-- [ ] 5. 광고 즉시 지급
-- [ ] 6. IAP 즉시 지급
 - [ ] 7. SDK 비활성화
 - [ ] 8. 서버 저장 차단 / LocalStorage 검증
 - [ ] 8-A. 저장 키 분리 (VOCAB `저장 키` 판정 "게임별 구분 없음"이면 필수)
@@ -171,16 +169,7 @@ git worktree remove ../{이름}
 
 **기존 코드 삭제 금지 → 전처리 분기로 묶기**
 
-**PureWeb 전용 처리 (광고 즉시지급, IAP 즉시지급 등)**
-
-```csharp
-#if UNITY_WEBGL && WEBGL_PUREWEB
-    // 즉시 처리
-    return;
-#else
-    // 기존 로직
-#endif
-```
+> 광고·IAP 즉시지급은 더 이상 이 포터가 다루지 않는다 — platform-porter가 `HLSDK.Instance.X()` 호출로 통합하면 `PureHandler`가 자동으로 즉시성공 처리한다.
 
 **WebGL 공통 처리 (SafeArea 제거, 서버 저장 차단 등)**
 
@@ -263,7 +252,6 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
       ↓
 [병렬] 파일 겹침 없는 그룹 (worktree 분기)
   worktree-ui:        2 SafeArea + 3 Screen.fullScreen
-  worktree-immediate: 5 광고 즉시지급 + 6 IAP 즉시지급
   worktree-sdk:       7 SDK 비활성화
       ↓ (worktree merge 완료 후)
 [순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 8-A 저장 키 분리 → 8-B Base64 인코딩 래핑 → 9 앱 이름·Favicon 설정 → 9-A WebGL 템플릿 동기화 → 10 CheatConsole
@@ -290,7 +278,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 | 7-5. WebGL 비호환 서비스 클래스 메서드 레벨 분기 | 7-0 | 위와 동일 |
 | 7-6. MonoBehaviour script missing 방지 | 7-0 | 7-0에서 이미 처리됨 — 7-0을 완료했다면 이 단계는 자동으로 충족 |
 
-**표에 없는 모든 단계**(1, 1-A, 2, 3, 3-B, 4, 5, 6, 7, 8, 8-A, 8-B, 9, 9-A, 10)는 선행 조건 없음 — 단독 요청 시 바로 실행 가능.
+**표에 없는 모든 단계**(1, 1-A, 2, 3, 3-B, 4, 7, 8, 8-A, 8-B, 9, 9-A, 10)는 선행 조건 없음 — 단독 요청 시 바로 실행 가능.
 
 ---
 
@@ -299,8 +287,8 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 | 항목 | 규칙 |
 |---|---|
 | 외부 SDK | 전면 금지 — 광고/어트리뷰션/결제 SDK 호출 차단 |
-| 광고 | 보상형 광고 → 즉시 지급 (`OnSuccess(true)`) |
-| IAP | 인앱결제 → 즉시 지급 |
+| 광고 | 보상형 광고 → 즉시 지급. **platform-porter가 HLSDK 경유로 자동 처리**(`PureHandler`가 즉시성공 구현) — 이 포터는 손대지 않음 |
+| IAP | 인앱결제 → 즉시 지급. **platform-porter가 HLSDK 경유로 자동 처리**(`PureHandler`가 즉시성공 구현) — 이 포터는 손대지 않음 |
 | 서버 저장 | 금지 — LocalStorage(`PlayerPrefs`)만 허용 |
 | SafeArea | 적용하지 않음 |
 | 토스 전용 콘텐츠 | 토스에서 뺀 콘텐츠는 퓨어웹에서도 제거 |
@@ -308,6 +296,16 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 ---
 
 ## 진입점 — NATIVE_BASELINE.md 읽기
+
+**platform-porter 완료 여부 게이트 — 필수, 최우선 확인**: 광고·IAP 즉시지급은 이제 이 포터가 아니라 platform-porter가 담당한다(HLSDK Provider가 퓨어웹에서 자동 즉시성공 처리 — `Docs/spec/platform-porter-redesign-spec.md` 참조). 아래로 진행하기 전 확인한다:
+
+```bash
+grep -q "HLSDK.Instance.QuickLogin(" {LOAD_METHOD 또는 GAME_INIT_METHOD 파일} 2>/dev/null && echo "PLATFORM_DONE" || echo "PLATFORM_NOT_DONE"
+```
+
+- `PLATFORM_DONE`이면 통과, 아래로 진행
+- `PLATFORM_NOT_DONE`이면 → **대신 실행하지 않는다.** 채팅에 아래를 출력하고 즉시 반환한다:
+  > "platform-porter를 먼저 실행하세요 — 광고·IAP 등 HLSDK 공통 통합이 아직 안 돼 있습니다. `Agent 도구, subagent_type: \"platform-porter\"`로 실행 후 다시 호출하세요."
 
 **교정 기록 읽기 — 착수 전 필수**: `pureweb-checklist.md` `## 교정 기록`을 Read한다. 이전 실행에서 문서-코드 불일치가 발견된 지점이 기록돼 있으면, 아래 단계 중 같은 파일:라인·같은 문서 항목을 다시 만났을 때 원본 문서(VOCAB·NATIVE_BASELINE 등) 대신 이 기록의 판단을 신뢰하고 재탐색·재작업하지 않는다.
 
@@ -349,7 +347,7 @@ gh issue list --state open --search "[포팅]" --json number,title
 
 **실행 범위 결정**
 
-prompt에 특정 단계가 명시됐으면(예: "7-3만", "5. 광고 즉시 지급 처리해줘") 그 단계를 범위로 잡는다. 위 "선행 조건 표"에서 그 단계의 선행 단계를 확인해 `## 단계 진행`에서 미완료(`- [ ]`)면 범위에 함께 포함한다(자동으로 먼저 처리). 선행 단계가 이미 `[x]`면 요청받은 단계만 진행한다. 명시되지 않은 다른 단계는 이번 실행에서 건드리지 않는다.
+prompt에 특정 단계가 명시됐으면(예: "7-3만", "8-A 저장 키 분리 처리해줘") 그 단계를 범위로 잡는다. 위 "선행 조건 표"에서 그 단계의 선행 단계를 확인해 `## 단계 진행`에서 미완료(`- [ ]`)면 범위에 함께 포함한다(자동으로 먼저 처리). 선행 단계가 이미 `[x]`면 요청받은 단계만 진행한다. 명시되지 않은 다른 단계는 이번 실행에서 건드리지 않는다.
 
 prompt에 특정 단계 명시가 없으면(예: "pureweb 포팅 해줘", "이어서 해줘") `## 단계 진행`에서 미완료(`- [ ]`)인 단계 전체를 범위로 잡는다 — 이미 `[x]`인 단계는 재실행하지 않는다. 체크리스트 파일 자체가 없으면(최초 실행) 전체 단계가 범위.
 
@@ -418,14 +416,6 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea" {SCRIPTS_PATH} --include="*.cs" 2>/d
 echo "=== Screen.fullScreen (태스크 3) ===" && \
 grep -rln "Screen\.SetResolution\|Screen\.fullScreen" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 
-echo "=== 광고 즉시지급 (태스크 5) ===" && \
-# PORTING_VOCAB.md {AD_REWARDED_METHOD} 값으로 grep
-grep -rln "{AD_REWARDED_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-
-echo "=== IAP 즉시지급 (태스크 6) ===" && \
-# PORTING_VOCAB.md {IAP_METHOD} 값으로 grep. IStoreListener는 SDK 인터페이스로 고정 검색
-grep -rln "{IAP_METHOD}\|IStoreListener" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-
 echo "=== 서버 저장 차단 (태스크 8) ===" && \
 grep -rln "Backend\.\|SaveCloud\|ServerSave\|CloudSave\|File\.Read\|File\.Write\|StreamWriter\|StreamReader" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
@@ -437,7 +427,6 @@ grep -rln "Backend\.\|SaveCloud\|ServerSave\|CloudSave\|File\.Read\|File\.Write\
 | 그룹 | 태스크 | worktree |
 |---|---|---|
 | A | 2 SafeArea + 3 Screen.fullScreen | `worktree-ui` |
-| B | 5 광고 즉시지급 + 6 IAP 즉시지급 | `worktree-immediate` |
 | C | 7 SDK 비활성화 | `worktree-sdk` |
 
 | 순차 | 태스크 | 이유 |
@@ -453,7 +442,6 @@ grep -rln "Backend\.\|SaveCloud\|ServerSave\|CloudSave\|File\.Read\|File\.Write\
 
 ```bash
 git worktree add ../worktree-ui -b pureweb/ui
-git worktree add ../worktree-immediate -b pureweb/immediate
 git worktree add ../worktree-sdk -b pureweb/sdk
 ```
 
@@ -624,89 +612,7 @@ grep -rln "WEBGL_TOSS" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 ---
 
-### 5. 광고 즉시 지급
-
-**완료 신호**: 아래 "완료 검증" 절의 grep을 착수 전에도 먼저 실행한다 — 0건이면 이미 완료(스킵).
-
-PORTING_VOCAB.md의 `{AD_REWARDED_METHOD}` 값을 실제 메서드명으로 사용해 탐색한다.
-
-```bash
-# {AD_REWARDED_METHOD}를 PORTING_VOCAB.md에서 읽은 실제 메서드명으로 대체
-grep -rn "{AD_REWARDED_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-
-**검토 포인트:**
-- `WEBGL_PUREWEB` 분기 없이 광고 SDK를 직접 호출하는 메서드
-- 콜백이 `WEBGL_PUREWEB`에서 호출되지 않는 경로
-
-**해결 방법 (예시 — 실제 메서드 시그니처는 코드에서 확인):**
-
-```csharp
-// 예시
-public void ShowRewardAD(AdRewardType type, GameObject context, System.Action<bool> OnSuccess)
-{
-#if UNITY_WEBGL && WEBGL_PUREWEB
-    OnSuccess?.Invoke(true);
-    return;
-#else
-    // 기존 광고 로직
-#endif
-}
-```
-
-**완료 검증 [필수 — 스킵 불가]**
-
-수정 완료 후 아래 grep이 0건인지 확인한다. 1건 이상이면 미처리 파일이 남아있다.
-
-```bash
-# PORTING_VOCAB.md {AD_REWARDED_METHOD} 실제 값으로 대체
-grep -rn "{AD_REWARDED_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
-  | grep -v "WEBGL_PUREWEB\|//"
-```
-
-- 결과 없음 → ✅ 체크리스트 5단계 업데이트 후 다음 단계 진행
-- 결과 있음 → 해당 메서드를 Read해 WEBGL_PUREWEB 분기 추가
-
----
-
-### 6. IAP 즉시 지급
-
-**완료 신호**: 아래 "완료 검증" 절의 grep을 착수 전에도 먼저 실행한다 — 0건이면 이미 완료(스킵).
-
-PORTING_VOCAB.md의 `{IAP_METHOD}` 값을 실제 메서드명으로 사용해 탐색한다.
-
-```bash
-# {IAP_METHOD}를 PORTING_VOCAB.md에서 읽은 실제 메서드명으로 대체. IStoreListener는 SDK 인터페이스로 고정
-grep -rn "{IAP_METHOD}\|IStoreListener" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-
-**해결 방법 (예시 — 실제 메서드 시그니처는 코드에서 확인):**
-
-```csharp
-// 예시
-public void InappPurchase(string productId, System.Action<bool> onResult)
-{
-#if UNITY_WEBGL && WEBGL_PUREWEB
-    onResult?.Invoke(true);
-    return;
-#else
-    // 기존 IAP 로직
-#endif
-}
-```
-
-**완료 검증 [필수 — 스킵 불가]**
-
-수정 완료 후 아래 grep이 0건인지 확인한다.
-
-```bash
-# PORTING_VOCAB.md {IAP_METHOD} 실제 값으로 대체
-grep -rn "{IAP_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
-  | grep -v "WEBGL_PUREWEB\|//"
-```
-
-- 결과 없음 → ✅ 체크리스트 6단계 업데이트 후 다음 단계 진행
-- 결과 있음 → 해당 메서드를 Read해 WEBGL_PUREWEB 분기 추가
+> **5(광고 즉시 지급)·6(IAP 즉시 지급)은 platform-porter로 이관됐다** — `{AD_REWARDED_METHOD}`/`{IAP_METHOD}`는 platform-porter의 5-2·6-3이 `HLSDK.Instance.X()`로 통합하고, `PureHandler`가 자동으로 즉시성공 처리한다(이슈 #42·#43, `Docs/spec/platform-porter-redesign-spec.md`). 이 포터는 더 이상 이 메서드들을 건드리지 않는다 — 진입점의 platform-porter 게이트가 선행을 보장한다. 잔여 안전망(VOCAB이 못 잡은 산발적 네이티브 호출)은 아래 "grep 자동 검증"에서 확인한다.
 
 ---
 
@@ -1184,9 +1090,12 @@ grep -rn "using Firebase\|using AppsFlyer\|using Facebook\|using Airbridge" \
 grep -rn "#if WEBGL_PUREWEB\|#elif WEBGL_PUREWEB" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
   | grep -v "UNITY_WEBGL\|//"
 
-# 즉시지급 누락 확인 — {AD_REWARDED_METHOD}를 PORTING_VOCAB.md 실제 값으로 대체
-grep -rn "{AD_REWARDED_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
-  | grep -v "WEBGL_PUREWEB\|//"
+# 광고·IAP 즉시지급 안전망 확인 — platform-porter가 처리했어야 함(5·6번 이관, 이슈 #42).
+# UNITY_WEBGL 가드가 전혀 없는 호출이 남아있으면 platform-porter가 놓친 것 — VOCAB이 못 잡은 산발적 네이티브 호출부일 수 있음.
+# 결과가 있어도 이 포터가 직접 고치지 않는다 — platform-porter 재실행 대상으로 checklist ## 확인 필요에 기록만 한다.
+# {AD_REWARDED_METHOD}·{IAP_METHOD}를 PORTING_VOCAB.md 실제 값으로 대체
+grep -rn "{AD_REWARDED_METHOD}\|{IAP_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
+  | grep -v "UNITY_WEBGL\|//"
 
 # 서버 저장 차단 누락 확인 — {SAVE_METHOD}를 PORTING_VOCAB.md 실제 값으로 대체. Backend.는 SDK 패턴으로 고정
 grep -rn "{SAVE_METHOD}\|Backend\." {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
@@ -1279,10 +1188,8 @@ Data + wasm 합산 50MB 이하 확인.
 CompileChecker: 통과 / 에러 N건
 → Unity 메뉴: Tools/H5/Compile Check (PUREWEB) 로 확인
 
-🔍 수동 테스트 필요 (리뷰 팝업은 pureweb-checklist.md `## 기획자 보고` 참조):
+🔍 수동 테스트 필요 (리뷰 팝업은 pureweb-checklist.md `## 기획자 보고` 참조. 광고·IAP 즉시지급 테스트는 platform-porter 완료 리포트 참조 — 이 포터는 손대지 않음):
 - Screen.fullScreen 전환 방지 — 실제 클릭 후 전체화면 전환 없는지 브라우저에서 확인
-- 보상형 광고 즉시 지급 — 실제 광고 버튼 클릭 후 보상 지급 여부 확인
-- IAP 즉시 지급 — 실제 구매 버튼 클릭 후 상품 지급 여부 확인
 - 외부 네트워크 요청 차단 — 브라우저 네트워크 탭에서 외부 도메인 요청 없는지 확인
 - 서버 저장 차단 — 실제 플레이 후 브라우저 개발자도구 → Application → IndexedDB에서 저장 확인
 - 배포 URL — 사업팀 전달 후 플레이 가능 여부 수동 확인
