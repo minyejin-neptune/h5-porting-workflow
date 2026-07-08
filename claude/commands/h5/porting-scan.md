@@ -666,7 +666,7 @@ grep -rln "ClaimPromotion\|PromotionReward\|promotionId" \
 grep -rln "Review\|Rating\|StoreReview\|RequestReview" \
   {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
-히트 파일을 Read해 위치(파일:라인)만 메인 표 `리뷰 팝업` 행에 기록한다. 발동조건은 여기서 분석하지 않는다 — toss-porter가 제거 직전에 파악해 toss-checklist에 테스트 항목으로 기록한다. 결과가 없으면 → "없음"으로 기록.
+히트 파일을 Read해 위치(파일:라인)만 메인 표 `리뷰 팝업` 행에 기록한다. 발동조건은 여기서 분석하지 않는다 — pureweb-porter가 제거 직전에 파악해 pureweb-checklist `## 기획자 보고`에 테스트 항목으로 기록한다(플랫폼 무관 WebGL 공통 처리 — 이슈 #10). 결과가 없으면 → "없음"으로 기록.
 
 **SafeArea 클래스**
 ```bash
