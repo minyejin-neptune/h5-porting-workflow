@@ -1,4 +1,3 @@
-#if UNITY_WEBGL
 namespace HLSDK
 {
     public enum HapticTier
@@ -17,6 +16,7 @@ namespace HLSDK
     {
         public static void Generate(HapticTier tier)
         {
+#if UNITY_WEBGL
             bool isAndroid = HLSDK.Instance.GetDeviceOS() == DeviceOS.ANDROID;
             string type;
 
@@ -49,8 +49,8 @@ namespace HLSDK
             }
 
             HLSDK.Instance.GenerateHapticFeedback(type);
+#endif
         }
     }
 }
-#endif
 
