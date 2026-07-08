@@ -117,6 +117,8 @@ grep -rln "forcedads\|interstitial_cool\|ad_cooltime\|ad_max" . --include="*.cs"
   > **개발 참고**: [`AdManager.cs:88`](../../Assets/Scripts/Ad/AdManager.cs) — `ShowRewardAD()` / [`AdManager.cs:102`](../../Assets/Scripts/Ad/AdManager.cs) — `ShowInterstitialAD()`
   ```
 
+**예외 — 실패 시 처리(Failure Handling)**: 재시도 없이 단순 종료하는 수준을 넘어 여러 분기·side-effect가 있는 경우, 해당 섹션의 개발 참고 블록에는 파일:라인 링크 외에 3~5줄 코드 스냅을 코드 블록으로 함께 인용해도 된다. 기획 영역 본문에는 여전히 코드를 기재하지 않는다.
+
 ### 기획 영역에 절대 쓰지 않는 것
 
 - 클래스명·함수명·파일명:라인번호
@@ -155,6 +157,9 @@ grep -rn "NoAds\|bFree\|isFree" {AD_MANAGER} | grep -v "//"
 
 # 7. 실패 처리 콜백 탐색 (광고 로드 실패 / 시청 미완료)
 grep -rn "onRewardResult.*false\|rewardFail\|AdFailed\|LoadFailed\|onVideoFailed\|rewardCancel" {SCRIPTS_PATH} --include="*.cs" | grep -v "//"
+
+# 8. 보상형 광고 쿨타임 변수/키 탐색 — PORTING_VOCAB 미지원 항목이므로 항상 직접 탐색
+grep -rn "rewardCool\|reward_cool\|RewardAdCooltime\|rewardVideoCool\|rewardad_cool" {SCRIPTS_PATH} --include="*.cs" | grep -v "//"
 ```
 
 ### 보상형 광고 검토 포인트
@@ -164,6 +169,7 @@ grep -rn "onRewardResult.*false\|rewardFail\|AdFailed\|LoadFailed\|onVideoFailed
 - 일부 placement가 `bFree = true` 조건(무료 지급)을 가지는지
 - 실패 콜백(`onRewardResult(false)`)이 보상 미지급 이외의 side-effect를 일으키는지
 - 샵 내 특정 placement에 일 제한 카운터(`RecordCount`)가 붙는지
+- 보상형 광고에 쿨타임 변수/키가 존재하는지, 존재하면 몇 초이고 어떤 화면에서 참조되는지 — 없으면 "쿨타임 없음"으로 확정
 
 ---
 
@@ -251,6 +257,19 @@ grep -n "{INTERSTITIAL_TRIGGER}\|{INTERSTITIAL_ENTRY}" {보상형_완료_콜백_
 
 추론으로 답하지 않는다. "가드가 없으니 가능할 수도", "SDK 내부 처리일 것이다" 같은 표현 금지. 위 플로우를 끝까지 타서 코드 경로의 존재/부재로만 판정한다.
 
+**Step 5: "동시 노출 가능"으로 판정된 경우 우선순위 확인**
+
+Step 4에서 "동시 노출 가능"으로 판정됐을 때만 실행한다. 두 광고 중 실제로 화면에 나타나는 쪽(우선순위)을 코드 경로로 판정한다.
+
+```bash
+# 전면/보상형 진입점 함수 내부에 "노출 중이면 무시" 가드가 있는지 확인
+grep -n "{INTERSTITIAL_ENTRY}" {AD_MANAGER} -A 5 | grep -i "isshowing\|isplaying\|is.*showing"
+```
+
+**판정 기준:**
+- 나중에 호출되는 쪽의 진입부에 "이미 광고가 노출 중이면 return" 형태의 가드가 있음 → **먼저 호출되는 광고가 우선순위** (가드로 나중 호출이 무시됨)
+- 그런 가드가 코드에 없음 → 두 Show 호출이 모두 그대로 실행되며, 실제 화면 우선순위는 SDK/네이티브 레이어의 동작이라 **코드로 판정 불가 — "확인 필요"로 명시**한다. 추측하지 않는다.
+
 ---
 
 ### 기본 규칙 2 — 보상형 광고 시청 시 전면형 쿨타임 영향 여부
@@ -266,7 +285,13 @@ PORTING_VOCAB.md `전면 쿨타임 변수` 행에서 `{COOLTIME_VAR}` 값을 읽
 grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep -v "\.cs:.*\.cs:"
 ```
 
-히트한 라인이 보상형 완료 콜백 내부인지 확인 → 내부이면 "보상형 시청 시 쿨타임 갱신됨", 없으면 "영향 없음".
+히트한 라인이 보상형 완료 콜백 내부인지 확인 → 내부가 아니면 "영향 없음"으로 확정, 종료.
+
+내부이면 해당 대입문을 Read로 직접 확인해 **어떤 값으로 바뀌는지**까지 특정한다:
+- `0` 또는 현재시각으로 대입 → "쿨타임이 즉시 초기화되어 전면 광고를 바로 다시 노출 가능해짐"
+- 기존 값에 시간을 더하는 대입(`+= N`, `+ N초` 등) → "쿨타임이 N초 연장됨"
+- 별도 플래그로 일시 정지(`pause`, `stop` 등) → "쿨타임 타이머가 일시 정지됨"
+- 위 패턴에 해당하지 않으면 실제 대입 코드를 근거로 그 내용을 그대로 서술한다.
 
 **Step 3: 쿨타임 변수가 없는 경우**
 
@@ -285,9 +310,8 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 ```markdown
 **기본 규칙 / Basic Rules**
 
-- 보상형/전면형 광고 동시 노출 가능 시점일 경우 우선순위 / Ad priority when rewarded and interstitial can display simultaneously:
-- 보상형 광고 시청 시 전면형 광고 쿨타임 영향 여부 / Whether rewarded ad viewing affects interstitial cooldown:
-- 광고(보상형 / 전면) **로드 실패 시 자동 재시도 금지**. 다음 로드는 **유저 인터랙션(광고 보기 버튼 등)이 발생한 시점에만** 트리거한다. 실패했다고 즉시/지연 후 재로드 호출하지 않는다.
+- 보상형/전면형 광고 동시 노출 가능 시점일 경우 우선순위 / Ad priority when rewarded and interstitial can display simultaneously: 없음 / 있음 — (있으면 보상형·전면형 중 어느 쪽이 우선인지 1줄로)
+- 보상형 광고 시청 시 전면형 광고 쿨타임 영향 여부 / Whether rewarded ad viewing affects interstitial cooldown: 없음 / 있음 — (있으면 어떤 영향인지 서술)
 
 **보상형 광고 / Rewarded Ads**
 
@@ -295,9 +319,9 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 | --- | --- | --- | --- |
 |  |  |  |  |
 
-- 쿨타임 규칙 / Cooldown Rules:
-- 일 제한 / Daily Limit:
-- 실패 시 처리 / Failure Handling:
+- 쿨타임 규칙 / Cooldown Rules: 없음 / 있음 — N초
+- 일 제한 / Daily Limit: 없음 / 있음 — N회 (Placement마다 다르면 "표 참조" + 하단 소표)
+- 실패 시 처리 / Failure Handling: 없음 / 있음 — 서술
 
 ---
 
@@ -305,9 +329,13 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 - 노출 위치 / Placement:
 - 노출 규칙 / Display Rules:
-- 쿨타임 규칙 / Cooldown Rules:
-- 실패 시 처리 / Failure Handling:
-- 예외 규칙 / Exception Rules (예: 튜토리얼 중, 보상형 광고 직후 등):
+  - 최초 노출 조건: (수학 기호 + 컨텐츠명, 예: 레벨 > 4 AND 스테이지 번호 >= 4)
+  - 이후 반복 규칙: (N판마다 / 쿨타임 등 반복 트리거)
+- 쿨타임 규칙 / Cooldown Rules: 없음 / 있음 — N초
+- 실패 시 처리 / Failure Handling: 없음 / 있음 — 서술
+- 예외 규칙 / Exception Rules (유저 상태 기반 예외만 — 최초 노출 타이밍은 위 노출 규칙에 기재):
+  - (예) 광고 제거 상품 구매 유저
+  - (예) 튜토리얼 미완료 유저
 
 ```
 
@@ -315,6 +343,9 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - 테이블 행은 Placement 하나당 한 행. 값이 확인되지 않으면 "확인 필요"가 아니라 반드시 코드를 파고들어 확인 후 기재한다. 끝까지 찾지 못한 경우에만 "코드에서 근거를 찾지 못했습니다"로 명시한다.
 - Condition·Notes 열에는 기획자 언어(상황·수치·조건)만 기재한다. 변수명·클래스명·enum·플래그 등 코드 내용은 기재하지 않는다.
 - 쿨타임 규칙 / 일 제한 / 실패 시 처리는 Placement 공통 규칙이면 테이블 아래 bullet, Placement별로 다르면 Notes 열에 기재한다.
+- 일 제한이 Placement마다 다르면 본문에 `Placement | Daily Limit` 소표를 만들고, `- 일 제한 / Daily Limit:` 줄에는 값 대신 "표 참조"라고만 기재한다.
+- 기본 규칙 1·2, 쿨타임 규칙, 일 제한, 실패 시 처리는 "없음" 또는 "있음 — 서술" 형식으로 기재한다. 빈칸으로 남기지 않는다.
+- 전면형 노출 규칙의 최초 노출 조건은 말로 풀어쓰지 않고 수학 기호로 표기한다. 단, 코드 변수명이 아니라 컨텐츠 이름을 쓴다. (예) `레벨 > 4 AND 스테이지 번호 >= 4`
 - 기본 규칙의 세 번째 항목("로드 실패 시 자동 재시도 금지")은 기획 원칙이므로 코드 확인 없이 그대로 출력한다.
 - "동상" 같은 약어 사용 금지 — 반복 조건도 전체를 다시 기재한다.
 - **포팅 주의사항(`⚠️ WebGL 포팅 주의사항` 등 개발 관련 내용)은 IAA.md에 기재하지 않는다.** 포팅 이슈 발견 시 처리 방법은 `## 포팅 이슈 기록 연동` 섹션을 따른다.

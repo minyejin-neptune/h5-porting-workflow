@@ -75,7 +75,7 @@ fi
 
 ## Step 2 — CLAUDE.md 초기화 (`Project-Specific Settings` 채우기)
 
-`init` 스킬을 실행하세요. 인자로 아래 지시를 전달합니다:
+**Claude Code에 기본 내장된 전역 `init` 스킬**(코드베이스를 탐색해 CLAUDE.md를 채우는 표준 기능 — h5-porting-workflow가 자체 정의한 스킬이 아니다)을 실행하세요. 인자로 아래 지시를 전달합니다:
 
 > "CLAUDE.md와 Docs/README.md를 읽고, 프로젝트 코드를 탐색해 CLAUDE.md 상단 `## Project-Specific Settings` 섹션을 실제 프로젝트에 맞게 채우거나 없는 항목은 삭제하세요. 추론 금지 — 코드에서 확인한 것만 기재, 확인 못 하면 '확인 필요'로 남기고 사용자에게 보고."
 
