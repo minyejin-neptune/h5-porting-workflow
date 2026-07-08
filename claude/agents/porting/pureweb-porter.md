@@ -594,7 +594,7 @@ grep -rn "Application\.OpenURL" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 public void GetServerTime(Action<DateTime> callback)
 {
 #if UNITY_WEBGL
-    callback?.Invoke(DateTime.UtcNow); // toss-porter에서 WEBGL_TOSS 분기로 세분화됨
+    callback?.Invoke(DateTime.UtcNow); // platform-porter에서 HLSDK.Instance.GetTime()으로 세분화됨
 #else
     // 기존 UnityWebRequest 로직
 #endif
@@ -1072,7 +1072,7 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 - 결과 있음 → ✅ 이미 추가됨
 - 결과 없음 → 씬에 프리팹을 추가하는 건 Unity Editor GUI 작업이라 AI가 대신 할 수 없다. `pureweb-checklist.md` `## 확인 필요`에 "CheatConsole.prefab을 `Assets/HyperLane/Plugins/WebGL/Util/Cheat/CheatConsole.prefab`에서 씬에 직접 추가 필요" 기록하고, 블로킹 없이 나머지 파이프라인을 계속 진행한다.
 
-**참고 — 치트 등록 방법**: 테스트용 치트가 필요해지면(예: 로컬 데이터 초기화) 아래 패턴으로 삽입한다. 이 단계에서는 방법만 알아두고, 실제 삽입은 필요하다고 판단되거나 요청받았을 때만 수행한다 — 상세 안전장치(`DeleteAll()` 금지 등)는 toss-porter 7-0 참조.
+**참고 — 치트 등록 방법**: 테스트용 치트가 필요해지면(예: 로컬 데이터 초기화) 아래 패턴으로 삽입한다. 이 단계에서는 방법만 알아두고, 실제 삽입은 필요하다고 판단되거나 요청받았을 때만 수행한다 — 상세 안전장치(`DeleteAll()` 금지 등)는 platform-porter 7-0 참조.
 
 `Register(이름, 설명, ...)`의 이름·설명은 **영어로 작성**한다(CheatConsole UI 표기 규칙).
 

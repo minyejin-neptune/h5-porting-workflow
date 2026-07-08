@@ -314,7 +314,7 @@ grep -rln "void Awake\|void Start" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 **로비/메인 진입점 (`{LOBBY_ENTRY}`)**
 
-로그인 로그(`LogDailyLogin`) 삽입 지점이 되는, **로그인·데이터 로드 이후 로비/메인 화면이 정상 표시되는 시점**을 확정한다. 이 앵커가 비면 toss-porter 3-A가 grep 추측으로 떨어진다.
+로그인 로그(`LogDailyLogin`) 삽입 지점이 되는, **로그인·데이터 로드 이후 로비/메인 화면이 정상 표시되는 시점**을 확정한다. 이 앵커가 비면 platform-porter 3-A가 grep 추측으로 떨어진다.
 
 ```bash
 # 로비/메인 진입 콜백·메서드
@@ -604,13 +604,13 @@ find Assets -name "*.png" -o -name "*.jpg" 2>/dev/null | grep -v HyperLane | wc 
 
 #### 4-H. 기존 치트 코드 탐색
 
-toss-porter 7-0(치트 — 서버/로컬 초기화)이 매번 처음부터 grep하지 않도록, 프로젝트에 이미 있는 치트/디버그 시스템을 미리 찾아둔다.
+platform-porter 7-0(치트 — 서버/로컬 초기화)이 매번 처음부터 grep하지 않도록, 프로젝트에 이미 있는 치트/디버그 시스템을 미리 찾아둔다.
 
 ```bash
 grep -rln "Cheat\|DebugConsole\|DevMenu\|GMMode\|CheatConsole" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
 
-- 결과 있음 → 파일:라인을 VOCAB `## 포터 기록`에 기록 (toss-porter 7-0이 읽기 참조)
+- 결과 있음 → 파일:라인을 VOCAB `## 포터 기록`에 기록 (platform-porter 7-0이 읽기 참조)
 - 결과 없음 → "없음"으로 기록
 
 #### 4-I. 플랫폼별 스캔 — Toss
@@ -700,7 +700,7 @@ grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLangua
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 저장.
 
-각 행의 플레이스홀더는 아래 템플릿 표 자체가 유일한 정의다 — toss-porter·pureweb-porter는 생성된 `PORTING_VOCAB.md`를 직접 읽어 `플레이스홀더` 열을 참조한다. 다른 문서(h5-port.md 등)가 이 목록을 별도로 재정의하지 않는다 — 재정의하면 이 템플릿과 어긋날 수 있다(드리프트).
+각 행의 플레이스홀더는 아래 템플릿 표 자체가 유일한 정의다 — platform-porter·toss-porter·pureweb-porter는 생성된 `PORTING_VOCAB.md`를 직접 읽어 `플레이스홀더` 열을 참조한다. 다른 문서(h5-port.md 등)가 이 목록을 별도로 재정의하지 않는다 — 재정의하면 이 템플릿과 어긋날 수 있다(드리프트).
 
 > **`메서드/클래스명` 열은 실제 메서드명을 반드시 백틱으로 감싸 적는다** — `h5-port-verify.py`(`extract_methods`)가 정규식 `` `([^`]+)` ``로 백틱 안의 값만 추출한다. 백틱 없이 일반 텍스트로 적으면 STEP 4 검증 스크립트가 메서드명을 찾지 못해 조용히 통과(0건)로 오판한다.
 > - 형식: `` `ClassName.MethodName()` `` (클래스명 없이 `` `MethodName()` ``도 가능)
@@ -987,5 +987,5 @@ fallback에서 `확인 필요` 또는 `근거 없음`으로 기록된 항목이 
 확인 완료 후:
 - 스캔 결과 검증: /porting-scan-verify
 - 퓨어웹: /pureweb-porter
-- 토스: /toss-porter
+- 토스: /platform-porter 실행 후 /toss-porter (platform-porter가 HLSDK 공통 통합을 선행해야 함)
 ```

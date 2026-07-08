@@ -15,7 +15,8 @@
 | `porting/NATIVE_BASELINE.md` | porting-scan | 포팅 전 네이티브 불변 스냅샷 — 외부 SDK 목록·프로젝트 정보·게임 구조 (scan-verify 후 동결) |
 | `porting/.sdk-list.md` | sdk-list-analyzer | 외부 SDK 목록 임시 산출(숨김 파일) — porting-scan이 수용해 NATIVE_BASELINE에 기재한 뒤 삭제 |
 | `porting/pureweb-checklist.md` | porting-scan | 기반 작업목록(가변) — 기반 포팅 이슈(컴파일·런타임·공백)·확인 필요·기획자 보고·교정 기록·빌드 기록. 단계 진행 표는 pureweb-porter가 추가 |
-| `porting/toss-checklist.md` | porting-scan | 토스 플랫폼 작업목록(가변) — 기획자 보고·교정 기록·빌드 기록. 기반 이슈는 pureweb-checklist 읽기 참조, 단계 진행 표는 toss-porter가 추가 |
+| `porting/toss-checklist.md` | porting-scan | 토스 전용(배너·프로모션 등) 작업목록(가변) — 기획자 보고·교정 기록·빌드 기록. 기반 이슈는 pureweb-checklist 읽기 참조, 단계 진행 표는 toss-porter가 추가 |
+| `porting/platform-checklist.md` | platform-porter (최초 실행 시 자체 생성) | HLSDK 공통(로그인·광고·IAP·저장·랭킹·햅틱·공유 등) 작업목록(가변) — platform-porter가 생성·관리, toss 등 개별 플랫폼 포터의 선행 조건 |
 | `porting/PORTING_VOCAB.md` | porting-scan | 포터 에이전트가 참조하는 메서드·클래스 어휘 사전(위치 인덱스) |
 | `porting/compile_result.log` | CompileChecker | 플랫폼별 컴파일 체크 결과 |
 | `porting/.stats/agent-stats.md` | 각 analyzer | 에이전트 실행별 히트/Zero-Hit 패턴 누적 기록 |

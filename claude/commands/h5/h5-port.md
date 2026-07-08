@@ -40,7 +40,7 @@ gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
 - 결과 없음(또는 gh remote 없음) → 일반 실행 — 인자 파싱대로 진행.
 - **open 포팅 이슈 있음 → 후속 모드**:
   1. STEP 0~2(초기 설정·인코딩·스캔·검증)는 재실행하지 않는다 — 이미 완료된 프로젝트다.
-  2. 이슈 제목(`[포팅] {PLATFORM} — {프로젝트명}`)에서 `{PLATFORM}`을 확인한다. `pureweb-checklist.md`(기반)와 `{PLATFORM}-checklist.md`(플랫폼 전용)의 `## 확인 필요`에서 미체크(`- [ ]`) 항목을 추출한다 — 이슈 본문이 아니라 체크리스트 파일이 정본이다.
+  2. 이슈 제목(`[포팅] {PLATFORM} — {프로젝트명}`)에서 `{PLATFORM}`을 확인한다. `pureweb-checklist.md`(기반)와 `{PLATFORM}-checklist.md`(플랫폼 전용)의 `## 확인 필요`에서 미체크(`- [ ]`) 항목을 추출한다 — 이슈 본문이 아니라 체크리스트 파일이 정본이다. `{PLATFORM}`이 TOSS면 `platform-checklist.md`(HLSDK 공통, 존재하는 경우만)도 함께 확인한다.
   3. 추출한 항목만 AskUserQuestion으로 재질문한다 (여전히 미확정이면 미확정 유지 허용).
   4. 확정된 답변은 해당 체크리스트 파일에 직접 반영한다(Edit, `- [ ]` → `- [x]` + 확정값).
   5. 새로 확정된 항목이 1건 이상이면 STEP 3-C로 가서 포터를 **부분 수정 모드**로 재호출한다 (prompt 형식은 STEP 3-C 참조). 확정된 항목이 없으면 "미확정 항목 변동 없음 — 종료"를 출력하고 끝낸다.
@@ -382,7 +382,7 @@ PORTING_VOCAB에 `게임중지: 확인 필요`로 기록된 항목이 있으면 
 > - Coroutine 타이머(WaitForSeconds 등): {파일 목록}
 > - Realtime 계열: {건수}건 (timeScale 무관)"
 >
-> - 멈춰야 함 → PORTING_VOCAB 광고 행 비고에 `게임중지: 필요` 갱신. Coroutine 타이머 파일 목록을 toss-porter 점검 대상으로 VOCAB에 추가.
+> - 멈춰야 함 → PORTING_VOCAB 광고 행 비고에 `게임중지: 필요` 갱신. Coroutine 타이머 파일 목록을 platform-porter 점검 대상으로 VOCAB에 추가.
 > - 멈추지 않아도 됨 → `게임중지: 불필요` 갱신.
 
 ### (선택) 기획 문서 생성 — 포팅 파이프라인과 독립
@@ -472,15 +472,16 @@ STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STE
 > **중요**: 포터는 반드시 `Agent 도구`의 `subagent_type` 파라미터로 실행한다.
 > 포터 파일을 직접 읽고 오케스트레이터가 내용을 실행하지 않는다.
 > - 퓨어웹: `Agent 도구, subagent_type: "pureweb-porter"`
-> - 토스: `Agent 도구, subagent_type: "toss-porter"`
+> - 플랫폼 공통(HLSDK 통합) — 토스 선택 시 필수 선행: `Agent 도구, subagent_type: "platform-porter"`
+> - 토스: `Agent 도구, subagent_type: "toss-porter"` (platform-porter 완료 후에만 실행 — toss-porter 자체에도 진입 게이트가 있어 대신 실행하지 않고 반환한다)
 
 인자에 `toss` 또는 `pureweb`이 포함된 경우 AskUserQuestion 없이 해당 포터를 바로 실행한다.
 인자가 없으면 AskUserQuestion으로 확인한다:
 
 > "어떤 플랫폼으로 포팅하시겠어요?"
 > - 퓨어웹 → Agent 도구로 `subagent_type: "pureweb-porter"` 실행
-> - 토스 → Agent 도구로 `subagent_type: "toss-porter"` 실행
-> - 둘 다 → 퓨어웹 먼저 완료 후 토스 순서로 실행
+> - 토스 → Agent 도구로 `subagent_type: "platform-porter"` 실행 후, 완료되면 `subagent_type: "toss-porter"` 실행
+> - 둘 다 → 퓨어웹 → platform-porter → 토스 순서로 실행
 > - 나중에 → 안내 메시지 출력 후 종료
 
 ### STEP 3-A. 사람 준비 항목 확인 (토스 포팅인 경우만)
@@ -489,18 +490,18 @@ STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STE
 
 `PORTING_VOCAB.md` `## Toss 전용` 섹션을 읽어 실제로 필요한 항목만 추린다:
 
-| 항목 | 노출 조건 (VOCAB `## Toss 전용` 기준) |
-|---|---|
-| 배너 광고 위치 — 상단/하단 | 배너 행이 "없음"이 아님 |
-| IAP PID 매핑 — 기존 PID ↔ Toss 상품 description | IAP 사용 (`{IAP_METHOD}` 행 있음) |
-| 햅틱 타입 — 이벤트별 기획 명세 | 햅틱 행이 "없음" (역기획 필요한 경우) |
-| 공유하기 문구 — 화면별 문구 | 공유하기 행이 "없음"이 아님 |
-| 프로모션 ID — Toss 콘솔 등록 여부 | 프로모션 행이 "없음"이 아님 |
-| 랭킹 버튼 추가 위치 | 랭킹 행이 "없음"이 아니고 기존 버튼이 없는 경우 |
+| 항목 | 노출 조건 (VOCAB `## Toss 전용` 기준) | 기록 대상 (담당 포터) |
+|---|---|---|
+| 배너 광고 위치 — 상단/하단 | 배너 행이 "없음"이 아님 | `toss-checklist.md` (toss-porter) |
+| IAP PID 매핑 — 기존 PID ↔ Toss 상품 description | IAP 사용 (`{IAP_METHOD}` 행 있음) | `platform-checklist.md` (platform-porter) |
+| 햅틱 타입 — 이벤트별 기획 명세 | 햅틱 행이 "없음" (역기획 필요한 경우) | `platform-checklist.md` (platform-porter) |
+| 공유하기 문구 — 화면별 문구 | 공유하기 행이 "없음"이 아님 | `platform-checklist.md` (platform-porter) |
+| 프로모션 ID — Toss 콘솔 등록 여부 | 프로모션 행이 "없음"이 아님 | `toss-checklist.md` (toss-porter) |
+| 랭킹 버튼 추가 위치 | 랭킹 행이 "없음"이 아니고 기존 버튼이 없는 경우 | `platform-checklist.md` (platform-porter) |
 
 추린 항목을 AskUserQuestion으로 한 번에 확인한다. **모든 항목에 "미확정" 선택지를 포함한다** — 기획이 확정되지 않았어도 포팅은 막히지 않는다(미확정 항목은 포터가 폴백 적용 또는 스킵+체크리스트 기록으로 처리).
 
-답변(미확정 포함)은 `Docs/porting/toss-checklist.md` `## 확인 필요`에 직접 기록한다(Edit) — 이슈가 아니라 체크리스트가 정본이다. 확정: `- [x] [사람 준비] {항목}: {확정값}` / 미확정: `- [ ] [사람 준비] {항목}: 미확정`.
+답변(미확정 포함)은 위 표의 "기록 대상"에 따라 `platform-checklist.md` 또는 `toss-checklist.md`의 `## 확인 필요`에 직접 기록한다(Edit) — 이슈가 아니라 체크리스트가 정본이다. 확정: `- [x] [사람 준비] {항목}: {확정값}` / 미확정: `- [ ] [사람 준비] {항목}: 미확정`. 두 파일 다 이 시점에 없을 수 있으므로(포터가 아직 실행 전) 필요하면 최소 헤더(`## 확인 필요` 섹션만이라도)로 미리 생성한다.
 
 ### STEP 3-B. 포팅 이슈 생성 (게임 repo에 gh remote 있는 경우만)
 
@@ -518,14 +519,14 @@ gh issue list --state open --search "[포팅]" --json number,title
 - 있으면 → 그 번호를 재사용하고 생성을 생략한다.
 - 없으면 → `/common:create-issue --no-confirm`으로 생성한다(실패·확인 처리는 그 스킬이 담당). 이슈 내용에 포함할 것:
   - 제목: `[포팅] {PLATFORM} — {프로젝트명}`
-  - DoD 체크박스: 해당 포터(`pureweb-porter.md`/`toss-porter.md`) `## 체크리스트 관리`의 `## 단계 진행` 목록을 그대로 옮긴다 — 단계 목록은 그 파일이 유일한 소스, 여기서 재정의하지 않는다.
-  - 참고: "정본: 기반(컴파일/런타임/공백) 이슈는 항상 `pureweb-checklist.md`, 플랫폼 전용 이슈는 `{PLATFORM}-checklist.md`. 확인 필요·사람 준비 항목은 이슈가 아니라 그 체크리스트 파일 `## 확인 필요`에 기록됨."
+  - DoD 체크박스: 해당 포터(`pureweb-porter.md`/`toss-porter.md`) `## 체크리스트 관리`의 `## 단계 진행` 목록을 그대로 옮긴다 — 단계 목록은 그 파일이 유일한 소스, 여기서 재정의하지 않는다. 토스 포팅이면 `platform-porter.md`의 `## 단계 진행` 목록도 함께 옮긴다(platform-porter가 선행 실행되므로).
+  - 참고: "정본: 기반(컴파일/런타임/공백) 이슈는 항상 `pureweb-checklist.md`, 플랫폼 전용 이슈는 `{PLATFORM}-checklist.md`, HLSDK 공통 이슈는 `platform-checklist.md`(토스 포팅인 경우). 확인 필요·사람 준비 항목은 이슈가 아니라 해당 체크리스트 파일 `## 확인 필요`에 기록됨."
 
 확보(생성 또는 재사용)한 이슈 번호를 기억해 STEP 3-C의 포터 prompt에 전달한다.
 
 ### STEP 3-C. 포터 실행
 
-포터를 실행하기 직전, `toss-checklist.md` `## 확인 필요`에 `[사람 준비]` 태그 항목 중 미확정이 남아 있으면 AskUserQuestion으로 한 번 재확인한다 — "그 사이 확정된 항목이 있나요?" (질문 수집과 포터 실행 사이에 기획이 확정됐을 수 있다). 확정으로 바뀐 항목은 해당 줄을 `- [x] [사람 준비] {항목}: {확정값}`으로 갱신한 뒤 진행한다.
+포터를 실행하기 직전, `platform-checklist.md`·`toss-checklist.md` `## 확인 필요`에 `[사람 준비]` 태그 항목 중 미확정이 남아 있으면(존재하는 파일만 확인 — 아직 생성 전이면 스킵) AskUserQuestion으로 한 번 재확인한다 — "그 사이 확정된 항목이 있나요?" (질문 수집과 포터 실행 사이에 기획이 확정됐을 수 있다). 확정으로 바뀐 항목은 해당 줄을 `- [x] [사람 준비] {항목}: {확정값}`으로 갱신한 뒤 진행한다.
 
 포터 실행 시 Agent 도구의 `prompt`에는 **현재 상태 컨텍스트만** 전달한다. 태스크 목록·처리 순서·수정 방법을 직접 기술하지 않는다. 포터의 파이프라인은 에이전트 자체 지침을 따른다.
 
