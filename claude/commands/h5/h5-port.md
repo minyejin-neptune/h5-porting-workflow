@@ -50,11 +50,61 @@ gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
 
 ## 커밋 원칙
 
-**각 STEP이 파일을 생성·수정했으면 완료 후 반드시 커밋한다.** 커밋 없이 다음 STEP으로 넘어가지 않는다 — 다음 STEP 시작 전 `git status`로 미커밋 변경사항이 없는지 확인한다. STEP별 커밋 대상·메시지는 각 STEP 본문에 명시돼 있다(STEP 0-C, STEP 1, STEP 1-A, STEP 1-C, STEP 2-B-commit 등). 포터(toss-porter/pureweb-porter) 실행 중 커밋은 포터 자체 지침(`## 체크리스트 관리`)을 따른다.
+**각 STEP이 파일을 생성·수정했으면 완료 후 반드시 커밋한다.** 커밋 없이 다음 STEP으로 넘어가지 않는다 — 다음 STEP 시작 전 `git status`로 미커밋 변경사항이 없는지 확인한다. STEP별 커밋 대상·메시지는 각 STEP 본문에 명시돼 있다(STEP 0-0, STEP 0-C, STEP 1, STEP 1-A, STEP 2-B-commit 등). 포터(toss-porter/pureweb-porter) 실행 중 커밋은 포터 자체 지침(`## 체크리스트 관리`)을 따른다.
 
 ---
 
 ## STEP 0 — 프로젝트 초기 설정
+
+### 0-0. HyperLane SDK 설치 확인
+
+**porting-init보다 먼저 실행한다** — porting-init이 `Assets/Editor/`에 복사하는 템플릿 파일들을, 뒤이어 실행되는 `npx hyperlane init`의 엔진 자동 감지·템플릿 복사 과정이 SDK 쪽으로 옮겨버리는 문제가 있었다. SDK 설치를 먼저 끝내 이 문제를 피한다.
+
+```bash
+ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
+```
+
+- INSTALLED → 0-1로
+- NOT_INSTALLED → AskUserQuestion으로 확인:
+
+> "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
+> - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 0-1로.
+> - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
+
+**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md)):
+
+```bash
+# 1. 프로젝트 루트(Assets/가 있는 위치)에서 실행
+npm install https://github.com/neptunez-dev/hyperlane-sdk.git
+
+# 2. 엔진(Unity) 자동 감지 후 공통 템플릿 복사 — Assets/HyperLane/, Packages/manifest.json UPM 의존성 등
+npx hyperlane init
+```
+
+- 토스처럼 게임 외부 wrapper 프로젝트가 필요한 플랫폼은 추가로 `npx hyperlane setup toss` 실행 (대화형은 `npx hyperlane setup`). 셋업 중 `npm create vite@latest`의 `Install with npm and start now?` 질문에는 **반드시 `No`** 선택 — `Yes` 선택 시 dev server가 떠서 셋업이 멈춘다.
+- PureWeb만 쓰는 경우 `init`까지로 끝.
+- `npm install` 산출물(`node_modules/`, `package-lock.json`, `package.json`)은 SDK CLI 자체가 요구하는 정상 산출물이다 — Unity 프로젝트라고 지우지 않는다(`init`이 `.gitignore`에 `node_modules/`, `Build/`를 자동 추가).
+
+**업데이트 절차** (이미 셋업된 프로젝트에서 SDK 코드만 최신화 — `init`/`setup` 재실행 불필요):
+
+```bash
+npm install https://github.com/neptunez-dev/hyperlane-sdk.git   # 최신 커밋 재설치 (URL 명시 필수 — 생략 시 package-lock 고정본 유지됨)
+npx hyperlane update                                              # Assets/HyperLane/, WebGLTemplates/, wrapper 파일 등 SDK 관리 파일 갱신
+```
+
+- `HyperlaneConfig.asset`, `granite.config.ts`, wrapper의 `package.json`/`node_modules`, 사용자 추가 파일은 `update`가 덮어쓰지 않음.
+- 특정 버전 고정: `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0` (태그) 또는 `#커밋해시`.
+
+**설치/업데이트 완료 후 커밋 (필수)** — `git status`로 SDK가 추가·수정한 파일을 확인 후 스테이징한다(`node_modules/`·`Build/`는 `.gitignore` 처리되어 제외됨):
+
+```bash
+git status
+git add Assets/HyperLane Packages/manifest.json package.json package-lock.json
+# 토스 wrapper setup을 실행한 경우 wrapper 디렉토리도 함께 add
+git commit -m "[공통] HyperLane SDK 설치"
+```
+
+### 0-1. porting-init 실행
 
 `~/.claude/commands/project/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
 
@@ -278,7 +328,7 @@ git commit -m "[수정] Android 컴파일 오류 수정"
 cat ~/.claude/settings.json 2>/dev/null | grep -A3 "PostToolUse\|CompileChecker" || echo "NOT_FOUND"
 ```
 
-- hook 있음 → STEP 1-C로
+- hook 있음 → STEP 2로
 - **hook 없음** → AskUserQuestion:
 
 > "`.cs` 파일 수정 시 자동 컴파일 체크를 위한 PostToolUse hook이 설정되어 있지 않습니다.
@@ -290,53 +340,7 @@ cat ~/.claude/settings.json 2>/dev/null | grep -A3 "PostToolUse\|CompileChecker"
 > hook 설정 방법: Claude Code 설정(`~/.claude/settings.json`) → PostToolUse 항목에 `.cs` 파일 수정 시 컴파일 체크 명령 추가.
 > 설정 방법을 모르면 `/help`에서 hooks 관련 문서를 참고하거나, 사용자에게 직접 설정 요청 후 계속 진행한다.
 
----
-
-## STEP 1-C — HyperLane SDK 설치 확인
-
-```bash
-ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
-```
-
-- INSTALLED → STEP 2로
-- NOT_INSTALLED → AskUserQuestion으로 확인:
-
-> "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
-> - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 STEP 2로.
-> - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
-
-**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md)):
-
-```bash
-# 1. 프로젝트 루트(Assets/가 있는 위치)에서 실행
-npm install https://github.com/neptunez-dev/hyperlane-sdk.git
-
-# 2. 엔진(Unity) 자동 감지 후 공통 템플릿 복사 — Assets/HyperLane/, Packages/manifest.json UPM 의존성 등
-npx hyperlane init
-```
-
-- 토스처럼 게임 외부 wrapper 프로젝트가 필요한 플랫폼은 추가로 `npx hyperlane setup toss` 실행 (대화형은 `npx hyperlane setup`). 셋업 중 `npm create vite@latest`의 `Install with npm and start now?` 질문에는 **반드시 `No`** 선택 — `Yes` 선택 시 dev server가 떠서 셋업이 멈춘다.
-- PureWeb만 쓰는 경우 `init`까지로 끝.
-- `npm install` 산출물(`node_modules/`, `package-lock.json`, `package.json`)은 SDK CLI 자체가 요구하는 정상 산출물이다 — Unity 프로젝트라고 지우지 않는다(`init`이 `.gitignore`에 `node_modules/`, `Build/`를 자동 추가).
-
-**업데이트 절차** (이미 셋업된 프로젝트에서 SDK 코드만 최신화 — `init`/`setup` 재실행 불필요):
-
-```bash
-npm install https://github.com/neptunez-dev/hyperlane-sdk.git   # 최신 커밋 재설치 (URL 명시 필수 — 생략 시 package-lock 고정본 유지됨)
-npx hyperlane update                                              # Assets/HyperLane/, WebGLTemplates/, wrapper 파일 등 SDK 관리 파일 갱신
-```
-
-- `HyperlaneConfig.asset`, `granite.config.ts`, wrapper의 `package.json`/`node_modules`, 사용자 추가 파일은 `update`가 덮어쓰지 않음.
-- 특정 버전 고정: `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0` (태그) 또는 `#커밋해시`.
-
-**설치/업데이트 완료 후 커밋 (필수)** — `git status`로 SDK가 추가·수정한 파일을 확인 후 스테이징한다(`node_modules/`·`Build/`는 `.gitignore` 처리되어 제외됨):
-
-```bash
-git status
-git add Assets/HyperLane Packages/manifest.json package.json package-lock.json
-# 토스 wrapper setup을 실행한 경우 wrapper 디렉토리도 함께 add
-git commit -m "[공통] HyperLane SDK 설치"
-```
+> HyperLane SDK 설치는 STEP 0-0에서 이미 끝났다 — 여기서 다시 확인하지 않는다.
 
 ---
 
