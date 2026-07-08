@@ -689,7 +689,7 @@ grep -rln "version\|Version\|buildNumber\|AppVersion\|uid\|userId\|UserID\|GetUs
 grep -rln "RestorePurchase\|Restore\|ContactUs\|RateApp\|StoreLink\|AppStore\|GooglePlay\|CrossPromo\|CrossPromotion\|FreeCache\|Anzu\|anzu\|CloudSave\|CloudLoad\|ICloudStorage" \
   {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
-히트 파일을 Read해 각 항목의 파일:라인을 확정 → VOCAB `불필요 UI 목록` 행에 **후보**로 기록(복수 가능). 제거 확정은 이 단계에서 하지 않는다 — toss-porter가 제거 전 사용자에게 확인한다.
+히트 파일을 Read해 각 항목의 파일:라인을 확정 → VOCAB `불필요 UI 목록` 행에 **후보**로 기록(복수 가능). 제거 확정은 이 단계에서 하지 않는다 — platform-porter가 제거 전 사용자에게 확인한다(이슈 #44, 14번 이관).
 
 **로컬라이제이션**
 ```bash
@@ -988,6 +988,6 @@ fallback에서 `확인 필요` 또는 `근거 없음`으로 기록된 항목이 
 
 확인 완료 후:
 - 스캔 결과 검증: /porting-scan-verify
-- 퓨어웹: /pureweb-porter
-- 토스: /platform-porter 실행 후 /toss-porter (platform-porter가 HLSDK 공통 통합을 선행해야 함)
+- 퓨어웹: /pureweb-porter 실행 후 /platform-porter
+- 토스: /pureweb-porter → /platform-porter → /toss-porter 순서로 실행 (pureweb-porter가 항상 최우선, 이슈 #44)
 ```
