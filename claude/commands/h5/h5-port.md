@@ -104,6 +104,15 @@ git add Assets/HyperLane Packages/manifest.json package.json package-lock.json
 git commit -m "[공통] HyperLane SDK 설치"
 ```
 
+**AppsInToss MCP 확인 (참고용, 비차단)** — Toss 공식 MCP(`apps-in-toss`, `search_docs`/`get_doc`)가 연결되어 있으면 SDK·미니앱 관련 질문을 문서 검색으로 정확히 답할 수 있다. 없어도 포팅은 계속 진행한다.
+
+```bash
+claude mcp list 2>/dev/null | grep -q "^apps-in-toss:" && echo "MCP_CONNECTED" || echo "MCP_NOT_CONNECTED"
+```
+
+- `MCP_CONNECTED` → 이후 SDK API 질문이 나오면 이 MCP의 `search_docs`/`get_doc`을 우선 사용한다.
+- `MCP_NOT_CONNECTED` → 그대로 진행한다. 설치를 원하면 사용자에게 안내: `brew tap toss/tap && brew trust toss/tap && brew install ax` 후 `claude mcp add apps-in-toss -s user -- ax mcp` (설치는 사용자 승인 필요 — 자동 진행하지 않는다).
+
 ### 0-1. porting-init 실행
 
 `~/.claude/commands/project/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
