@@ -102,7 +102,7 @@ git commit -m "[{prefix}] {단계명}"
 - [ ] 8-B. Base64 인코딩 래핑 (VOCAB `저장 인코딩` Base64 없음이면 필수 — 스킵 불가)
 - [ ] 9. 앱 이름 및 Favicon 설정
 - [ ] 9-A. WebGL 템플릿 — persistentDataPath 자동 동기화
-- [ ] 10. CheatConsole.prefab 씬 추가 + 로컬 초기화 치트
+- [ ] 10. CheatConsole.prefab 씬 추가
 - [ ] 검증
 ```
 
@@ -257,7 +257,7 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
   worktree-immediate: 5 광고 즉시지급 + 6 IAP 즉시지급
   worktree-sdk:       7 SDK 비활성화
       ↓ (worktree merge 완료 후)
-[순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 8-A 저장 키 분리 → 8-B Base64 인코딩 래핑 → 9 앱 이름·Favicon 설정 → 9-A WebGL 템플릿 동기화 → 10 치트
+[순차] 1 RunInBackground → 1-A 리뷰 팝업 → 3-B 외부 네트워크 차단 → 8 서버 저장 차단 → 8-A 저장 키 분리 → 8-B Base64 인코딩 래핑 → 9 앱 이름·Favicon 설정 → 9-A WebGL 템플릿 동기화 → 10 CheatConsole
       ↓
 [선택] 4 토스 콘텐츠 동기화 (grep 자동 판단)
       ↓
@@ -989,9 +989,7 @@ grep -n "autoSyncPersistentDataPath" Assets/WebGLTemplates/PureWeb/index.html
 
 ---
 
-### 10. CheatConsole.prefab 씬 추가 + 로컬 초기화 치트 👤🤖
-
-**씬 설정 (👤 수동):**
+### 10. CheatConsole.prefab 씬 추가 👤
 
 ```bash
 grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
@@ -1000,40 +998,18 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 - 결과 있음 → ✅ 이미 추가됨
 - 결과 없음 → 씬에 프리팹을 추가하는 건 Unity Editor GUI 작업이라 AI가 대신 할 수 없다. `pureweb-checklist.md` `## 확인 필요`에 "CheatConsole.prefab을 `Assets/HyperLane/Plugins/WebGL/Util/Cheat/CheatConsole.prefab`에서 씬에 직접 추가 필요" 기록하고, 블로킹 없이 나머지 파이프라인을 계속 진행한다.
 
-**로컬 초기화 치트 등록 (🤖 코드 삽입):**
-
-퓨어웹은 서버 저장이 없으므로(3-B 서버 저장 차단 참조) toss-porter 7-0의 "Reset Local+Server"에 대응하는 항목은 만들지 않는다 — 로컬 초기화만 등록한다.
-
-**기존 치트 코드 확인**: PORTING_VOCAB.md `## 포터 기록`에서 scan이 찾은 기존 치트/디버그 시스템 파일:라인을 먼저 확인한다(재탐색 없이). 이미 "Reset Local" 등 로컬 초기화 치트가 있으면 스킵.
-
-게임 진입점(`{GAME_INIT_METHOD}`) 내부, 플랫폼 분기 직전에 삽입:
+**참고 — 치트 등록 방법**: 테스트용 치트가 필요해지면(예: 로컬 데이터 초기화) 아래 패턴으로 삽입한다. 이 단계에서는 방법만 알아두고, 실제 삽입은 필요하다고 판단되거나 요청받았을 때만 수행한다 — 상세 안전장치(`DeleteAll()` 금지 등)는 toss-porter 7-0 참조.
 
 ```csharp
 #if WEBGL_DEBUG_CONSOLE
-    RegisterCheats();
+    RegisterCheats(); // 게임 진입점 내부, 플랫폼 분기 직전에 호출
 #endif
-```
 
-`RegisterCheats()` 메서드 가드는 `#if UNITY_WEBGL || UNITY_EDITOR`로 선언해야 에디터 비-WebGL 타겟에서도 컴파일된다.
-
-등록 패턴 — 저장 방식이 PlayerPrefs이고 8-A를 거쳤으면 그때 확정한 `SAVE_KEY`를 그대로 쓴다. 다른 저장 방식이면 toss-porter 7-0 "로컬 초기화 코드 결정" 표(파일 기반 `File.Delete`, ES3 `ES3.DeleteFile()` 등)를 참조한다:
-
-```csharp
+// #if UNITY_WEBGL || UNITY_EDITOR — 에디터 비-WebGL 타겟에서도 컴파일되도록
 void RegisterCheats()
 {
     CheatRegister.ClearAll();
-
-    CheatRegister.Register(
-        "Reset Local",
-        "로컬 데이터 초기화",
-        Color.yellow,
-        () =>
-        {
-            PlayerPrefs.DeleteKey(SAVE_KEY); // 8-A에서 확정한 실제 키. DeleteAll() 금지 — 다른 시스템 값까지 지워짐
-            PlayerPrefs.Save();
-        }
-    );
-
+    CheatRegister.Register("치트 이름", "설명", Color.yellow, () => { /* 동작 */ });
     CheatRegister.Build();
 }
 ```
