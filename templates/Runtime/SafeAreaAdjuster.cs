@@ -12,6 +12,7 @@ public class SafeAreaAdjuster : MonoBehaviour
     #if WEBGL_TOSS
     [SerializeField] private float OffsetPaddingTop = 50f;
     [SerializeField] private float OffsetPaddingBottom = 0f;
+    // minyejin: [TODO] 플랫폼이 추가된다면 elif 문으로 분기 처리 필요
     #else
     [SerializeField] private float OffsetPaddingTop = 0f;
     [SerializeField] private float OffsetPaddingBottom = 0f;
