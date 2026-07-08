@@ -34,6 +34,6 @@ while IFS= read -r src; do
 done < <(find "$REPO/claude" -type f)
 
 echo ""
-echo "✅ 설치 완료. Claude Code에서 /reload-plugins 또는 재시작 후 사용."
+echo "✅ 설치 완료. Claude Code 재시작 후 사용."
 echo "   업데이트: 이 repo에서 git pull"
 echo "   템플릿: $REPO/templates 를 직접 참조 (심볼릭 없음)"

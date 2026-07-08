@@ -5,24 +5,37 @@ Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude C
 - 배포 방식: **git clone + 심볼릭 링크** (플러그인 아님)
 - 편집은 repo에서, `git pull`로 전 프로젝트에 즉시 반영
 
-## 파이프라인
+## 스킬 & 에이전트 구조
+
+### 메인 파이프라인 — `/h5:h5-port` 하나로 오케스트레이션
 
 ```
-STEP 0  프로젝트 초기 설정 (porting-init, HyperLane SDK 설치)
-  →
-STEP 1  EUC-KR → UTF-8 인코딩 변환
-  →
-STEP 2  프로젝트 분석 (porting-scan → porting-scan-verify)
-  →
-STEP 3  포터 실행
-  pureweb-porter (SDK 초기화·로그인·저장·광고·IAP — HLSDK 공통 기반, 브라우저 테스트 가능)
-    → platform-porter (HLSDK 서버 연동 — Toss/Kakao 공통)
-      → toss-porter (Toss 전용 — 배너·프로모션 등)
-  →
-STEP 4  포팅 검증 (h5-port-verify.py)
+/h5:h5-port (스킬, 오케스트레이터)
+  → STEP 0  project:porting-init (스킬)        CLAUDE.md·FRAMEWORK_REFERENCE.md·HyperLane SDK 설치
+  → STEP 1  EUC-KR → UTF-8 인코딩 변환           (h5-port가 직접 처리)
+  → STEP 2  h5:porting-scan (스킬)
+              → h5:porting-scan-verify (스킬)   NATIVE_BASELINE·VOCAB·체크리스트 생성 및 검증
+  → STEP 3  pureweb-porter (에이전트)           SDK 초기화·로그인·저장·광고·IAP — 브라우저 테스트 가능
+              → platform-porter (에이전트)      HLSDK 서버 연동 — Toss/Kakao 공통
+                → toss-porter (에이전트)        Toss 전용 — 배너·프로모션 등
+  → STEP 4  h5-port-verify.py (스크립트)        플랫폼별 처리 누락 최종 검증
 ```
 
-전체 실행은 `/h5:h5-port` 하나로 오케스트레이션된다.
+### 독립 실행 — 파이프라인 밖에서 필요할 때 직접 호출
+
+```
+analyze:content-analyze (스킬)
+  콘텐츠 시스템 역기획서/작업가이드/단계출시 문서 생성
+
+h5:stats-logging-analyzer (스킬)
+  여러 프로젝트의 agent-stats.md 대조 → 3회+ 반복 Zero-Hit 패턴 탐지 → 이슈화 제안
+
+design:iap-analyzer / iaa-analyzer / save-point-analyzer (에이전트)
+  porting-scan 산출물(NATIVE_BASELINE·VOCAB) 재사용 → 사업팀 전달용 IAP/IAA/저장 역기획 문서
+
+common:feature-breakdown → common:create-issue → common:resolve-issue (스킬 체인)
+  이 워크플로우 자체를 수정할 때 쓰는 계획 → 이슈 → 구현 루틴
+```
 
 ## 구조
 
@@ -32,7 +45,7 @@ claude/                       # ~/.claude 에 심볼릭될 내용
     porting/    pureweb-porter, platform-porter, toss-porter, sdk-list-analyzer
     design/     iap-analyzer, iaa-analyzer, save-point-analyzer
   commands/
-    h5/         h5-port, porting-scan, porting-scan-verify
+    h5/         h5-port, porting-scan, porting-scan-verify, stats-logging-analyzer
     project/    porting-init
     analyze/    content-analyze
     common/     feature-breakdown, create-issue, resolve-issue, auto-resolve
@@ -62,7 +75,7 @@ cd ~/github/h5-porting-workflow
 
 > `templates/` 는 심볼릭하지 않는다. 워크플로우가 `~/github/h5-porting-workflow/templates/` 를 직접 참조한다.
 
-설치 후 Claude Code에서 `/reload-plugins` 또는 재시작.
+설치 후 Claude Code 재시작.
 
 ## 업데이트
 
@@ -83,17 +96,9 @@ cd ~/github/h5-porting-workflow && git pull
 
 개별 포터를 직접 호출할 수도 있다(`Agent 도구, subagent_type: "pureweb-porter"` 등) — 이 경우 각 포터가 선행 포터 완료 여부를 진입점에서 스스로 확인하고, 안 됐으면 대신 실행하지 않고 안내만 한 뒤 반환한다.
 
-## 상태 관리 (포팅 대상 프로젝트 안에 생성됨)
+## 상태 관리
 
-포팅 작업의 진행 상황은 워크플로우 repo가 아니라 **포팅 대상 게임 프로젝트의 `Docs/porting/`** 아래에 기록·갱신된다.
-
-| 파일 | 성격 | 정본 여부 |
-|---|---|---|
-| `NATIVE_BASELINE.md` | 포팅 전 네이티브 스냅샷 (scan-verify 후 동결, 불변) | 스캔 결과 정본 |
-| `PORTING_VOCAB.md` | 포터가 참조하는 메서드·파일 위치 인덱스 — 포팅 중 계속 갱신 | 위치 정보 정본 |
-| `pureweb-checklist.md` / `platform-checklist.md` / `toss-checklist.md` | 단계 진행·이슈·확인 필요·교정 기록 (가변) | **작업 진행 정본** |
-
-GitHub 이슈를 함께 쓰는 경우(`/common:create-issue` 연동), 이슈는 위 체크리스트를 비추는 **미러**일 뿐이다 — 상태가 어긋나면 체크리스트 기준으로 이슈를 갱신한다. 전체 산출물 목록·생성 시점은 `templates/README.md`(포팅 대상 프로젝트에 `Docs/README.md`로 복사됨) 참조.
+포팅 진행 상황은 워크플로우 repo가 아니라 **포팅 대상 게임 프로젝트의 `Docs/porting/{platform}-checklist.md`**에 기록·갱신된다 — 사람이 직접 확인·재검토할 수 있는 정본. 산출물 전체 목록은 `templates/README.md` 참조.
 
 ## 경로 규칙 (기여 시)
 
