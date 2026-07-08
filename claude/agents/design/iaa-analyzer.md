@@ -312,6 +312,7 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 - 보상형/전면형 광고 동시 노출 가능 시점일 경우 우선순위 / Ad priority when rewarded and interstitial can display simultaneously: 없음 / 있음 — (있으면 보상형·전면형 중 어느 쪽이 우선인지 1줄로)
 - 보상형 광고 시청 시 전면형 광고 쿨타임 영향 여부 / Whether rewarded ad viewing affects interstitial cooldown: 없음 / 있음 — (있으면 어떤 영향인지 서술)
+- 광고(보상형 / 전면) **로드 실패 시 자동 재시도 금지**. 다음 로드는 **유저 인터랙션(광고 보기 버튼 등)이 발생한 시점에만** 트리거한다. 실패했다고 즉시/지연 후 재로드 호출하지 않는다.
 
 **보상형 광고 / Rewarded Ads**
 
