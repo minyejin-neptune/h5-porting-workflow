@@ -13,12 +13,15 @@ Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude C
 /h5:h5-port (스킬, 오케스트레이터)
   → STEP 0  project:porting-init (스킬)        CLAUDE.md·FRAMEWORK_REFERENCE.md·HyperLane SDK 설치
   → STEP 1  EUC-KR → UTF-8 인코딩 변환           (h5-port가 직접 처리)
-  → STEP 2  h5:porting-scan (스킬)
+             ↳ sdk-list-analyzer (에이전트) 📊  외부 SDK 목록 — Android 컴파일 체크와 병렬 실행
+  → STEP 2  h5:porting-scan (스킬) 📊
               → h5:porting-scan-verify (스킬)   NATIVE_BASELINE·VOCAB·체크리스트 생성 및 검증
   → STEP 3  pureweb-porter (에이전트)           SDK 초기화·로그인·저장·광고·IAP — 브라우저 테스트 가능
               → platform-porter (에이전트)      HLSDK 서버 연동 — Toss/Kakao 공통
                 → toss-porter (에이전트)        Toss 전용 — 배너·프로모션 등
   → STEP 4  h5-port-verify.py (스크립트)        플랫폼별 처리 누락 최종 검증
+
+📊 = grep 탐색 결과를 대상 프로젝트의 Docs/porting/.stats/agent-stats.md 에 기록 (Hit/Zero-Hit 패턴 누적)
 ```
 
 ### 독립 실행 — 파이프라인 밖에서 필요할 때 직접 호출
@@ -27,11 +30,12 @@ Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude C
 analyze:content-analyze (스킬)
   콘텐츠 시스템 역기획서/작업가이드/단계출시 문서 생성
 
-h5:stats-logging-analyzer (스킬)
-  여러 프로젝트의 agent-stats.md 대조 → 3회+ 반복 Zero-Hit 패턴 탐지 → 이슈화 제안
-
-design:iap-analyzer / iaa-analyzer / save-point-analyzer (에이전트)
+design:iap-analyzer / iaa-analyzer / save-point-analyzer (에이전트) 📊
   porting-scan 산출물(NATIVE_BASELINE·VOCAB) 재사용 → 사업팀 전달용 IAP/IAA/저장 역기획 문서
+
+h5:stats-logging-analyzer (스킬)
+  위 📊 지점들이 여러 프로젝트에 남긴 agent-stats.md를 전부 대조
+  → 같은 (에이전트, 라벨)이 3회+ 반복 Zero-Hit → 탐색 패턴 재검토 후보로 보고 → 이슈화 제안
 
 common:feature-breakdown → common:create-issue → common:resolve-issue (스킬 체인)
   이 워크플로우 자체를 수정할 때 쓰는 계획 → 이슈 → 구현 루틴
