@@ -155,9 +155,6 @@ grep -rn "NoAds\|bFree\|isFree" {AD_MANAGER} | grep -v "//"
 
 # 7. 실패 처리 콜백 탐색 (광고 로드 실패 / 시청 미완료)
 grep -rn "onRewardResult.*false\|rewardFail\|AdFailed\|LoadFailed\|onVideoFailed\|rewardCancel" {SCRIPTS_PATH} --include="*.cs" | grep -v "//"
-
-# 8. 광고 그룹 ID 탐색
-grep -rn "ca-app-pub\|adUnitId\|ad_unit\|rewarded_id\|interstitial_id\|adKey\|adGroupId" {SCRIPTS_PATH} --include="*.cs" | grep -v "//"
 ```
 
 ### 보상형 광고 검토 포인트
@@ -302,8 +299,6 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - 일 제한 / Daily Limit:
 - 실패 시 처리 / Failure Handling:
 
-광고 그룹 ID / Ad Group ID:
-
 ---
 
 **전면형 광고 / Interstitial Ads**
@@ -314,14 +309,12 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 - 실패 시 처리 / Failure Handling:
 - 예외 규칙 / Exception Rules (예: 튜토리얼 중, 보상형 광고 직후 등):
 
-광고 그룹 ID / Ad Group ID:
 ```
 
 **출력 원칙:**
 - 테이블 행은 Placement 하나당 한 행. 값이 확인되지 않으면 "확인 필요"가 아니라 반드시 코드를 파고들어 확인 후 기재한다. 끝까지 찾지 못한 경우에만 "코드에서 근거를 찾지 못했습니다"로 명시한다.
 - Condition·Notes 열에는 기획자 언어(상황·수치·조건)만 기재한다. 변수명·클래스명·enum·플래그 등 코드 내용은 기재하지 않는다.
 - 쿨타임 규칙 / 일 제한 / 실패 시 처리는 Placement 공통 규칙이면 테이블 아래 bullet, Placement별로 다르면 Notes 열에 기재한다.
-- 광고 그룹 ID는 코드에서 grep으로 확인한다. 네이티브 SDK 내부에만 존재해 코드에서 찾을 수 없는 경우 "코드에서 근거를 찾지 못했습니다"로 명시한다.
 - 기본 규칙의 세 번째 항목("로드 실패 시 자동 재시도 금지")은 기획 원칙이므로 코드 확인 없이 그대로 출력한다.
 - "동상" 같은 약어 사용 금지 — 반복 조건도 전체를 다시 기재한다.
 - **포팅 주의사항(`⚠️ WebGL 포팅 주의사항` 등 개발 관련 내용)은 IAA.md에 기재하지 않는다.** 포팅 이슈 발견 시 처리 방법은 `## 포팅 이슈 기록 연동` 섹션을 따른다.
