@@ -71,7 +71,7 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 > - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 0-1로.
 > - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
 
-**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md)):
+**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md), 상세 API는 [매뉴얼](https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual) 참고):
 
 ```bash
 # 1. 프로젝트 루트(Assets/가 있는 위치)에서 실행

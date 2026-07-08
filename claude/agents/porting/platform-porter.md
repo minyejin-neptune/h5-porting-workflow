@@ -11,6 +11,8 @@ tools: Read, Bash, Edit, Write, Agent, Skill
 
 > **왜 분리됐나**: `Assets/HyperLane/WebGLProviderHandler.cs`(abstract 계약)를 `TossHandler`/`KakaoHandler`/`PureHandler`가 각각 구현하고, `HLSDK.Instance.X()`는 전부 `provider.XAsync()`로 위임하는 얇은 래퍼다(`HLSDK.cs`). 게임 코드가 이 래퍼만 호출하도록 통합해두면 어느 플랫폼 빌드에서도 동일하게 동작한다 — 이 통합 작업이 플랫폼별로 반복될 이유가 없어 별도 에이전트로 분리했다. 근거: `Docs/spec/platform-porter-redesign-spec.md`.
 
+> 📚 HyperLane SDK 매뉴얼: https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual
+
 > **추론 금지**: 코드·에셋에서 직접 확인한 사실만 기재한다. 확인 불가 시 "확인 필요"로 명시한다.
 
 > **전처리문 추가 전 필수 확인**: 새 `#if` 전처리문을 추가하기 전에 사용할 심볼을 반드시 사용자에게 먼저 물어본다.

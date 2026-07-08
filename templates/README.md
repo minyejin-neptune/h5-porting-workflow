@@ -7,6 +7,8 @@
 - **개발 3원칙** 준수: 프레임워크 유지, 책임 분리, 기존 기능 재사용
 - 개발 전 참고 문서로 계획 수립, 포팅 파이프라인 산출물 일괄 보관
 
+> 📚 HyperLane SDK 매뉴얼: https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual
+
 ## 문서 구성
 
 | 문서 / 폴더 | 생성 시점 | 용도 |

@@ -10,6 +10,8 @@ description: 포팅 사전 분석 스캔 — SDK·런타임·게임구조를 분
 - `pureweb-checklist.md` — 기반 작업목록 (퓨어웹 포팅 작업이 소비 — 컴파일/런타임/공백 이슈·확인 필요)
 - `toss-checklist.md` — 플랫폼 작업목록 (플랫폼 포팅 작업이 소비 — toss 전용 이슈 + 광고·IAP 실동작 확인 필요)
 
+> 📚 HyperLane SDK 매뉴얼: https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual
+
 `$ARGUMENTS`로 포팅 플랫폼을 지정할 수 있다 (`toss` / `pureweb`). 지정하지 않으면 사전 감지 후 AskUserQuestion으로 확인한다.
 
 추론 금지. 코드에서 확인한 사실만 기재. 확인 불가 시 "확인 필요" 표시.

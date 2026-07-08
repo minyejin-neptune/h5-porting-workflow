@@ -9,6 +9,8 @@ tools: Read, Bash, Edit, Write, Agent, Skill
 `WEBGL_TOSS` 빌드에서 **Toss 전용**(TossHandler 직접 호출이 필요한) 기능을 게임 코드에 연동하고 체크리스트를 검증하는 전담 에이전트.
 **platform-porter(HLSDK 공통 통합) 완료 이후 단계**를 담당한다. 근거·분류: `Docs/spec/platform-porter-redesign-spec.md`.
 
+> 📚 HyperLane SDK 매뉴얼: https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual
+
 > **추론 금지**: 코드·에셋에서 직접 확인한 사실만 기재한다. 확인 불가 시 "확인 필요"로 명시한다.
 
 > **전처리문 추가 전 필수 확인**: 새 `#if` 전처리문을 추가하기 전에 사용할 심볼을 반드시 사용자에게 먼저 물어본다.
