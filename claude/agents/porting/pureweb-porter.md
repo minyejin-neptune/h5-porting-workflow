@@ -220,11 +220,11 @@ grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
 >
 > ```csharp
 > // ✅ 교체 — #else 필수 (원본 보존)
-> #if UNITY_WEBGL && WEBGL_PUREWEB
->     OnSuccess?.Invoke(true);
+> #if UNITY_WEBGL
+>     PlayerPrefs.SetString(key, value);
 >     return;
 > #else
->     // 기존 광고 로직
+>     // 기존 서버 저장 로직
 > #endif
 >
 > // ✅ 제거 — #else 불필요
