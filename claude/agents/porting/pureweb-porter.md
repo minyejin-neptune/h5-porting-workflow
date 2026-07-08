@@ -474,13 +474,19 @@ grep -rn "{GAME_INIT_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep
 | `async UniTask Start()` / `async UniTask Init...()` | UniTask |
 | 판별 불가 | → 결정 필요 라우팅(초기화 메서드 형식: Coroutine vs UniTask — 잘못 추측하면 컴파일 깨짐). 이 단계는 스킵 |
 
-**Coroutine 패턴:**
+> **`Initialize()` 실패 시 진행 중단**: `HLSDK.Instance.Initialize()`는 `UniTask`만 반환하고 성공/실패 bool은 주지 않는다(내부적으로 `provider.InitGameAsync()`의 `UniTask<bool>` 결과를 버림 — SDK 자체의 한계, 포터가 고칠 수 없음). 그래서 확인 가능한 유일한 실패 신호는 **예외(throw)** 뿐이다 — try-catch로 감싸고, 예외 발생 시 이후 로직(로그인·데이터 로드 등)으로 진행하지 않는다.
+
+**Coroutine 패턴** (로그인 단계와 동일하게 `bool?`/`WaitUntil` 구조로 통일):
 
 ```csharp
 private IEnumerator {GAME_INIT_METHOD}()
 {
 #if UNITY_WEBGL
-    yield return HLSDK.Instance.Initialize().ToCoroutine();
+    bool? sdkInitSuccess = null;
+    InitializeSdk(success => sdkInitSuccess = success).Forget();
+    yield return new WaitUntil(() => sdkInitSuccess.HasValue);
+    if (sdkInitSuccess != true) yield break; // 초기화 실패 — 이후 로직 진행 금지
+
 #if WEBGL_DEBUG_CONSOLE
     RegisterCheats();
 #endif
@@ -488,6 +494,22 @@ private IEnumerator {GAME_INIT_METHOD}()
 #endif
     // 기존 로직 계속
 }
+
+#if UNITY_WEBGL
+private async UniTask InitializeSdk(System.Action<bool> onComplete)
+{
+    try
+    {
+        await HLSDK.Instance.Initialize();
+        onComplete?.Invoke(true);
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError($"[SDK] 초기화 실패: {e.Message}");
+        onComplete?.Invoke(false);
+    }
+}
+#endif
 ```
 
 **UniTask 패턴:**
@@ -496,7 +518,18 @@ private IEnumerator {GAME_INIT_METHOD}()
 private async UniTask {GAME_INIT_METHOD}()
 {
 #if UNITY_WEBGL
-    await HLSDK.Instance.Initialize();
+    bool sdkInitSuccess = true;
+    try
+    {
+        await HLSDK.Instance.Initialize();
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError($"[SDK] 초기화 실패: {e.Message}");
+        sdkInitSuccess = false;
+    }
+    if (!sdkInitSuccess) return; // 초기화 실패 — 이후 로직 진행 금지
+
 #if WEBGL_DEBUG_CONSOLE
     RegisterCheats();
 #endif
