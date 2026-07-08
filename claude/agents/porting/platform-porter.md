@@ -168,7 +168,7 @@ git worktree remove ../{이름}
 | `WEBGL_DEV_VER` | 개발 빌드 — IAP 우회(즉시 지급), 치트 활성화, 테스트 광고 |
 | `WEBGL_LIVE_VER` | 라이브 빌드 — 실제 IAP, 치트 비활성화, 프로덕션 서버 |
 | `WEBGL_DEBUG_CONSOLE` | 화면 디버그 콘솔(vConsole) 활성화 — HLSDK가 자동 처리 |
-| `WEBGL_PUREWEB` | 서버 저장/불러오기 등 일부 공통 로직에서 제외 대상으로만 등장 — 배너·프로모션 등 플랫폼 전용 심볼(`WEBGL_TOSS` 등)은 이 에이전트에서 다루지 않는다 |
+| `WEBGL_PUREWEB` | **서버 저장(`SetUserData`/`GetUserData`) 제외에만 사용** — Provider(`PureHandler` 등)로 위임되는 API(광고·IAP·로그인·랭킹·햅틱·공유 등)는 이미 자동 처리되므로 이 심볼로 걸러내지 않는다. 배너·프로모션 등 플랫폼 전용 심볼(`WEBGL_TOSS` 등)은 이 에이전트에서 다루지 않는다 |
 
 ---
 
@@ -239,15 +239,18 @@ HLSDK wrapper(`HLSDK.Instance.GetTime()` 등)와 `NeptuneAPI.Instance.GetTimeAsy
 #endif
 ```
 
-**플랫폼마다 다른 구현이 필요한 경우** (광고 Show/Load 자체는 공통이지만, 퓨어웹은 즉시지급으로 대체돼야 하는 경우 등)
+**`WEBGL_PUREWEB` 제외가 필요한 경우 — Provider로 위임되지 않는 API만** (예: `SetUserData`/`GetUserData` 서버 저장 — HLSDK.cs에서 NeptuneAPI로 직행, Provider 추상화 밖)
 
 ```csharp
-#if UNITY_WEBGL && !WEBGL_PUREWEB
-    // HLSDK 공통 API 호출 (Toss·Kakao 등 실제 플랫폼)
-#else
-    // 기존 네이티브 로직 또는 퓨어웹 즉시지급(pureweb-porter 담당)
+#if UNITY_WEBGL
+    // 로컬 저장 등 모든 WebGL 빌드 공통 처리
+    #if !WEBGL_PUREWEB
+    // 서버 저장 — 퓨어웹은 서버 동기화 자체를 하지 않음(pureweb-porter 정책)
+    #endif
 #endif
 ```
+
+> **`HLSDK.Instance.X()`로 Provider(`TossHandler`/`KakaoHandler`/`PureHandler`)에 위임되는 API(광고·IAP·로그인·랭킹·햅틱·공유 등)는 `WEBGL_PUREWEB`을 걸러낼 필요가 없다** — `PureHandler`가 이미 해당 동작을 즉시성공/no-op으로 구현해뒀다. 이 파일의 기본 패턴(바로 위)처럼 `#if UNITY_WEBGL`만 쓴다.
 
 > **주의 — 기존 iOS/Android 분기가 나뉜 경우**: `#if !UNITY_WEBGL`로 통으로 감싸면 iOS·Android 로직이 뭉개진다.
 > 기존에 `UNITY_IOS` / `UNITY_ANDROID` 분기가 있으면 `#if UNITY_WEBGL`을 맨 앞에 삽입하고 기존 분기를 `#elif`로 유지한다:
@@ -825,15 +828,15 @@ grep -rn "LoadAdMobRV\|LoadInterstitialAd\|LoadRewardedAd\|LoadAd\b\|isLoadedRew
 grep -n "OnSuccess\|OnRewardResult\|onRewardResult\|OnResult" <광고매니저파일>.cs
 ```
 
-> **가드 기준 — 광고 Load/Show는 `#if UNITY_WEBGL && !WEBGL_PUREWEB`.**
-> `LoadRewardedAd`·`ShowRewardedAd`·`LoadInterstitialAd`·`ShowInterstitialAd`는 HLSDK 공통 API다. 퓨어웹은 실제 광고 대신 즉시지급으로 처리해야 하므로 광고 분기에서만 제외(`!WEBGL_PUREWEB`)하고, 퓨어웹 즉시지급은 pureweb-porter가 별도로 담당한다.
+> **가드 기준 — 광고 Load/Show는 `#if UNITY_WEBGL`만으로 충분하다. `WEBGL_PUREWEB` 제외 불필요.**
+> `LoadRewardedAd`·`ShowRewardedAd`·`LoadInterstitialAd`·`ShowInterstitialAd`는 `WebGLProviderHandler` 추상 계약을 통해 Provider로 위임되는 HLSDK 공통 API다. `PureHandler`(퓨어웹 Provider)가 이미 이 메서드들을 즉시성공으로 구현해뒀으므로(`ShowRewardedAdAsync`가 `startCall→successCall→closeCall` 순으로 즉시 호출), 호출부에서 퓨어웹을 따로 걸러낼 필요가 없다. `!WEBGL_PUREWEB`로 제외하면 오히려 `#else`가 없는 패턴에서 퓨어웹 빌드가 콜백을 아예 못 받는 결함이 생긴다(과거 실사례).
 
 **보상형 광고 패턴:**
 
 ```csharp
 void LoadRewardVideo()
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     HLSDK.Instance.LoadRewardedAd(success => { isLoadedRewardVideo = success; });
 #else
     isLoadedRewardVideo = true;
@@ -842,7 +845,7 @@ void LoadRewardVideo()
 
 void ShowRewardVideo(/* 보상 콜백, 미보상 콜백 */)
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     HLSDK.Instance.ShowRewardedAd(
         startCall: () =>
         {
@@ -873,7 +876,7 @@ void ShowRewardVideo(/* 보상 콜백, 미보상 콜백 */)
 ```csharp
 void LoadInterstitial()
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     HLSDK.Instance.LoadInterstitialAd(success => { isLoadedInterstitial = success; });
 #else
     isLoadedInterstitial = true;
@@ -882,7 +885,7 @@ void LoadInterstitial()
 
 void ShowInterstitial(/* 종료 콜백 */)
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     HLSDK.Instance.ShowInterstitialAd(
         startCall: () => { OnAdVisibilityChanged(true); },
         successCall: () => { /* 클릭 이벤트 등 */ },
@@ -913,7 +916,7 @@ private System.Action _pendingShowInterstitial = null;
 
 private void LoadInterstitialAd()
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     if (_isLoadingInterstitial) return;
     _isLoadingInterstitial = true;
     HLSDK.Instance.LoadInterstitialAd(ok =>
@@ -931,7 +934,7 @@ private void LoadInterstitialAd()
 
 public void ShowInterstitial()
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     if (!_interstitialAdLoaded)
     {
         _pendingShowInterstitial = ShowInterstitialInternal;
@@ -972,7 +975,7 @@ private System.Action _pendingShowRewarded = null;
 
 private void LoadRewardedAd()
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     if (_isLoadingRewardedAd) return;
     _isLoadingRewardedAd = true;
     HLSDK.Instance.LoadRewardedAd(ok =>
@@ -990,7 +993,7 @@ private void LoadRewardedAd()
 
 public void ShowRewardedAd(/* 보상 콜백, 미보상 콜백 */)
 {
-#if UNITY_WEBGL && !WEBGL_PUREWEB
+#if UNITY_WEBGL
     if (!_rewardedAdLoaded)
     {
         _pendingShowRewarded = () => ShowRewardedAdInternal(/* 콜백 전달 */);
@@ -1272,10 +1275,6 @@ public void {IAP_METHOD}(string productId, Action OnSuccess, Action OnFailed = n
     OnSuccess?.Invoke();
     return;
 #elif UNITY_WEBGL
-    #if WEBGL_PUREWEB
-    OnSuccess?.Invoke();
-    return;
-    #else
     HLSDK.Instance.PurchaseByOriginalPID(
         productId,
         giveProductInfo =>
@@ -1294,12 +1293,13 @@ public void {IAP_METHOD}(string productId, Action OnSuccess, Action OnFailed = n
             }
         }
     );
-    #endif
 #else
     // 기존 네이티브 IAP 로직
 #endif
 }
 ```
+
+> `WEBGL_PUREWEB` 분기를 넣지 않는다 — `PureHandler.PurchaseAsync`가 이미 `giveCallback`·`purchaseCallback`을 즉시 성공으로 호출하도록 구현돼 있어 퓨어웹 빌드도 위 코드 그대로 정상 동작한다.
 
 **LogPurchaseAsync 중복 확인:**
 
