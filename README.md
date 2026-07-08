@@ -10,10 +10,11 @@ claude/                       # ~/.claude 에 심볼릭될 내용
   agents/
     porter/    toss-porter, pureweb-porter
     design/    iap-analyzer, iaa-analyzer, save-point-analyzer
-    unity-compile-checker, h5-game-porting-analyst, toss-sdk-expert
+    unity-compile-checker, toss-sdk-expert
   commands/
     h5/        h5-port, porting-scan, porting-scan-verify
     project/   porting-init
+    analyze/   content-analyze
 templates/                    # 워크플로우가 repo 경로로 직접 참조 (심볼릭 없음)
   CLAUDE_Porting.md, h5-porter-template.md, README.md
   scripts/h5-port-verify.py
@@ -71,5 +72,5 @@ repo 안 파일끼리의 참조 경로 기준:
 
 ## 범위
 
-- 포함: 코어 포팅(스캔/검증/포터/컴파일) + analyzer 3종(iap/iaa/save-point)
+- 포함: 코어 포팅(스캔/검증/포터/컴파일) + analyzer 3종(iap/iaa/save-point) + content-analyze
 - 미포함: currency-analyzer, local-push-analyzer, biz-doc-writer (필요 시 추가)
