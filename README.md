@@ -1,6 +1,7 @@
 # h5-porting-workflow
 
-- Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude Code 워크플로우
+Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude Code 워크플로우
+
 - 배포 방식: **git clone + 심볼릭 링크** (플러그인 아님)
 - 편집은 repo에서, `git pull`로 전 프로젝트에 즉시 반영
 
