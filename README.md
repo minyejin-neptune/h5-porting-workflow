@@ -1,19 +1,25 @@
 # h5-porting-workflow
 
-Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude Code 워크플로우.
-배포 방식: **git clone + 심볼릭 링크** (플러그인 아님). 편집은 repo에서, `git pull`로 전 프로젝트에 즉시 반영.
+- Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude Code 워크플로우
+- 배포 방식: **git clone + 심볼릭 링크** (플러그인 아님)
+- 편집은 repo에서, `git pull`로 전 프로젝트에 즉시 반영
 
 ## 파이프라인
 
 ```
 STEP 0  프로젝트 초기 설정 (porting-init, HyperLane SDK 설치)
+  →
 STEP 1  EUC-KR → UTF-8 인코딩 변환
+  →
 STEP 2  프로젝트 분석 (porting-scan → porting-scan-verify)
-STEP 3  포터 실행 — pureweb-porter → platform-porter → toss/kakao-porter 순서
+  →
+STEP 3  포터 실행
+  pureweb-porter (SDK 초기화·로그인·저장·광고·IAP — HLSDK 공통 기반, 브라우저 테스트 가능)
+    → platform-porter (HLSDK 서버 연동 — Toss/Kakao 공통)
+      → toss-porter (Toss 전용 — 배너·프로모션 등)
+  →
 STEP 4  포팅 검증 (h5-port-verify.py)
 ```
-
-`pureweb-porter`가 항상 최우선 실행된다 — SDK 초기화·로그인·저장·광고·IAP 등 HLSDK 공통 기반을 브라우저에서 바로 테스트 가능한 상태로 완성하고, `platform-porter`가 그 위에 HLSDK 서버 연동(Toss/Kakao 공통)을 이어붙인다. Toss 전용(배너·프로모션 등)만 `toss-porter`가 마지막에 처리한다.
 
 전체 실행은 `/h5:h5-port` 하나로 오케스트레이션된다.
 
