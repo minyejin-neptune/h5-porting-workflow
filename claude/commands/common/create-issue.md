@@ -1,6 +1,6 @@
 ---
 description: 입력한 내용을 구조화된 GitHub 이슈로 작성해 바로 gh로 생성
-argument-hint: 생성할 이슈 내용을 한 줄로
+argument-hint: "[--no-confirm] 생성할 이슈 내용을 한 줄로"
 ---
 
 # GitHub 이슈 생성
@@ -9,7 +9,9 @@ argument-hint: 생성할 이슈 내용을 한 줄로
 
 > 이슈 내용: **$ARGUMENTS**
 
-인자가 비어 있으면 여기서 멈추고 "생성할 이슈 내용을 인자로 입력해주세요 (예: `/common:create-issue 로그인 화면에서 새로고침하면 세션이 풀림`)" 라고 안내한다.
+인자가 `--no-confirm`으로 시작하면 그 플래그를 떼어내고 나머지를 이슈 내용으로 쓴다 — Step 1의 repo 확인을 건너뛴다(서브에이전트 등 사용자에게 물어볼 수 없는 호출자용). 플래그 없으면 기존대로 확인한다.
+
+인자(플래그 제외)가 비어 있으면 여기서 멈추고 "생성할 이슈 내용을 인자로 입력해주세요 (예: `/common:create-issue 로그인 화면에서 새로고침하면 세션이 풀림`)" 라고 안내한다.
 
 ---
 
@@ -28,7 +30,7 @@ gh repo view --json nameWithOwner -q .nameWithOwner   # 대상 repo 확인
 ```
 
 - 인증이 안 돼 있으면 멈추고 "`! gh auth login` 으로 로그인해주세요" 안내.
-- repo가 감지되면 그 repo에 생성한다. 현재 위치가 대상 repo가 맞는지 사용자에게 한 번 확인한다.
+- repo가 감지되면 그 repo에 생성한다. `--no-confirm`이면 바로 진행, 아니면 현재 위치가 대상 repo가 맞는지 사용자에게 한 번 확인한다.
 - 라벨을 붙일 계획이면 존재 여부를 확인한다: `gh label list`.
 
 ## Step 2 — 유형 판별
