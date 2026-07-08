@@ -50,13 +50,13 @@ gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
 
 ## 커밋 원칙
 
-**각 STEP이 파일을 생성·수정했으면 완료 후 반드시 커밋한다.** 커밋 없이 다음 STEP으로 넘어가지 않는다 — 다음 STEP 시작 전 `git status`로 미커밋 변경사항이 없는지 확인한다. STEP별 커밋 대상·메시지는 각 STEP 본문에 명시돼 있다(STEP 0-0, STEP 0-C, STEP 1, STEP 1-A, STEP 2-B-commit 등). 포터(toss-porter/pureweb-porter) 실행 중 커밋은 포터 자체 지침(`## 체크리스트 관리`)을 따른다.
+**각 STEP이 파일을 생성·수정했으면 완료 후 반드시 커밋한다.** 커밋 없이 다음 STEP으로 넘어가지 않는다 — 다음 STEP 시작 전 `git status`로 미커밋 변경사항이 없는지 확인한다. STEP별 커밋 대상·메시지는 각 STEP 본문에 명시돼 있다(STEP 0-A, STEP 0-D, STEP 1, STEP 1-A, STEP 2-B-commit 등). 포터(toss-porter/pureweb-porter) 실행 중 커밋은 포터 자체 지침(`## 체크리스트 관리`)을 따른다.
 
 ---
 
 ## STEP 0 — 프로젝트 초기 설정
 
-### 0-0. HyperLane SDK 설치 확인
+### 0-A. HyperLane SDK 설치 확인
 
 **porting-init보다 먼저 실행한다** — porting-init이 `Assets/Editor/`에 복사하는 템플릿 파일들을, 뒤이어 실행되는 `npx hyperlane init`의 엔진 자동 감지·템플릿 복사 과정이 SDK 쪽으로 옮겨버리는 문제가 있었다. SDK 설치를 먼저 끝내 이 문제를 피한다.
 
@@ -64,11 +64,11 @@ gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
 ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 ```
 
-- INSTALLED → 0-1로
+- INSTALLED → 0-B로
 - NOT_INSTALLED → AskUserQuestion으로 확인:
 
 > "HyperLane SDK가 설치되어 있지 않습니다. 설치 후 진행할까요?"
-> - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 0-1로.
+> - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 0-B로.
 > - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
 
 **설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md), 상세 API는 [매뉴얼](https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual) 참고):
@@ -113,13 +113,13 @@ claude mcp list 2>/dev/null | grep -q "^apps-in-toss:" && echo "MCP_CONNECTED" |
 - `MCP_CONNECTED` → 이후 SDK API 질문이 나오면 이 MCP의 `search_docs`/`get_doc`을 우선 사용한다.
 - `MCP_NOT_CONNECTED` → 그대로 진행한다. 설치를 원하면 사용자에게 안내: `brew tap toss/tap && brew trust toss/tap && brew install ax` 후 `claude mcp add apps-in-toss -s user -- ax mcp` (설치는 사용자 승인 필요 — 자동 진행하지 않는다).
 
-### 0-1. porting-init 실행
+### 0-B. porting-init 실행
 
 `~/.claude/commands/project/porting-init.md` 파일을 읽고 해당 지침에 따라 실행한다.
 
 완료 후 아래 절차를 순서대로 실행한다.
 
-### 0-A. 브랜치 확인
+### 0-C. 브랜치 확인
 
 ```bash
 git branch --show-current
@@ -128,7 +128,7 @@ git branch --show-current
 브랜치명이 `플랫폼/버전` 형식(예: `toss/v1.0`, `pureweb/1.2.3`)인지 확인한다.
 버전 값은 Unity Editor의 `Player Settings` → `Version`(또는 `ProjectSettings/ProjectSettings.asset`의 `bundleVersion`)에서 확인한다 — 임의로 지어내지 않는다.
 
-- 형식이 맞으면 → 0-B로 진행
+- 형식이 맞으면 → 0-D로 진행
 - 형식이 맞지 않으면(예: `main`, `master`, 빈 값) → 아래 메시지를 출력하고 **사용자가 확인할 때까지 대기**:
 
 ```
@@ -140,34 +140,7 @@ git branch --show-current
 
 AskUserQuestion으로 확인 후 진행한다.
 
-### 0-B. Addressables 패키지 확인
-
-porting-init 단계에서 `HLAddressableTool.cs`는 Addressables 패키지가 있을 때만 복사된다(없으면 컴파일 오류가 나므로 자동으로 건너뜀). 패키지 상태와 실제 파일 존재 여부가 일치하는지 확인한다.
-
-```bash
-grep -q "com.unity.addressables" Packages/manifest.json \
-  && echo "ADDRESSABLES_OK" \
-  || echo "ADDRESSABLES_MISSING"
-ls Assets/Editor/HLAddressableTool.cs 2>/dev/null && echo "FILE_EXISTS" || echo "FILE_ABSENT"
-```
-
-| 패키지 | 파일 | 판정 |
-|---|---|---|
-| OK | EXISTS | 정상 → 0-C로 진행 |
-| MISSING | ABSENT | 정상(porting-init이 건너뜀) → 0-C로 진행 |
-| MISSING | EXISTS | 과거 복사분 잔존 — 컴파일 오류 유발 가능. 아래 AskUserQuestion |
-| OK | ABSENT | porting-init 미실행/실패 추정. 아래 AskUserQuestion |
-
-- `MISSING` + `EXISTS` → AskUserQuestion:
-  > "Addressables 패키지가 없는데 `HLAddressableTool.cs`가 이미 존재합니다(과거 복사분으로 추정). 컴파일 오류를 유발할 수 있습니다.
-  > - 패키지 설치 후 계속 → Unity Editor에서 `com.unity.addressables`를 설치한 뒤 알려주세요.
-  > - 파일 삭제 후 계속 → `rm -f Assets/Editor/HLAddressableTool.cs Assets/Editor/HLAddressableTool.cs.meta`"
-- `OK` + `ABSENT` → AskUserQuestion:
-  > "Addressables 패키지는 있는데 `HLAddressableTool.cs`가 없습니다. porting-init에서 복사가 누락된 것으로 보입니다.
-  > - 다시 복사 → `cp ~/github/h5-porting-workflow/templates/Editor/HLAddressableTool.cs ./Assets/Editor/HLAddressableTool.cs`
-  > - 건너뛰고 계속"
-
-### 0-C. STEP 0 산출물 커밋
+### 0-D. STEP 0 산출물 커밋
 
 STEP 0에서 생성·수정된 파일을 커밋한다.
 
@@ -349,7 +322,7 @@ cat ~/.claude/settings.json 2>/dev/null | grep -A3 "PostToolUse\|CompileChecker"
 > hook 설정 방법: Claude Code 설정(`~/.claude/settings.json`) → PostToolUse 항목에 `.cs` 파일 수정 시 컴파일 체크 명령 추가.
 > 설정 방법을 모르면 `/help`에서 hooks 관련 문서를 참고하거나, 사용자에게 직접 설정 요청 후 계속 진행한다.
 
-> HyperLane SDK 설치는 STEP 0-0에서 이미 끝났다 — 여기서 다시 확인하지 않는다.
+> HyperLane SDK 설치는 STEP 0-A에서 이미 끝났다 — 여기서 다시 확인하지 않는다.
 
 ---
 
