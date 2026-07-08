@@ -5,7 +5,7 @@
 ### Response Rules
 - **Always respond in Korean** in chat, regardless of the language used in instructions or code.
 - Before any code analysis response, ask the user to choose the output format (save as `.md` file / print in chat).
-    - If `.md` file is chosen: save to the `.md/` subfolder inside the folder containing the target class. Do NOT duplicate output in chat. (e.g., `Assets/500_Scripts/PlayManager/.md/bug-xxx.md`)
+    - If `.md` file is chosen: always ask the user where to save it — never assume a default location. Do NOT duplicate output in chat.
     - If chat is chosen: print directly in chat.
 - Do NOT delete original comments. If deletion is necessary, always ask first.
 - **No inference**: Only present facts confirmed by directly reading the code. Do not assert causes using speculative expressions like "it is likely that~" or "it may be because~". If no evidence is found in the code, explicitly state "코드에서 근거를 찾지 못했습니다".
