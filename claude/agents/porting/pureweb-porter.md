@@ -33,6 +33,11 @@ tools: Read, Bash, Edit, Write, Agent, Skill
 >
 > 확정 답변은 h5-port 후속 모드(재실행 시 미확정 재질문 → 부분 수정 재호출)가 수집·반영한다.
 
+> **완료 여부 사전 확인 — 사용자 선작업 인식**: 사용자가 이 섹션의 작업을 포터 실행 전에 이미 직접 처리했을 수 있다. 각 섹션 착수 전, 본문에 표시된 "**완료 신호**"(또는 섹션 자체의 탐색·완료검증 grep)로 이미 반영됐는지 확인한다.
+> 1. 완료 신호와 **정확히 일치**(해당 API 호출·패턴이 코드에 이미 존재)하면 → 코드 수정 없이 스킵. `pureweb-checklist.md` `## 단계 진행`에 `- [x] {단계} — ⏭️ 스킵: 이미 처리됨 확인({파일}:{라인})`으로 기록하고 다음 섹션으로 진행한다.
+> 2. 부분 일치·모호(관련 코드는 있으나 완료 신호와 다름)하면 → 스킵하지 않고 섹션의 원래 절차대로 진행한다. 과잉 스킵으로 필요한 포팅이 누락되는 게, 이미 된 걸 다시 확인하는 것보다 위험하다.
+> 3. 완료 신호가 명시되지 않은 섹션(사람 결정·수동 작업 전용)은 이 확인을 적용하지 않는다.
+
 ---
 
 ## 컴파일 체크 자동화
@@ -465,6 +470,8 @@ grep -n "runInBackground\|RunInBackground" Assets/HyperLane/Editor/H5Builder.cs 
 
 ### 1-A. 리뷰 팝업 제거 🤖
 
+**완료 신호**: VOCAB `리뷰 팝업` 파일:라인 위치에 팝업 표시 호출이 이미 `#if !UNITY_WEBGL`로 감싸져 있음 → 스킵.
+
 모바일에서만 의미 있는 팝업(리뷰 요청, 앱스토어 유도 등)을 WebGL에서 차단한다. 플랫폼 무관 WebGL 공통 처리 — `[웹지엘]` prefix.
 
 PORTING_VOCAB.md 메인 표 → `리뷰 팝업` 행(위치) 확인:
@@ -513,6 +520,8 @@ Read에서 파악한 발동조건을 `Docs/porting/pureweb-checklist.md` `## 기
 
 ### 2. SafeArea 제거
 
+**완료 신호**: `ApplySafeArea()` 호출이 이미 `#if !UNITY_WEBGL`로 감싸져 있음 → 스킵.
+
 SafeArea 관련 코드를 찾아 WebGL에서 비활성화한다.
 
 ```bash
@@ -531,6 +540,8 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" {SCRIPTS_PATH} --inc
 
 ### 3. Screen.fullScreen / SetResolution 방지
 
+**완료 신호**: `Screen.SetResolution(width, height, false)`가 이미 `#if UNITY_WEBGL` 분기 안에 존재 → 스킵.
+
 ```bash
 grep -rn "Screen.SetResolution\|Screen.fullScreen" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
@@ -548,6 +559,8 @@ Screen.SetResolution(width, height, true);
 ---
 
 ### 3-B. 외부 네트워크 요청 차단
+
+**완료 신호**: 아래 탐색 grep 자체가 이미 "미처리 항목 찾기" 형태다 — 0건이면 완료(스킵), 결과 있으면 그 항목만 처리.
 
 WebGL에서 외부 도메인 요청은 CORS 오류를 유발하거나 현재 탭을 이탈시킨다.
 아래 패턴을 모두 탐색한다.
@@ -591,6 +604,8 @@ public void GetServerTime(Action<DateTime> callback)
 
 ### 4. 토스 콘텐츠 동기화
 
+**완료 신호**: 아래 탐색 자체가 완료 판정이다 — 0건이면 완료(스킵).
+
 토스 선행 완료 여부를 물어볼 필요 없이 아래 탐색으로 바로 판단한다 — 결과가 있으면 토스 처리가 이미 있다는 뜻이므로 동기화 진행, 0건이면 스킵:
 
 ```bash
@@ -604,6 +619,8 @@ grep -rln "WEBGL_TOSS" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 ---
 
 ### 5. 광고 즉시 지급
+
+**완료 신호**: 아래 "완료 검증" 절의 grep을 착수 전에도 먼저 실행한다 — 0건이면 이미 완료(스킵).
 
 PORTING_VOCAB.md의 `{AD_REWARDED_METHOD}` 값을 실제 메서드명으로 사용해 탐색한다.
 
@@ -647,6 +664,8 @@ grep -rn "{AD_REWARDED_METHOD}" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 ---
 
 ### 6. IAP 즉시 지급
+
+**완료 신호**: 아래 "완료 검증" 절의 grep을 착수 전에도 먼저 실행한다 — 0건이면 이미 완료(스킵).
 
 PORTING_VOCAB.md의 `{IAP_METHOD}` 값을 실제 메서드명으로 사용해 탐색한다.
 
@@ -740,6 +759,8 @@ public class SomeManager : MonoBehaviour { ... }
 
 #### 7-1. DLL .meta — WebGL 비활성화
 
+**완료 신호**: 아래 탐색이 완료 판정 — 0건이면 완료(스킵).
+
 ```bash
 # D 대상 SDK 폴더별로
 find {SDK_FOLDER} \( -name "*.dll.meta" -o -name "*.aar.meta" \) 2>/dev/null \
@@ -754,6 +775,8 @@ find {SDK_FOLDER} \( -name "*.dll.meta" -o -name "*.aar.meta" \) 2>/dev/null \
 
 #### 7-2. .jslib .meta — WebGL 비활성화
 
+**완료 신호**: 발견된 `.jslib.meta`에 이미 `WebGL: enabled: 0`이면 완료(스킵).
+
 ```bash
 find Assets -name "*.jslib" 2>/dev/null | grep -v HyperLane
 ```
@@ -761,6 +784,8 @@ find Assets -name "*.jslib" 2>/dev/null | grep -v HyperLane
 발견 시 .meta에서 `WebGL: enabled: 1` → `0` 으로 변경.
 
 #### 7-3. C# 코드 가드
+
+**완료 신호**: 아래 탐색이 완료 판정 — `A_MISSING` 출력이 없으면 완료(스킵).
 
 ```bash
 # D 대상 SDK 네임스페이스별로 — UNITY_WEBGL 가드 없는 using 파일
@@ -778,6 +803,8 @@ using SomeSDK;
 
 #### 7-4. StreamingAssets html 파일 확인
 
+**완료 신호**: 아래 탐색이 완료 판정 — 0건이면 완료(스킵).
+
 빌드 결과물에 외부 SDK 스크립트가 포함된 html 파일이 있는지 확인한다.
 
 ```bash
@@ -789,6 +816,8 @@ find Assets/StreamingAssets -name "*.html" 2>/dev/null \
 - 결과 있음 → 해당 html 파일을 Read해서 외부 SDK 스크립트 태그 제거
 
 #### 7-5. WebGL 비호환 서비스 클래스 — 메서드 레벨 분기
+
+**완료 신호**: 아래 탐색으로 찾은 파일에 이미 `#if UNITY_WEBGL` 스텁(콜백 즉시 호출 등)이 있으면 그 파일은 완료(스킵), 없는 파일만 처리.
 
 외부 SDK가 아닌 게임 내 서비스 클래스가 `TcpClient`, `Thread`, `Socket` 등 WebGL 미지원 API를 사용하는 경우.
 
@@ -837,6 +866,8 @@ public class TimeServer
 
 ### 8. 서버 저장 차단 / LocalStorage 검증
 
+**완료 신호**: 아래 탐색이 완료 판정 — 0건이면 완료(스킵).
+
 ```bash
 # System.IO 직접 사용
 grep -rn "File\.Read\|File\.Write\|StreamWriter\|StreamReader" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
@@ -875,6 +906,8 @@ public void SaveToServer(string key, string value, System.Action<bool> onComplet
 
 ### 8-A. 저장 키 분리
 
+**완료 신호**: `{게임이름}_{키이름}_{DEV|LIVE}` 형식의 SAVE_KEY가 이미 존재 → 스킵.
+
 PORTING_VOCAB.md `저장 키` 판정이 **"게임별 구분 없음"** 이면 필수. 판정이 "있음"이면 스킵.
 
 저장 담당 파일(`{SAVE_METHOD}` 위치)을 Read해 `PlayerPrefs.SetString` 키를 확인한다.
@@ -901,6 +934,8 @@ grep -n "PlayerPrefs\.SetString\|PlayerPrefs\.GetString" {SAVE_FILE} 2>/dev/null
 ---
 
 ### 8-B. Base64 인코딩 래핑
+
+**완료 신호**: 저장/불러오기 메서드에 `Convert.ToBase64String`/`Convert.FromBase64String` 이미 존재 → 스킵.
 
 > **PORTING_VOCAB.md `저장 인코딩` 행이 `없음`이면 필수 — 스킵 불가.**
 > PlayerPrefs 평문 JSON은 브라우저 개발자도구 IndexedDB에서 그대로 노출된다.
@@ -1004,6 +1039,8 @@ find Assets -iname "*icon*" -o -iname "*appicon*" -o -iname "*launcher*" 2>/dev/
 
 ### 9-A. WebGL 템플릿 — persistentDataPath 자동 동기화
 
+**완료 신호**: 아래 탐색으로 `config.autoSyncPersistentDataPath = true;`가 이미 주석 해제 상태면 완료(스킵).
+
 HyperLane WebGLTemplates(Unity 기본 템플릿 계열)는 `config.autoSyncPersistentDataPath = true;` 줄이 기본 주석 처리되어 있다. 주석 상태로 두면 브라우저 콘솔에 매 빌드마다 "Manual synchronization ... JS_FileSystem_Sync() is deprecated" 경고가 뜬다(PlayerPrefs/파일 저장 자체는 정상 동작 — 콘솔 경고일 뿐이지만 매번 재발생하므로 미리 처리).
 
 ```bash
@@ -1019,6 +1056,8 @@ grep -n "autoSyncPersistentDataPath" Assets/WebGLTemplates/PureWeb/index.html
 ---
 
 ### 10. CheatConsole.prefab 씬 추가 👤
+
+**완료 신호**: 아래 탐색이 완료 판정 — 결과 있으면 완료(스킵, "이미 추가됨").
 
 ```bash
 grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
