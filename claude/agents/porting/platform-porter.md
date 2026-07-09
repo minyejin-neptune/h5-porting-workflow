@@ -1182,7 +1182,7 @@ WEBGL_LIVE_VER narrow {SCRIPTS_PATH} platform-checklist.md SubmitLeaderBoard
 hook이 각 `.cs` 수정 시 자동 실행했으므로 마지막 컴파일 결과만 확인한다:
 
 ```bash
-grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
+grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -3
 ```
 
 - 에러 없음 → ✅ 완료 리포트 출력
@@ -1205,65 +1205,31 @@ git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
 
 ## 완료 후 채팅 출력
 
-작업 완료 후 아래 형식으로 리포트를 출력한다.
+상세 항목별 처리 내역(✅/⏭️, 근거 파일:라인)은 `platform-checklist.md`에 이미 기록돼 있다 — 채팅에 다시 나열하지 않는다.
+채팅에는 체크리스트에 남지 않는 것만 출력한다: **CompileChecker 결과**, 그리고 이번 실행에서 실제로 해당한 **🔍 수동 테스트 필요** / **⚠️ 주의 필요** / **👤 직접 처리 필요** 항목만. 각 구획은 해당 항목이 있을 때만 출력하고(해당 없으면 구획째 생략), ✅만인 항목은 어느 구획에도 넣지 않는다.
 
 ```
-✅ platform-porter 완료 — 포팅 체크리스트 리포트
-
-범례: ✅ 코드 처리 완료 | 🔍 수동 테스트 필요 | ⚠️ 주의 필요 | ⏭️ 스킵 | 👤 직접 처리 필요
-
-────────────────────────────────────────────────────────────────
-카테고리 항목 결과
-────────────────────────────────────────────────────────────────
-UI UID/version 추가 ✅ {파일명}:N / 👤 직접 처리 필요
-             근거: HLSDK.Instance.GetUserKey() + Application.version
-
-서버 연동 서버 시간 체크 ✅ {파일명}:N
-             근거: HLSDK.Instance.GetTime() 분기 추가
-
-게임 로그인 로그인 API 연동 ✅ {파일명}:N
-             근거: HLSDK.Instance.QuickLogin() → LoadCloud 직전 삽입
-             🔍 실제 로그인 흐름 확인 필요 (중복 실행·코루틴 겹침 주의)
-
-로그인 로그 로그인 로그 삽입 ✅ {파일명}:N
-             근거: HLSDK.Instance.LogDailyLogin() → 로비 등 정상 진입 시점
-
-백그라운드 백그라운드 사운드 처리 ✅ {파일명}:N
-             근거: HLSDK.Instance.OnApplicationPause 구독
-             🔍 광고 나올 때, 앱 나갔을 때 사운드 차단·복원 확인 필요
-
-광고 SDK 광고 API — 전면/보상형 로드·노출 ✅ N건 처리
-             근거: HLSDK.Instance.Load/ShowRewardedAd·Interstitial 연동
-             🔍 실제 광고 로드·노출 확인 필요 — Load 실패 시 광고가 안 보이는지(퓨어웹 즉시지급 분기와 게이트가 섞이지 않았는지) 확인
-광고 SDK 광고 중 BGM 처리 ✅ OnAdVisibilityChanged(bool) 연결
-
-인앱 SDK 가격 연동 ✅ {파일명}:N / ⏭️ 스킵
-             근거: HLSDK.GetProductInfoByOriginalPID().displayAmount
-인앱 SDK 구매 연동 ✅ {파일명}:N
-             근거: HLSDK.Instance.PurchaseByOriginalPID()
-             🔍 실제 구매 흐름 및 서버 로그 확인 필요
-
-치트 서버·로컬 초기화 + 재시작 방지 ✅ Reset Local / Reset Local+Server 등록
-             👤 CheatConsole.prefab을 씬에 직접 추가 필요
-
-서버 연동 HLSDK 저장/불러오기 ✅ {파일명}:N
-             🔍 서버 초기화 후 로컬 불러오기 / 로컬 초기화 후 서버 불러오기 확인 필요
-
-햅틱 기기 진동 처리 ✅ N건 처리 / 👤 직접 처리 필요
-
-SafeArea SafeArea 적용 ✅ {파일명}:N / ⚠️ 클래스 없음
-
-랭킹 접근 버튼·보드·점수 등록 ✅ / 👤 직접 처리 필요
-
-공유하기 ShareLink 추가 ✅ 기존 버튼에 연결 / 👤 직접 처리 필요
-
-로컬라이제이션 ✅ GetSystemLang() 사용 / 👤 추가 작업 필요
-────────────────────────────────────────────────────────────────
+✅ platform-porter 완료 — 상세: Docs/porting/platform-checklist.md
 
 CompileChecker: 통과 / 에러 N건
 
+🔍 수동 테스트 필요:
+- 로그인 — 중복 실행·코루틴 겹침 확인
+- 백그라운드 사운드 — 광고 노출/앱 이탈 시 사운드 차단·복원 확인
+- 광고 로드/노출 — Load 실패 시 광고 미노출 확인(퓨어웹 즉시지급 분기와 게이트가 안 섞였는지)
+- 인앱 구매 — 실제 구매 흐름·서버 로그 확인
+- HLSDK 저장/불러오기 — 서버↔로컬 초기화 순서 확인
+
+⚠️ 주의 필요:
+- {해당하는 항목명} — {사유, 예: SafeArea 클래스 없음}
+
+👤 직접 처리 필요:
+- {해당하는 항목명, 예: UID/version 삽입 위치, CheatConsole.prefab 씬 추가, 햅틱 강도 확정, 랭킹/공유 버튼 연결, 로컬라이제이션 텍스트}
+
 다음 단계: 개별 플랫폼 포터(예: toss-porter) 실행 → 배너·프로모션 등 플랫폼 전용 작업 진행
 ```
+
+위 🔍/⚠️/👤 목록은 예시다 — 이번 실행에서 실제로 해당하는 항목만 나열한다.
 
 `$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_{현재 .porting-context 값(TOSS 등)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md` (예: `.porting-context`가 `TOSS`면 `WEBGL_TOSS`).
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
