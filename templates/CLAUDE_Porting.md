@@ -7,7 +7,6 @@
 - Before any code analysis response, ask the user to choose the output format (save as `.md` file / print in chat).
     - If `.md` file is chosen: always ask the user where to save it — never assume a default location. Do NOT duplicate output in chat.
     - If chat is chosen: print directly in chat.
-- Do NOT delete original comments. If deletion is necessary, always ask first.
 - **No inference**: Only present facts confirmed by directly reading the code. Do not assert causes using speculative expressions like "it is likely that~" or "it may be because~". If no evidence is found in the code, explicitly state "코드에서 근거를 찾지 못했습니다".
 - **Insufficient data**: If the information needed to make a judgment is not present in the code, explicitly state "insufficient data".
 
@@ -32,12 +31,12 @@ Details: [.md/PROJECT.md](.md/PROJECT.md)
 
 ## Porting Workflow Overview
 
-포팅 관련 요청을 받으면 아래 순서를 따른다 — 사용자가 매번 각 단계를 명시하지 않아도 먼저 제안한다.
+When a request is porting-related, follow this order — proactively suggest it even if the user doesn't spell out each step.
 
-1. 새 포팅 세션이면 `h5-port`로 시작한다 — STEP 0~4(인코딩·`porting-scan`·`porting-scan-verify`·포터 실행·`porting-verify` 최종검증)를 순서대로 자동 진행한다. 사용자가 특정 단계만 요청하면 그 단계로 바로 진입(예: "포터만 다시 해줘" → STEP 3).
-2. 포팅 코드를 수정했으면 커밋 전 `porting-verify` 스킬로 검증한다(❌ 미처리/⚠️ 확인 필요/✅ 이상 없음 판정 + exceptions 처리까지 전담) — `h5-port-verify.py`를 직접 실행하지 않는다.
-3. `platform-checklist.md` `## 단계 진행`에 `⏭️ 스킵: /platform-decisions ...로 처리 필요`가 있으면, 또는 사용자가 햅틱·랭킹버튼·공유하기·UID/version·UI삭제·로컬라이제이션에 대해 직접 물어보면 `platform-decisions` 스킬을 실행한다(인자 없이 실행하면 대기 항목부터 보여줌) — platform-porter(서브에이전트)는 이 질문들을 할 수 없어서 분리돼 있다.
-4. h5-port 완료 보고에 대기 중인 판단 항목이 남아있다고 나오면, 사용자에게 확인 없이 바로 `platform-decisions` 실행을 제안한다.
+1. For a new porting session, start with `h5-port` — it runs STEP 0–4 (encoding fix, `porting-scan`, `porting-scan-verify`, porter execution, `porting-verify` final check) in sequence automatically. If the user asks for a specific step only, jump straight there (e.g., "redo just the porter" → STEP 3).
+2. After modifying porting-related code, verify with the `porting-verify` skill before committing (it owns interpreting the result — `❌ 미처리` / `⚠️ 확인 필요` / `✅ 이상 없음` — plus exceptions handling) — do not run `h5-port-verify.py` directly.
+3. If `platform-checklist.md` `## 단계 진행` shows `⏭️ 스킵: /platform-decisions ...로 처리 필요`, or the user asks directly about haptics, ranking button, share text, UID/version, unnecessary-UI removal, or localization, run the `platform-decisions` skill (no argument shows what's pending) — platform-porter (a subagent) can't ask these questions itself, which is why they're split out.
+4. If h5-port's completion report lists pending judgment items, suggest running `platform-decisions` right away without waiting to be asked.
 
 ---
 
@@ -100,6 +99,7 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 
 ## General Coding Rules
 
+- Do NOT delete original comments. If deletion is necessary, always ask first.
 - **After changing code, always update the affected docs** (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
 - Prefer explicit types over `var`.
