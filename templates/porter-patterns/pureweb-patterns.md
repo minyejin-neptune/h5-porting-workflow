@@ -18,7 +18,6 @@ private IEnumerator {GAME_INIT_METHOD}()
 #if WEBGL_DEBUG_CONSOLE
     RegisterCheats();
 #endif
-    // platform-porter가 여기 이어서 로그인(InitPlatform()) 호출을 삽입한다
 #endif
     // 기존 로직 계속
 }
@@ -61,7 +60,6 @@ private async UniTask {GAME_INIT_METHOD}()
 #if WEBGL_DEBUG_CONSOLE
     RegisterCheats();
 #endif
-    // platform-porter가 여기 이어서 로그인(InitPlatform()) 호출을 삽입한다
 #endif
     // 기존 로직 계속
 }
@@ -124,7 +122,7 @@ public void ShowRewardAD(AdRewardType type, GameObject context, System.Action<bo
     OnSuccess?.Invoke(true);
     return;
 #else
-    // 기존 광고 로직 — 나중에 platform-porter가 이 #else 앞에 #elif UNITY_WEBGL(HLSDK 경유)을 끼워넣는다
+    // 기존 광고 로직
 #endif
 }
 ```
@@ -141,7 +139,7 @@ public void Purchase(string productId)
     GiveProduct(productId);
     return;
 #else
-    // 기존 IAP 로직 — 나중에 platform-porter가 이 #else 앞에 #elif UNITY_WEBGL(HLSDK 경유)을 끼워넣는다
+    // 기존 IAP 로직
 #endif
 }
 ```
@@ -217,7 +215,7 @@ public void SaveToServer(string key, string value, System.Action<bool> onComplet
     onComplete?.Invoke(true);
     return;
     #else
-    // 나중에 platform-porter가 여기(HLSDK 서버 동기화만)를 채운다 — allData를 그대로 재사용, 로컬 저장은 이미 위에서 끝남
+    // HLSDK 서버 동기화 — allData 재사용, 로컬 저장은 이미 완료됨
     #endif
 #else
     // 기존 서버 저장 로직

@@ -112,7 +112,7 @@ private async UniTask<bool> InitPlatform()
 // 로비 진입 완료 시점 (Start, OnEnable, 초기화 콜백 등)
 #if UNITY_WEBGL
     #if WEBGL_PUREWEB
-        // PureWeb — 실사용자 세션 없음(QuickLogin이 항상 성공만 반환하는 스텁)이라 제외
+        // PureWeb — 제외
     #else
         #if !UNITY_EDITOR
         HLSDK.Instance.LogDailyLogin();
@@ -138,9 +138,9 @@ HLSDK.Instance.OnApplicationPause += (string pauseStr) =>
 
 ```csharp
 #if UNITY_WEBGL && WEBGL_PUREWEB
-    isLoadedRewardVideo = true;           // pureweb-porter가 이미 넣은 분기 — 유지
+    isLoadedRewardVideo = true;
 #elif UNITY_WEBGL
-    HLSDK.Instance.LoadRewardedAd(success => { isLoadedRewardVideo = success; });  // 이 포터가 추가
+    HLSDK.Instance.LoadRewardedAd(success => { isLoadedRewardVideo = success; });
 #else
     // 기존 네이티브 로직 — 유지
 #endif
@@ -455,7 +455,7 @@ public void {IAP_METHOD}(string productId, Action OnSuccess, Action OnFailed = n
     OnSuccess?.Invoke();
     return;
 #elif WEBGL_PUREWEB
-    GiveProduct(productId);  // pureweb-porter가 이미 넣은 분기 — 유지, HLSDK 미경유
+    GiveProduct(productId);  // HLSDK 미경유
     OnSuccess?.Invoke();
 #elif UNITY_WEBGL
     HLSDK.Instance.PurchaseByOriginalPID(
@@ -562,11 +562,10 @@ void RegisterCheats()
 
 ```csharp
 #if UNITY_WEBGL
-    string allData = {LOCAL_SAVE_METHOD}(); // pureweb-porter가 이미 넣은 공통 호출 — Base64 인코딩 포함, 그대로 유지
+    string allData = {LOCAL_SAVE_METHOD}(); // Base64 인코딩 포함 — 그대로 재사용
     #if WEBGL_PUREWEB
-    // pureweb-porter가 이미 넣은 분기 — 유지
     #else
-    // ↓ platform-porter가 여기를 채운다 — 이미 !WEBGL_PUREWEB 확정된 지점, allData 재사용
+    // 이 지점은 !WEBGL_PUREWEB 확정 — allData 재사용해 서버 동기화만 수행
     string extraData = /* "key1 : val1, key2 : val2" — 서버 모니터링용 필드 */;
     string timestamp = new System.DateTimeOffset(/* 프로젝트의 현재 시각 소스 — 예: System.DateTime.UtcNow */).ToUnixTimeSeconds().ToString();
 
