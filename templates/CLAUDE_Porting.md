@@ -201,9 +201,6 @@ If changes are already mixed on the same branch — before committing:
 
 ## Scope & Approval Rules
 
-- **Do not create new files** without explicit user confirmation. Propose the file name and purpose first, wait for approval.
-- **Do not expand scope** beyond what was requested — no new controllers, features, or refactors unless asked.
-- Before editing shared/global variables or prefixes (e.g., promotion prefixes, manifest entries): verify they are not reused elsewhere. Prefer introducing a new variable over modifying the existing one.
 - If unsure whether a change is in scope, stop and ask.
 
 ---
