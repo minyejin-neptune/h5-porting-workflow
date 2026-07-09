@@ -475,7 +475,7 @@ grep -rn "SceneManager.LoadScene\|LoadSceneAsync\|OnSceneLoaded" {SCRIPTS_PATH} 
 grep -rn "LogDailyLogin\|LogLoginAsync\|LogLogin" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
 ```
 
-발견된 로비 진입 시점에 삽입한다. **조건 3가지 — PureWeb 제외 + 에디터 제외 + WebGL 대상**: PureWeb의 `QuickLogin`은 실제 인증 없이 항상 성공만 반환하는 스텁(`PureHandler.QuickLoginAsync` 확인)이라 서버에 붙일 실사용자 세션이 없어 DAU 로그 의미가 없고, 에디터는 테스트 중 DAU 오염을 막기 위해 제외한다.
+발견된 로비 진입 시점에 삽입한다. **조건 3가지 — PureWeb 제외 + 에디터 제외 + WebGL 대상**: PureWeb의 `QuickLogin`은 실제 인증 없이 항상 성공만 반환하는 스텁(`PureHandler.QuickLoginAsync` 확인)이라 서버에 붙일 실사용자 세션이 없어 제외하고, 에디터는 테스트 중 실행되지 않도록 제외한다.
 
 삽입 전 `porter-rule.md` § 코딩 컨벤션(패턴 A/B, 기존 iOS/Android 분기 주의)에 따라 **그 위치의 기존 전처리문 계층을 먼저 확인**한다 — 이미 `#if UNITY_WEBGL { ... }` 구조가 있으면 그 안에 위 3조건을 계층으로 끼워 넣고, 없으면 아래 코드 패턴의 계층 구조를 그대로 새로 만든다. 위 3조건을 플랫 `&&` 한 줄로 합쳐 새로 쓰지 않는다.
 

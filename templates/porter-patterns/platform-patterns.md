@@ -112,7 +112,7 @@ private async UniTask<bool> InitPlatform()
 // 로비 진입 완료 시점 (Start, OnEnable, 초기화 콜백 등)
 #if UNITY_WEBGL
     #if WEBGL_PUREWEB
-        // PureWeb — 실사용자 세션 없음(QuickLogin이 항상 성공만 반환하는 스텁)이라 DAU 로그 제외
+        // PureWeb — 실사용자 세션 없음(QuickLogin이 항상 성공만 반환하는 스텁)이라 제외
     #else
         #if !UNITY_EDITOR
         HLSDK.Instance.LogDailyLogin();
