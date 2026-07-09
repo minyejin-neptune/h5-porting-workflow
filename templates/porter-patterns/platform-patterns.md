@@ -487,36 +487,63 @@ void RegisterCheats()
 {
     CheatRegister.ClearAll();
 
+    // DEV/LIVE 키는 리터럴로 직접 참조한다 — SAVE_KEY 상수는 빌드 시점에
+    // 둘 중 하나로만 고정되므로(8-A 패턴), 지금 빌드가 아닌 쪽 키를 지우려면
+    // 상수가 아니라 두 리터럴 문자열이 둘 다 필요하다.
+    const string SAVE_KEY_DEV = "{GameName}_Data_DEV";
+    const string SAVE_KEY_LIVE = "{GameName}_Data_LIVE";
+
     CheatRegister.Register(
-        "Reset Local",
-        "Reset local data",
+        "Reset Local (DEV)",
+        "Reset local data for DEV build",
         Color.yellow,
         () =>
         {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드
+            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_DEV만 대상
         }
     );
 
     CheatRegister.Register(
-        "Reset Local+Server",
-        "Reset local and server data",
+        "Reset Local+Server (DEV)",
+        "Reset local and server data for DEV build",
         Color.red,
 #if !UNITY_EDITOR
         () =>
         {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드
+            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_DEV만 대상
             async UniTaskVoid ResetServerAsync()
             {
                 string empty = /* 검수받은 빈 데이터 직렬화 */;
                 string timestamp = new System.DateTimeOffset(System.DateTime.UtcNow).ToUnixTimeSeconds().ToString();
                 NTH5Response<SetUserDataResponse> result = await HLSDK.Instance.SetUserData(empty, timestamp, "");
-                Debug.Log("[CHEAT] 서버 초기화: " + (result.success ? "성공" : "실패 - " + result.error));
+                Debug.Log("[CHEAT] DEV server reset: " + (result.success ? "success" : "failed - " + result.error));
             }
             ResetServerAsync().Forget();
         }
 #else
         () => { /* 에디터: 로컬만 초기화 */ }
 #endif
+    );
+
+    CheatRegister.Register(
+        "Reset Local (LIVE)",
+        "Reset local data for LIVE build",
+        Color.yellow,
+        () =>
+        {
+            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_LIVE만 대상
+        }
+    );
+
+    CheatRegister.Register(
+        "Reset Local+Server (LIVE)",
+        "Reset local data only. LIVE server data is NOT reset (production safety).",
+        Color.red,
+        () =>
+        {
+            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_LIVE만 대상
+            // ⚠️ 실제 서버(SetUserData) 초기화는 절대 수행하지 않는다 — 프로덕션 데이터 보호.
+        }
     );
 
     CheatRegister.Build(); // 반드시 마지막에 호출 — 미호출 시 UI에 표시 안 됨
