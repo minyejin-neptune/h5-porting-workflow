@@ -505,10 +505,7 @@ void RegisterCheats()
         "Reset Local (DEV)",
         "Reset local data for DEV build",
         Color.yellow,
-        () =>
-        {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_DEV만 대상
-        }
+        () => ResetLocal(SAVE_KEY_DEV)
     );
 
     CheatRegister.Register(
@@ -518,7 +515,7 @@ void RegisterCheats()
 #if !UNITY_EDITOR
         () =>
         {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_DEV만 대상
+            ResetLocal(SAVE_KEY_DEV);
             async UniTaskVoid ResetServerAsync()
             {
                 string empty = /* 검수받은 빈 데이터 직렬화 */;
@@ -529,7 +526,7 @@ void RegisterCheats()
             ResetServerAsync().Forget();
         }
 #else
-        () => { /* 에디터: 로컬만 초기화 */ }
+        () => ResetLocal(SAVE_KEY_DEV)
 #endif
     );
 
@@ -537,24 +534,24 @@ void RegisterCheats()
         "Reset Local (LIVE)",
         "Reset local data for LIVE build",
         Color.yellow,
-        () =>
-        {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_LIVE만 대상
-        }
+        () => ResetLocal(SAVE_KEY_LIVE)
     );
 
     CheatRegister.Register(
         "Reset Local+Server (LIVE)",
         "Reset local data only. LIVE server data is NOT reset (production safety).",
         Color.red,
-        () =>
-        {
-            // VOCAB 저장 방식에 따른 로컬 초기화 코드 — SAVE_KEY_LIVE만 대상
-            // ⚠️ 실제 서버(SetUserData) 초기화는 절대 수행하지 않는다 — 프로덕션 데이터 보호.
-        }
+        () => ResetLocal(SAVE_KEY_LIVE)
     );
 
     CheatRegister.Build(); // 반드시 마지막에 호출 — 미호출 시 UI에 표시 안 됨
+}
+
+// 게임 정지(재시작 전 자동 저장 등이 덮어쓰는 것 방지) + VOCAB 저장 방식에 따른 실제 로컬 삭제
+void ResetLocal(string key)
+{
+    Time.timeScale = 0f;
+    // VOCAB 저장 방식에 따른 로컬 초기화 코드 — key 대상
 }
 ```
 
