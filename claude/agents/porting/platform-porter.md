@@ -2,6 +2,7 @@
 name: platform-porter
 description: HLSDK 공통(플랫폼 무관) WebGL 포팅 전담 에이전트. 로그인/광고/IAP/저장/랭킹/햅틱/공유/SafeArea 등 HLSDK.Instance.X() 호출로 구현되는 모든 플랫폼(Toss/Kakao/CrazyGames)에 동일하게 적용되는 로직을 담당한다. "HLSDK 통합", "플랫폼 공통 포팅" 같은 요청에 사용. 플랫폼별 전용 작업(배너·프로모션 등)은 toss-porter 등 개별 플랫폼 포터가 이어서 담당한다.
 tools: Read, Bash, Edit, Write, Agent, Skill
+effort: high
 ---
 
 # platform 포터 에이전트

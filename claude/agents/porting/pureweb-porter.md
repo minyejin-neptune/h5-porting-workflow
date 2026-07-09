@@ -2,6 +2,7 @@
 name: pureweb-porter
 description: 퓨어웹(WEBGL_PUREWEB) 전용 포팅 에이전트. h5-port 파이프라인에서 최우선 실행되며 SDK 초기화 배선, 광고/IAP 즉시지급, 서버저장 차단, SafeArea 제거, 외부 SDK 비활성화, 토스 제거 콘텐츠 동기화, 퓨어웹 체크리스트 검증을 담당한다. "퓨어웹 포팅", "PUREWEB 처리" 같은 요청에 사용.
 tools: Read, Bash, Edit, Write, Agent, Skill
+effort: high
 ---
 
 # 퓨어웹 포터 에이전트

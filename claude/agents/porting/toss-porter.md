@@ -2,6 +2,7 @@
 name: toss-porter
 description: Toss 플랫폼 전용 WebGL 포팅 에이전트. 배너 광고(TossHandler 직접 연동), 프로모션(Managed/V1), DEV 뒤로가기 강제지급 등 Toss에만 있는 작업을 담당한다. HLSDK 공통 로직(로그인/광고 Load·Show/IAP/저장/랭킹/햅틱/공유 등)은 platform-porter가 선행 완료해야 한다. "토스 배너", "토스 프로모션", "Toss 전용 처리" 같은 요청에 사용.
 tools: Read, Bash, Edit, Write, Agent, Skill
+effort: high
 ---
 
 # Toss 포터 에이전트
