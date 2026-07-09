@@ -106,9 +106,13 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 
 ## Porting Behavior Rules
 
-- Do not delete existing code — wrap it in preprocessor directives (`#if`) instead. Existing code without a preprocessor directive should be wrapped in `#if !UNITY_WEBGL` by default.
-- **Porting must not change which branch existing define combinations take** (editor shadowing invariant). In the editor with WebGL build target, `UNITY_EDITOR` and `UNITY_WEBGL` are both defined — when inserting a new WebGL arm in front of a chain that mentions `UNITY_EDITOR` below, add `&& !UNITY_EDITOR` to the new arm.
-- Porter subagents (pureweb/platform/toss-porter) follow their own operational procedure (decision-routing, checklist/VOCAB updates, compile checks, verification) as defined in `porter-rule.md` — do not duplicate it here. For platform-porter's 6 judgment steps (haptic, ranking button, share text, UID/version placement, unnecessary-UI removal, localization) that it can't resolve on its own, run the `platform-decisions` skill.
+Porter subagents (pureweb/platform/toss-porter) own their full operational procedure in `porter-rule.md` — not duplicated here:
+- Coding conventions (`#if` wrapping, editor-shadowing invariant, etc.)
+- Decision-routing (can't ask mid-run)
+- Checklist/VOCAB updates
+- Compile checks, verification
+
+For platform-porter's 6 judgment steps it can't resolve on its own (haptic, ranking button, share text, UID/version placement, unnecessary-UI removal, localization), run the `platform-decisions` skill.
 
 ---
 
