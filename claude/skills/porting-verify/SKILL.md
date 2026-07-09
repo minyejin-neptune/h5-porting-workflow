@@ -41,8 +41,20 @@ python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
 | 결과 | 대응 |
 |---|---|
 | `✅ 이상 없음` | 완료 — 호출자에게 반환 |
-| `❌ 미처리` | 호출자에게 파일:라인 반환 — 호출자가 코드 수정 후 이 스킬 재호출 |
+| `❌ 미처리` | 아래 "❌ 항목 기록" 수행 후 호출자에게 반환 — 호출자가 코드 수정 후 이 스킬 재호출 |
 | `⚠️ 확인 필요` | 2단계로 진행 |
+
+### ❌ 항목 기록
+
+`❌ 미처리` 결과가 있으면 코드 수정 전에 먼저 기록한다. 기록 대상은 호출 시 받은 `{checklist-file}`에 따라 다르다 — `## 이슈` 섹션이 없는 파일(`platform-checklist.md`)은 자체 기록 대상이 아니므로 리다이렉트한다(신규 공통 이슈 발견 시 `platform-porter.md`가 이미 쓰는 컨벤션과 동일):
+
+| `{checklist-file}` | 기록 대상 | 태그 |
+|---|---|---|
+| `pureweb-checklist.md` | 자기 자신의 `## 이슈` | `[검증]` |
+| `toss-checklist.md` | 자기 자신의 `## 이슈` | `[검증]` |
+| `platform-checklist.md` | 같은 `Docs/porting/` 안의 `pureweb-checklist.md` `## 이슈` | `[검증:platform]` |
+
+기록 형식: `- [ ] {파일}:{라인} — {태그} {패턴 요약}`
 
 ## 2단계 — ❌/⚠️ 항목 처리 (패턴 분석 → 확정 → exceptions 기록)
 
@@ -96,6 +108,6 @@ python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
 
 ```
 검증 결과: ✅ 이상 없음 {N}건 / ❌ 미처리 {N}건 / ⚠️ 확인 필요(미확정) {N}건
-{❌ 있으면 파일:라인 목록}
+{❌ 있으면 "대표 최대 3건: {파일:라인 최대 3개} — 전체는 {기록 대상 파일} `## 이슈` 참조"}
 {⚠️ 미확정 있으면 "{checklist-file} `## 확인 필요` 참조"}
 ```
