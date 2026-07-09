@@ -1256,9 +1256,9 @@ Unity Editor `Tools > Addressables > HL Addressable Tool` 실행.
 
 ## 검증
 
-### grep 자동 검증
+### grep 자동 검증 — 존재 여부 체크 (4개)
 
-아래 항목을 순서대로 실행하고 결과를 판정한다.
+아래 항목은 "존재하냐 안 하냐"만 보는 체크라 결과 없음이 곧 문제다 — `porting-verify` 스킬(결과 없음=문제 없음 전제)과 극성이 반대라 grep으로 유지한다.
 
 ```bash
 # [1] 로그인 연동 여부 — QuickLogin 호출 존재 확인 (결과 없으면 누락)
@@ -1267,39 +1267,11 @@ grep -rn "QuickLogin\|HLSDK.*Login" {SCRIPTS_PATH} --include="*.cs" | grep -v Hy
 # [2] 로그인 로그 삽입 여부 — LogDailyLogin 호출 존재 확인 (결과 없으면 누락)
 grep -rn "LogDailyLogin" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//"
 
-# [3] 보상형 광고 UNITY_WEBGL 분기 누락 (결과 있으면 처리 필요)
-grep -rn "ShowRewardedAd\|LoadRewardedAd" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
-# [4] 전면 광고 UNITY_WEBGL 분기 누락 (결과 있으면 처리 필요)
-grep -rn "ShowInterstitialAd\|LoadInterstitialAd" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
 # [5] 광고 중 BGM 처리 여부 — OnAdVisibilityChanged 존재 확인 (결과 없으면 누락)
 grep -rn "OnAdVisibilityChanged\|AudioListener\.pause" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//"
 
-# [6] IAP UNITY_WEBGL 분기 누락 (결과 있으면 처리 필요)
-grep -rn "InappPurchase\|PurchaseProduct" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
-# [7] 서버 저장 UNITY_WEBGL 분기 누락 (결과 있으면 처리 필요)
-grep -rn "SaveCloud\|SetUserData" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
-# [8] 햅틱 UNITY_WEBGL 가드 누락 (결과 있으면 처리 필요)
-grep -rn "Vibrate\b\|\.Vibrate(" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
-
-# [9] 랭킹 Submit LIVE 분기 누락 (결과 있으면 처리 필요)
-grep -rn "SubmitLeaderBoard" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "WEBGL_LIVE_VER"
-
 # [10] OnApplicationPause 구독 여부 — 결과 없으면 단계 4 처리 누락
 grep -rn "OnApplicationPause" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//"
-
-# [11] 불필요한 UI WebGL 가드 누락 (결과 있으면 처리 필요)
-grep -rn "RestorePurchase\|ContactUs" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -v "//" \
-  | grep -v "UNITY_WEBGL"
 ```
 
 판정 기준:
@@ -1308,15 +1280,25 @@ grep -rn "RestorePurchase\|ContactUs" {SCRIPTS_PATH} --include="*.cs" | grep -v 
 |---|---|---|
 | [1] QuickLogin | ⚠️ 로그인 연동 누락 | ✅ |
 | [2] LogDailyLogin | ⚠️ 로그인 로그 누락 | ✅ |
-| [3] 보상형 광고 | ✅ | ⚠️ 분기 누락 — 재처리 |
-| [4] 전면 광고 | ✅ | ⚠️ 분기 누락 — 재처리 |
 | [5] OnAdVisibilityChanged | ⚠️ BGM 처리 누락 | ✅ |
-| [6] IAP | ✅ | ⚠️ 분기 누락 — 재처리 |
-| [7] 서버 저장 | ✅ | ⚠️ 분기 누락 — 재처리 |
-| [8] 햅틱 | ✅ | ⚠️ 가드 누락 — 재처리 |
-| [9] 랭킹 Submit | ✅ | ⚠️ LIVE 분기 누락 — 재처리 |
 | [10] OnApplicationPause | ⚠️ 백그라운드 사운드 누락 (4번 미처리) | ✅ |
-| [11] 불필요한 UI | ✅ | ⚠️ 가드 누락 — 재처리 |
+
+### porting-verify 스킬 검증 — 게이팅 체크 (7개)
+
+나머지는 "이미 존재하는 호출이 `UNITY_WEBGL`(또는 랭킹은 `WEBGL_LIVE_VER`)로 가드됐는가"를 보는 체크라 스킬에 위임한다.
+
+`Skill` 도구로 `porting-verify` 호출:
+```
+{WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS)} narrow {SCRIPTS_PATH} platform-checklist.md ShowRewardedAd LoadRewardedAd ShowInterstitialAd LoadInterstitialAd InappPurchase PurchaseProduct SaveCloud SetUserData Vibrate RestorePurchase ContactUs
+```
+(항목 [3][4][6][7][8][11] — 보상형/전면 광고, IAP, 서버 저장, 햅틱, 불필요한 UI)
+
+```
+WEBGL_LIVE_VER narrow {SCRIPTS_PATH} platform-checklist.md SubmitLeaderBoard
+```
+(항목 [9] 랭킹 Submit LIVE 분기 — 별도 호출, 다른 게이팅 심볼)
+
+❌/⚠️ 결과 해석·exceptions 처리는 스킬이 전담한다.
 
 ### CompileChecker 최종 확인
 
