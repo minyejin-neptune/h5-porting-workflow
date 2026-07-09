@@ -423,6 +423,23 @@ grep -q "HLSDK.Instance.Initialize(" {GAME_INIT_METHOD 파일} 2>/dev/null && ec
 - `PUREWEB_NOT_DONE`이면 → **대신 실행하지 않는다.** 채팅에 아래를 출력하고 즉시 반환한다:
   > "pureweb-porter를 먼저 실행하세요 — SDK 초기화(HLSDK.Instance.Initialize())가 아직 배선되지 않았습니다. `Agent 도구, subagent_type: \"pureweb-porter\"`로 실행 후 다시 호출하세요."
 
+**0-D단계 — 포팅 이슈 확보(스텝별)**
+
+prompt에 `포팅 이슈 매핑: {STEP_ID}=#{번호}, ...` 형식이 있으면 그 매핑을 그대로 쓴다. 없으면(단독 실행 등) 스스로 스텝별로 확보한다:
+
+```bash
+gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null && echo "REPO_OK" || echo "NO_REMOTE"
+```
+
+1. `NO_REMOTE` → 이슈 없이 진행한다 (기록은 체크리스트만 — 유일하게 이슈를 생략하는 경우).
+2. `REPO_OK` → `## 단계 진행`의 미완료(`- [ ]`) 스텝마다:
+   ```bash
+   gh issue list --state open --search "[포팅] PLATFORM {STEP_ID}" --json number,title
+   ```
+   있으면 그 번호를 재사용, 없으면 `Skill` 도구로 `/common:create-issue --no-confirm` 호출해 생성한다. 제목: `[포팅] PLATFORM {STEP_ID} — {스텝명}`. DoD 체크박스 1개: `- [ ] {스텝명} 완료`. 실패·확인 처리는 그 스킬이 담당한다.
+
+확보한 스텝ID:이슈번호 매핑은 이후 각 스텝 완료 시 그 스텝의 이슈만 `gh issue edit`(진행 상황 동기화)에 사용한다 — 다른 스텝의 이슈는 건드리지 않는다. 확인 필요·결정 필요 항목은 체크리스트에만 기록한다.
+
 **1단계 — 파일 읽기**
 
 - NATIVE_BASELINE.md → 외부 SDK 목록 확인 (불변)
@@ -1426,6 +1443,8 @@ Unity Editor `Tools > Addressables > HL Addressable Tool` 실행.
 ## 체크리스트 상태 갱신
 
 각 태스크 완료 후 `Docs/porting/platform-checklist.md` `## 단계 진행` 해당 항목을 갱신한다 (`## 체크리스트 관리` 규칙 참조 — `- [ ] {단계}` → `- [x] {단계} — ✅ commit xxxxxxxx` / `⏭️` + 사유).
+
+**스텝별 이슈 매핑이 있는 경우**(prompt로 받았거나 진입점 **0-D단계 포팅 이슈 확보(스텝별)**에서 직접 확보): 단계 완료 시 매핑에서 **그 단계에 해당하는 이슈 번호만** `gh issue edit`로 진행 상황을 동기화하고, 커밋 메시지에 `(#N)`을 참조한다. 다른 스텝의 이슈는 건드리지 않는다. 이슈는 체크리스트를 비추는 미러일 뿐이니 체크리스트 갱신을 먼저 하고 이슈는 그 내용을 반영만 한다.
 
 기반 이슈(컴파일/런타임/공백)는 `pureweb-checklist.md`가 단일 기록처다. 이 포터 작업 중 아래 상황이 생기면:
 
