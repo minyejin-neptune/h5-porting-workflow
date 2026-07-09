@@ -12,15 +12,30 @@ $ARGUMENTS 프로젝트의 H5 포팅을 순서대로 실행한다.
 
 ## 인자 파싱
 
-`$ARGUMENTS`로 시작 스텝 또는 플랫폼을 지정할 수 있다. 생략하면 STEP 0부터 전체 실행.
+`$ARGUMENTS`로 시작 스텝 또는 플랫폼을 지정할 수 있다. 번호와 키워드 둘 다 인식한다.
 
-| 형식 | 동작 |
+| 인자 | 동작 |
 |---|---|
-| (없음) | STEP 0부터 전체 실행 |
-| `2` | STEP 2(프로젝트 분석)부터 시작 |
-| `3` | STEP 3(포터 선택)부터 시작 |
-| `toss` | STEP 3, toss 포터 바로 실행 |
-| `pureweb` | STEP 3, pureweb 포터 바로 실행 |
+| (없음) | 아래 "시작 스텝 판정" 수행 — 무조건 STEP 0이 아니다 |
+| `0`~`4` 번호 (서브스텝 포함, 예: `2-B`) | 해당 STEP부터 시작 |
+| `toss` / `pureweb` | STEP 3, 해당 포터 바로 실행 |
+| 키워드 | 아래 매핑 표의 STEP부터 시작 |
+
+**키워드 매핑**:
+
+| 키워드 (유사 표현 포함) | STEP |
+|---|---|
+| 설치, 초기설정, init | 0 |
+| 인코딩, encoding | 1 |
+| 안드로이드 컴파일, android | 1-A |
+| 분석, 스캔, scan | 2 |
+| 스캔검증, 스캔 검증, scan-verify | 2-B |
+| 포터, 포팅, porter | 3 |
+| 검증, verify | 4 |
+
+**미인식 인자 — STEP 0 폴백 금지**: 인자가 있는데 위 표 어디에도 매칭되지 않으면 STEP 0부터 시작하지 않는다. AskUserQuestion으로 의도한 스텝을 확인한 뒤 그 스텝으로 점프한다.
+
+**시작 스텝 판정 (인자 없음)**: `Docs/porting/PORTING_VOCAB.md` 또는 `Docs/porting/pureweb-checklist.md`가 존재하면 이미 진행된 프로젝트다 — STEP 0부터 재실행하지 않고, 체크리스트 `## 단계 진행`의 미완료 항목을 근거로 이어서 할 스텝을 제안하고 AskUserQuestion으로 확인한다. 둘 다 없으면(신규 프로젝트) STEP 0부터 전체 실행.
 
 **스텝 점프 시 필수 처리**: 어느 스텝에서 시작하든 아래 순서로 먼저 실행한다.
 1. 아래 VOCAB 변수 매핑 컨벤션 섹션을 읽는다
@@ -71,29 +86,23 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 > - 설치하겠습니다 → 아래 **설치 절차**대로 안내. 완료되면 알려달라고 안내. 확인 후 0-B로.
 > - 설치 없이 진행 → 이후 분석 및 포팅에서 HLSDK 연동 불가 상태로 진행. NATIVE_BASELINE.md 프로젝트 정보 `HyperLane SDK` 행에 "⚠️ 미설치" 기록 (scan 생성 전이면 scan에게 전달).
 
-**설치 절차** (Unity Editor 임포트 방식이 아니라 npm CLI 방식 — 출처: [README.md](https://github.com/neptunez-dev/hyperlane-sdk/blob/main/README.md), 상세 API는 [매뉴얼](https://github.com/neptunez-dev/hyperlane-sdk/tree/main/docs/manual) 참고):
+**설치 절차**:
 
 ```bash
-# 1. 프로젝트 루트(Assets/가 있는 위치)에서 실행
-npm install https://github.com/neptunez-dev/hyperlane-sdk.git
-
-# 2. 엔진(Unity) 자동 감지 후 공통 템플릿 복사 — Assets/HyperLane/, Packages/manifest.json UPM 의존성 등
-npx hyperlane init
+bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-init.sh
 ```
 
 - 토스처럼 게임 외부 wrapper 프로젝트가 필요한 플랫폼은 추가로 `npx hyperlane setup toss` 실행 (대화형은 `npx hyperlane setup`). 셋업 중 `npm create vite@latest`의 `Install with npm and start now?` 질문에는 **반드시 `No`** 선택 — `Yes` 선택 시 dev server가 떠서 셋업이 멈춘다.
 - PureWeb만 쓰는 경우 `init`까지로 끝.
-- `npm install` 산출물(`node_modules/`, `package-lock.json`, `package.json`)은 SDK CLI 자체가 요구하는 정상 산출물이다 — Unity 프로젝트라고 지우지 않는다(`init`이 `.gitignore`에 `node_modules/`, `Build/`를 자동 추가).
 
 **업데이트 절차** (이미 셋업된 프로젝트에서 SDK 코드만 최신화 — `init`/`setup` 재실행 불필요):
 
 ```bash
-npm install https://github.com/neptunez-dev/hyperlane-sdk.git   # 최신 커밋 재설치 (URL 명시 필수 — 생략 시 package-lock 고정본 유지됨)
-npx hyperlane update                                              # Assets/HyperLane/, WebGLTemplates/, wrapper 파일 등 SDK 관리 파일 갱신
+bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-update.sh
 ```
 
-- `HyperlaneConfig.asset`, `granite.config.ts`, wrapper의 `package.json`/`node_modules`, 사용자 추가 파일은 `update`가 덮어쓰지 않음.
-- 특정 버전 고정: `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0` (태그) 또는 `#커밋해시`.
+- 원복 정책·안전장치는 스크립트 주석 참고.
+- 특정 버전 고정이 필요하면 스크립트 대신 수동으로 `npm install https://github.com/neptunez-dev/hyperlane-sdk.git#v1.0.0`(태그) 또는 `#커밋해시` 실행 후 `npx hyperlane update`.
 
 **설치/업데이트 완료 후 커밋 (필수)** — `git status`로 SDK가 추가·수정한 파일을 확인 후 스테이징한다(`node_modules/`·`Build/`는 `.gitignore` 처리되어 제외됨):
 
