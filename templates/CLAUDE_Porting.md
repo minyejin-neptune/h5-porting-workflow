@@ -14,24 +14,24 @@
 
 ---
 
-## Project-Specific Settings (filled during porting-init — confirm from code; delete any line that does not apply)
+## Project Context
 
-### Project Summary
+### Project-Specific Settings (filled during porting-init — confirm from code; delete any line that does not apply)
+
+#### Project Summary
 Fill with a one-line description (e.g. Unity mobile game, Toss/PureWeb WebGL build target).
 Details: [.md/PROJECT.md](.md/PROJECT.md)
 
-### Custom Build Entry Point (project-only, beyond HyperLane `Hyperlane/Build/`)
+#### Custom Build Entry Point (project-only, beyond HyperLane `Hyperlane/Build/`)
 - e.g. `Treeplla/Build/` (`Assets/Treeplla/Editor/AutoBuild.cs`) — delete if not present.
 
-### Deploy Command
+#### Deploy Command
 - e.g. `cd Deploy/Toss/unity-webgl-wrapper && ./deploy-ait.sh` — replace with the actual path, or delete if none.
 
-### Project-Only Define Symbols (beyond the standard `WEBGL_*`)
+#### Project-Only Define Symbols (beyond the standard `WEBGL_*`)
 - e.g. `AVOEX_FIREBASE` (Firebase), `AVOEX_CLOUD_ONCE` (CloudOnce) — list only what the project actually uses; confirm prefix and name from code.
 
----
-
-## Porting Workflow Overview
+### Porting Workflow Overview
 
 When a request is porting-related, follow this order — proactively suggest it even if the user doesn't spell out each step.
 
@@ -40,9 +40,7 @@ When a request is porting-related, follow this order — proactively suggest it 
 3. If `platform-checklist.md` `## 단계 진행` shows `⏭️ 스킵: /platform-decisions ...로 처리 필요`, or the user asks directly about haptics, ranking button, share text, UID/version, unnecessary-UI removal, or localization, run the `platform-decisions` skill (no argument shows what's pending) — platform-porter (a subagent) can't ask these questions itself, which is why they're split out.
 4. If h5-port's completion report lists pending judgment items, suggest running `platform-decisions` right away without waiting to be asked.
 
----
-
-## Pre-Analysis Reference
+### Pre-Analysis Reference
 
 Before any code analysis, check if the following files exist and read them first.
 Do not re-analyze content already documented there.
@@ -57,7 +55,7 @@ Do not re-analyze content already documented there.
 After completing analysis of any game system, check the relevant doc in `Docs/`.
 If the doc is outdated or contradicts the code — update it and report what changed.
 
-### Code Search Rule — VOCAB first
+#### Code Search Rule — VOCAB first
 
 When looking for a file, class, or method, always follow this order. Actively use VOCAB (the location index).
 
@@ -66,13 +64,15 @@ When looking for a file, class, or method, always follow this order. Actively us
 3. If the grep/find fallback also finds nothing and this step has no already-specified handling (e.g., skip) — do not guess. Record it in the project's checklist `## 확인 필요` section for human review, and move to the next step.
 4. Add any file:line newly confirmed via grep fallback to VOCAB `## 포터 기록`, so it is never re-searched.
 
-Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Verification Rules below.)
+Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Response Rules above.)
 
 ---
 
-## Excluded from Analysis / Modification
+## Code Rules
 
-### Internal Company SDK — No modification / Request permission before reading
+### Excluded from Analysis / Modification
+
+#### Internal Company SDK — No modification / Request permission before reading
 
 | Path | Rule |
 |---|---|
@@ -82,16 +82,12 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 - Reading (Read/grep) is allowed only after permission is granted, for the purpose of understanding the API.
 - Do not read automatically without permission.
 
----
-
-## Code Modification Rules
+### Code Modification Rules
 
 - **Prefer reusing existing public methods** over editing internal keys or values directly (e.g., use `PopupManager.ShowAlertAsync` instead of editing popup key strings).
 - Before modifying shared/global variables or prefixes: check all usages first. If the variable is reused elsewhere, introduce a new one instead.
 
----
-
-## General Coding Rules
+### General Coding Rules
 
 - Do NOT delete original comments. If deletion is necessary, always ask first.
 - **After changing code, always update the affected docs** (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
@@ -102,9 +98,7 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 - **Skip filler progress messages** (e.g. "확인 중입니다", "잠시만 기다려주세요") — report only the result.
 - **When quoting a subagent's completion report, extract only the essentials** (scope done, error count, `## 확인 필요` items) — do not re-paste the full report.
 
----
-
-## Porting Behavior Rules
+### Porting Behavior Rules
 
 Porter subagents (pureweb/platform/toss-porter) own their full operational procedure in `porter-rule.md` — not duplicated here:
 - Coding conventions (`#if` wrapping, editor-shadowing invariant, etc.)
@@ -116,7 +110,9 @@ For platform-porter's 6 judgment steps it can't resolve on its own (haptic, rank
 
 ---
 
-## Task Workflow (Plan → Issue → Resolve)
+## Workflow Rules
+
+### Task Workflow (Plan → Issue → Resolve)
 
 Progress large tasks in the following order.
 
@@ -126,11 +122,9 @@ Progress large tasks in the following order.
 
 - **Required**: If any change arises before the issue is resolved (scope change, design change, etc.), you MUST update the plan document or the issue FIRST, then proceed. Never proceed while the code and the plan/issue are out of sync.
 
----
+### Git Branch Workflow
 
-## Git Branch Workflow
-
-### worktree — required for parallel work on branches sharing the same HEAD
+#### worktree — required for parallel work on branches sharing the same HEAD
 
 **Always separate directories using worktree, or stack commits on each branch before switching.**
 
@@ -145,7 +139,7 @@ git worktree list
 git worktree remove ../{project-name}-<suffix>
 ```
 
-### Commit Message Prefix
+#### Commit Message Prefix
 
 커밋 메시지는 `[prefix] 내용` 형식을 사용한다.
 
@@ -159,9 +153,7 @@ git worktree remove ../{project-name}-<suffix>
 | `[문서]` | 문서 작업 |
 | `[빌드]` | 빌드 설정 |
 
----
-
-### Separating mixed changes into different branches
+#### Separating mixed changes into different branches
 
 If changes are already mixed on the same branch — before committing:
 
@@ -169,12 +161,10 @@ If changes are already mixed on the same branch — before committing:
 2. `git checkout <target-branch>` — files are now separated.
 3. Manually apply only the target files, then commit.
 
----
-
-## Build / Deploy Rules
+### Build / Deploy Rules
 
 - Builds must be run only from Unity Editor menu `Hyperlane/Build/`.
-- For project-only build menus and deploy commands, see **"Project-Specific Settings"** at the top.
+- For project-only build menus and deploy commands, see **"Project-Specific Settings"** above.
 - Follow the required define combinations per platform:
 
 | Build Target | Required Define Symbols |
@@ -184,7 +174,7 @@ If changes are already mixed on the same branch — before committing:
 | Pure DEV | `WEBGL_PUREWEB`, `WEBGL_DEV_VER`, `ENABLE_LOG`, `WEBGL_DEBUG_CONSOLE` |
 | Pure LIVE | `WEBGL_PUREWEB`, `WEBGL_LIVE_VER` |
 
-### Define Symbol Reference
+#### Define Symbol Reference
 
 | Symbol | Meaning |
 |---|---|
@@ -195,11 +185,9 @@ If changes are already mixed on the same branch — before committing:
 | `ENABLE_LOG` | Enable debug logging |
 | `WEBGL_DEBUG_CONSOLE` | Enable on-screen debug console |
 
-> For project-only defines (Firebase, save SDK, etc.), see **"Project-Specific Settings"** at the top.
+> For project-only defines (Firebase, save SDK, etc.), see **"Project-Specific Settings"** above.
 
----
-
-## Scope & Approval Rules
+### Scope & Approval Rules
 
 - If unsure whether a change is in scope, stop and ask.
 
