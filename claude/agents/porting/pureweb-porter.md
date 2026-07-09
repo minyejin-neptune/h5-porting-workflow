@@ -801,17 +801,7 @@ grep -rn "CheatConsole" Assets --include="*.unity" 2>/dev/null | head -5
 
 ### h5-port-verify 스크립트 검증
 
-grep 대신 전처리문 구조 파서로 정확하게 검증한다. PORTING_VOCAB.md에서 메서드명을 읽어 자동 실행한다.
-
-```bash
-# {AD_REWARDED_METHOD}, {IAP_METHOD}, {SAVE_METHOD}를 PORTING_VOCAB.md 실제 값으로 대체
-python ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-  --platform WEBGL_PUREWEB \
-  --scripts Assets/Script \
-  --method {AD_REWARDED_METHOD} \
-  --method {IAP_METHOD} \
-  --method {SAVE_METHOD}
-```
+`Skill` 도구로 `porting-verify` 호출: `WEBGL_PUREWEB narrow {SCRIPTS_PATH} pureweb-checklist.md {AD_REWARDED_METHOD 실제값} {IAP_METHOD 실제값} {SAVE_METHOD 실제값}` (메서드명은 PORTING_VOCAB.md에서 읽은 실제 값). ❌/⚠️ 결과 해석·exceptions 처리는 스킬이 전담한다.
 
 ### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
 
@@ -822,55 +812,6 @@ git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
       --platform WEBGL_PUREWEB --mode check-editor-shadow
 ```
-
-결과 처리:
-
-| 출력 | 의미 | 대응 |
-|---|---|---|
-| `❌ 미처리` | 가드 없는 실제 이슈 | 해당 파일 수정 |
-| `⚠️ 확인 필요` | `#elif UNITY_WEBGL` 블록 안 호출 | 아래 절차로 사용자 확인 |
-| `✅ 이상 없음` | 완료 | 다음 단계 진행 |
-
-#### ❌ / ⚠️ 항목 처리 — 패턴 분석 → 사용자 확인 → verify-exceptions 기록
-
-**사용자가 JSON을 직접 작성하지 않는다.** 에이전트가 아래 순서로 처리한다.
-
-**1단계 — 패턴 분석**
-
-❌/⚠️ 항목을 Read로 실제 코드 확인 후 패턴별로 묶는다:
-
-| 패턴 | 예시 | 판단 근거 |
-|---|---|---|
-| 위임 호출 | `IAPManager.Instance.Purchase(...)` | 호출 대상 정의에 이미 가드 있음 |
-| `#elif UNITY_WEBGL` 분기 | DataController.cs:167 | PlayerPrefs 처리 → PUREWEB 전용 분기 가능성 |
-| 진짜 미처리 | 가드 없이 직접 SDK 호출 | 수정 필요 |
-
-**2단계 — 패턴별 판단을 결정 필요 라우팅으로 기록**
-
-항목마다 하나씩이 아니라 **패턴 단위**로 묶어 라우팅한다. 잘못 "안전" 처리하면 실제 버그가 검증을 통과해 숨겨지므로 에이전트가 임의로 safe 판정하지 않는다 → 결정 필요 라우팅(verify ❌/⚠️ 패턴별 safe 판정 — 패턴 요약과 건수, 근거 파일:라인 첨부. 예: "28건 전부 `DataController.Instance.SaveGameData()` 위임 호출, 정의에 PUREWEB 가드 확인됨 — safe 처리 여부"). 판정 전까지 해당 항목들은 미처리 상태로 둔다.
-
-**3단계 — 에이전트가 verify-exceptions.json 생성·기록**
-
-사람이 "안전"으로 확정한 패턴을 `Docs/porting/verify-exceptions.json`에 기록한다:
-
-```json
-[
-  {
-    "file": "Assets/Script/Data/DataController.cs",
-    "directive_line": 167,
-    "directive": "#elif UNITY_WEBGL",
-    "decision": "safe",
-    "note": "PlayerPrefs 로드 — 사용자 확인"
-  }
-]
-```
-
-- `decision: "safe"` → 다음 실행 시 자동 필터링
-- `decision: "unsafe"` → 실제 이슈, 수정 필요
-
-**4단계 — 스크립트 재실행해서 필터링 확인**
-
-기록 후 스크립트를 재실행해 해당 항목이 `✅ 로그 필터링`으로 바뀌는지 확인한다.
 
 ### grep 자동 검증
 
@@ -985,12 +926,5 @@ CompileChecker: 통과 / 에러 N건
 다음 단계: 빌드 배포 후 위 🔍 항목 수동 테스트
 ```
 
-`$ARGUMENTS`에 `--orchestrated`가 없으면 검증 스크립트를 직접 실행하세요.
+`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_PUREWEB full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md pureweb-checklist.md`.
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
-
-```bash
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-  --platform WEBGL_PUREWEB \
-  --vocab Docs/porting/PORTING_VOCAB.md \
-  --scripts {SCRIPTS_PATH}
-```
