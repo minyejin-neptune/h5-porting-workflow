@@ -54,7 +54,7 @@ claude/                       # ~/.claude 에 심볼릭될 내용
     analyze/    content-analyze
     common/     feature-breakdown, create-issue, resolve-issue, auto-resolve
 templates/                    # 워크플로우가 repo 경로로 직접 참조 (심볼릭 없음)
-  CLAUDE_Porting.md, h5-porter-template.md, README.md
+  CLAUDE_Porting.md, porter-rule.md, README.md
   scripts/h5-port-verify.py, scripts/compile-check.sh
   Editor/*.cs, Runtime/*.cs
 docs/

@@ -183,7 +183,7 @@ grep -c "^\- \[x\]" Docs/porting/platform-checklist.md 2>/dev/null
 **0-A단계 — 심볼 섹션 최신 여부 확인**
 
 ```bash
-grep 'WEBGL_\|UNITY_WEBGL' ~/github/h5-porting-workflow/templates/h5-porter-template.md
+grep 'WEBGL_\|UNITY_WEBGL' ~/github/h5-porting-workflow/templates/porter-rule.md
 ```
 
 이 파일 **플랫폼 전처리기 심볼** 섹션에 없는 심볼이 결과에 있으면 사용자에게 보고 후 계속 진행.
