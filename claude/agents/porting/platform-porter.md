@@ -1406,15 +1406,7 @@ CompileChecker: 통과 / 에러 N건
 다음 단계: 개별 플랫폼 포터(예: toss-porter) 실행 → 배너·프로모션 등 플랫폼 전용 작업 진행
 ```
 
-`$ARGUMENTS`에 `--orchestrated`가 없으면 검증 스크립트를 직접 실행하세요.
+`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `{$(cat .porting-context 2>/dev/null || echo TOSS)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md`.
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
-
-```bash
-PLATFORM=$(cat .porting-context 2>/dev/null || echo TOSS)
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-  --platform "$PLATFORM" \
-  --vocab Docs/porting/PORTING_VOCAB.md \
-  --scripts {SCRIPTS_PATH}
-```
 
 > 이 에이전트가 다루는 `#if UNITY_WEBGL` 단독 가드 코드는 위 검증에서 "안전"으로 자동 통과된다(`webgl_generic_safe`) — 실제 게이팅 확인은 위 `## 검증` § grep 자동 검증(11개 항목)이 담당한다.
