@@ -1336,7 +1336,7 @@ grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
 이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). `.porting-context`로 현재 선택된 플랫폼을 읽어 `--platform`에 반드시 전달한다(누락 시 플랫폼별 판정이 부정확해짐). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
 
 ```bash
-PLATFORM=$(cat .porting-context 2>/dev/null || echo TOSS)
+PLATFORM="WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS)"
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
       --platform "$PLATFORM" --mode check-editor-shadow
@@ -1406,7 +1406,7 @@ CompileChecker: 통과 / 에러 N건
 다음 단계: 개별 플랫폼 포터(예: toss-porter) 실행 → 배너·프로모션 등 플랫폼 전용 작업 진행
 ```
 
-`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `{$(cat .porting-context 2>/dev/null || echo TOSS)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md`.
+`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_{현재 .porting-context 값(TOSS 등)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md` (예: `.porting-context`가 `TOSS`면 `WEBGL_TOSS`).
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
 
 > 이 에이전트가 다루는 `#if UNITY_WEBGL` 단독 가드 코드는 위 검증에서 "안전"으로 자동 통과된다(`webgl_generic_safe`) — 실제 게이팅 확인은 위 `## 검증` § grep 자동 검증(11개 항목)이 담당한다.
