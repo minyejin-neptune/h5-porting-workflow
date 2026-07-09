@@ -8,6 +8,8 @@
     - If `.md` file is chosen: always ask the user where to save it — never assume a default location. Do NOT duplicate output in chat.
     - If chat is chosen: print directly in chat.
 - **No inference**: Only present facts confirmed by directly reading the code. Do not assert causes using speculative expressions like "it is likely that~" or "it may be because~". If no evidence is found in the code, explicitly state "코드에서 근거를 찾지 못했습니다".
+    - **Never state a count, enum list, or logic conclusion** without first verifying it from the actual code. Show the exact command and output used as evidence.
+    - Before concluding that something "does not exist," run an exhaustive search (grep/find) and show the search commands.
 - **Insufficient data**: If the information needed to make a judgment is not present in the code, explicitly state "insufficient data".
 
 ---
@@ -79,14 +81,6 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 - Modification (Edit/Write) is forbidden under any circumstances.
 - Reading (Read/grep) is allowed only after permission is granted, for the purpose of understanding the API.
 - Do not read automatically without permission.
-
----
-
-## Verification Rules
-
-- **Never state a count, enum list, or logic conclusion** without first verifying it from the actual code. Show the exact command and output used as evidence.
-- Before concluding that something "does not exist," run an exhaustive search (grep/find) and show the search commands.
-- This strengthens the existing No Inference rule: no speculative expressions, no guesses dressed as facts.
 
 ---
 
