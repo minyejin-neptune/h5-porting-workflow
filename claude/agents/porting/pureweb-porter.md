@@ -16,74 +16,13 @@ effort: high
 
 > **전처리문 추가 전 필수 확인**: 새 `#if` 전처리문을 추가하기 전에 사용할 심볼을 반드시 사용자에게 먼저 물어본다.
 
-> **탐색 기본 원칙 — 모든 스텝 예외 없이 적용**:
-> 파일·클래스·메서드를 찾아야 할 때는 반드시 아래 순서를 따른다.
-> 1. `Docs/porting/PORTING_VOCAB.md`에서 해당 플레이스홀더 행의 파일:라인 확인
-> 2. 파일:라인이 있으면 → 바로 Read
-> 3. 없거나 "확인 필요"이면 → grep fallback
-> 4. grep fallback도 0건이고 이 단계에 이미 명시된 처리(스킵 등)가 없으면 — 추측으로 진행하지 않는다. `pureweb-checklist.md` `## 확인 필요`에 `- [ ] {대상} — grep fallback 0건, 수동 확인 필요` 형식으로 기록하고 이 단계는 스킵, 다음 단계로 진행한다.
-
-> **`{SCRIPTS_PATH}` 확정**: 작업 시작 시 `head -5 Docs/porting/NATIVE_BASELINE.md`로 헤더의 `스크립트 경로:` 값을 읽어 본문의 모든 `{SCRIPTS_PATH}`를 대체한다. 헤더에 없으면 사용자에게 확인 — `Assets/Scripts`로 임의 가정하지 않는다.
-> 같은 헤더의 `부속 경로:`(EXTRA_PATHS)가 "없음"이 아니면, 본문의 모든 grep 탐색을 그 경로들에도 반복 실행한다 — SCRIPTS_PATH만 검색하면 부속 코드 폴더의 SDK 참조·이슈를 놓친다.
->
-> grep을 **첫 번째** 수단으로 쓰지 않는다. VOCAB에 없을 때만 쓴다.
->
-> **VOCAB 업데이트 원칙**: grep fallback으로 발견한 파일:라인은 작업 완료 후 `Docs/porting/PORTING_VOCAB.md` `## 포터 기록` 섹션에 추가한다. 다음 포터 실행 시 재탐색 없이 바로 Read할 수 있도록.
-
-> **결정 필요 라우팅 — 사람 결정이 필요한 지점의 공통 처리**: 이 에이전트는 서브에이전트라 실행 중 사용자에게 질문할 수 없다. 본문에서 "→ 결정 필요 라우팅({항목})"을 만나면:
-> 1. `pureweb-checklist.md` `## 확인 필요`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 기록 (체크리스트가 정본 — 이슈에는 기록하지 않는다).
-> 2. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
->
-> 확정 답변은 h5-port 후속 모드(재실행 시 미확정 재질문 → 부분 수정 재호출)가 수집·반영한다.
-
-> **완료 여부 사전 확인 — 사용자 선작업 인식**: 사용자가 이 섹션의 작업을 포터 실행 전에 이미 직접 처리했을 수 있다. 각 섹션 착수 전, 본문에 표시된 "**완료 신호**"(또는 섹션 자체의 탐색·완료검증 grep)로 이미 반영됐는지 확인한다.
-> 1. 완료 신호와 **정확히 일치**(해당 API 호출·패턴이 코드에 이미 존재)하면 → 코드 수정 없이 스킵. `pureweb-checklist.md` `## 단계 진행`에 `- [x] {단계} — ⏭️ 스킵: 이미 처리됨 확인({파일}:{라인})`으로 기록하고 다음 섹션으로 진행한다.
-> 2. 부분 일치·모호(관련 코드는 있으나 완료 신호와 다름)하면 → 스킵하지 않고 섹션의 원래 절차대로 진행한다. 과잉 스킵으로 필요한 포팅이 누락되는 게, 이미 된 걸 다시 확인하는 것보다 위험하다.
-> 3. 완료 신호가 명시되지 않은 섹션(사람 결정·수동 작업 전용)은 이 확인을 적용하지 않는다.
-
-> **문서 오류 → 코드 기준 교정 기록**: NATIVE_BASELINE.md·PORTING_VOCAB.md·체크리스트의 기존 기술 내용이 실제 코드와 다르다는 것을 발견하고, 문서가 아닌 **코드를 기준으로 판단해 다르게 처리**했다면 `pureweb-checklist.md` `## 교정 기록`에 아래 형식으로 append한다:
-> `- {단계} — 문서: {틀렸던 문서·항목}, 실제: {코드 근거 파일:라인}, 처리: {실제로 한 조치}`
-> grep fallback 0건 등 단순 탐색 실패는 대상이 아니다(그건 `## 확인 필요` 몫) — 문서에 내용이 있었는데 그게 틀렸을 때만 해당한다.
+> **공용 규칙 — `templates/porter-rule.md`를 Read해서 따른다**: 탐색 기본 원칙(VOCAB-first)·`{SCRIPTS_PATH}`/EXTRA_PATHS 확정·결정 필요 라우팅·완료 여부 사전 확인·문서 오류 교정 기록·컴파일 체크 자동화·worktree 병렬 작업 방침·HLSDK API 참조·코딩 컨벤션(전처리문 규칙·패턴 A/B·에디터 섀도잉 금지·전처리문 3박자·불필요한 주석 금지)은 전부 이 문서가 단일 소스다. `{PLATFORM_SYMBOL}` = `WEBGL_PUREWEB`, `{platform}-checklist.md` = `pureweb-checklist.md`로 치환해서 읽는다.
 
 ---
 
 ## 컴파일 체크 자동화
 
-`.cs` 파일 수정 시 PostToolUse hook이 자동으로 컴파일을 검사한다. hook 출력 신호에 즉시 반응한다:
-
-| 신호 | 대응 |
-|---|---|
-| `✅ [COMPILE_OK]` | 단계 완료 조건 충족 시 커밋 → 다음 단계 진행 |
-| `❌ [COMPILE_ERROR]` | 에러 즉시 수정 → 수정 파일 저장 시 자동 재검사 |
-| `⚠️ [COMPILE_REQUIRED]` | **즉시 중단** — 아래 처리 |
-
-**단계 커밋 기준** — 아래 조건을 모두 충족하면 즉시 커밋:
-1. `✅ [COMPILE_OK]` 확인
-2. 해당 단계에 결정 필요 항목이 없거나 모두 라우팅(포팅 이슈·체크리스트 기록) 완료됨
-3. 👤 수동 작업 항목은 사용자가 완료 확인 후
-
-```bash
-# CLAUDE.md prefix 중 단계 성격에 맞게 선택:
-# [퓨어웹]  — PureWeb 전용 코드 변경 (대부분의 단계)
-# [웹지엘]  — WebGL 공통 변경 (양 플랫폼에 영향)
-# [공통]    — 플랫폼 무관 변경
-# [수정]    — 버그 수정
-git commit -m "[{prefix}] {단계명}"
-```
-
-`⚠️ [COMPILE_REQUIRED]` 발생 시:
-
-1. 표준 스크립트로 실행 (사전 점검·부수효과 되돌리기 내장):
-   ```bash
-   PLATFORM=$(cat .porting-context 2>/dev/null || echo PUREWEB)
-   bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh "$PLATFORM"
-   ```
-2. 출력 판정:
-   - `✅` → 계속 진행
-   - `❌` → 출력된 에러 목록 수정 후 재실행
-   - `⛔ STOP`(에디터 열림) → 서브에이전트는 실행 중 메인 세션에 알림을 보낼 방법이 없다 — blind 대기는 알림을 그만큼 늦추는 것과 같으므로, 빠르게 실패해 즉시 반환하는 것이 사용자에게 가장 빨리 알리는 방법이다. `Temp/UnityLockfile`을 5초 간격 2회만 재확인(`lsof Temp/UnityLockfile`, 트랜지언트 락 배제용). 그래도 잠겨 있으면 체크리스트 `## 확인 필요`에 "⛔ 에디터 열림 — 컴파일 체크 불가, 에디터 닫고 재실행 필요" 기록 후 즉시 작업 중단·반환한다. 재실행 시 "실행 범위 결정"이 `## 단계 진행`의 미완료 단계부터 자동 재개하므로 재대기 손해가 없다.
-
-> hook 미설정 시 → Unity 메뉴 **Tools/H5/Compile Check (PUREWEB)** 수동 실행
+`templates/porter-rule.md` § 컴파일 체크 자동화 참조. `{PLATFORM_SYMBOL}` = `WEBGL_PUREWEB`, 스크립트 인자는 `echo PUREWEB`, hook 미설정 시 Unity 메뉴 **Tools/H5/Compile Check (PUREWEB)**, git commit prefix는 `[퓨어웹]`(대부분)/`[웹지엘]`(공통 변경)/`[공통]`/`[수정]`.
 
 ---
 
@@ -134,24 +73,7 @@ git commit -m "[{prefix}] {단계명}"
 
 ## worktree 병렬 작업 방침
 
-수정 대상 파일이 겹치지 않는 태스크 그룹은 worktree로 병렬 실행한다.
-
-- **파일 겹침 없음** → worktree로 병렬 실행
-- **파일 겹침 있음** → 순차 처리 (같은 worktree)
-
-```bash
-# worktree 생성
-git worktree add ../{이름} -b {브랜치명}
-
-# worktree 안에서 단계 완료 시 커밋 (prefix는 위 기준 참조)
-git commit -m "[{prefix}] {단계명}"
-
-# main worktree로 돌아와서 merge 후 제거
-git merge {브랜치명}
-git worktree remove ../{이름}
-```
-
-구체적인 태스크 그룹 분류는 아래 **의존성 파악 및 병렬 작업 계획** 섹션을 따른다.
+`templates/porter-rule.md` § worktree 병렬 작업 방침 참조. 구체적인 태스크 그룹 분류는 아래 **의존성 파악 및 병렬 작업 계획** 섹션을 따른다.
 
 ---
 
@@ -170,81 +92,11 @@ git worktree remove ../{이름}
 
 ## 코딩 컨벤션
 
-> **불필요한 주석 금지**: 코드가 스스로 설명되면 주석을 달지 않는다. 주석은 "왜"가 코드만 보고는 드러나지 않을 때만(숨은 제약, 특정 버그 우회, 비직관적 동작) 추가한다. "무엇을 하는지" 설명하는 주석, 이번 포팅 작업을 언급하는 주석(예: "여기서부터 퓨어웹 처리", "이슈 처리")은 달지 않는다 — 아래 예시 코드의 `/* */`·`// 예시` 표기는 이 문서 안에서 삽입 위치·형식을 보여주기 위한 표기일 뿐, 실제 게임 코드에 그대로 옮기는 텍스트가 아니다.
+`templates/porter-rule.md` § 코딩 컨벤션 참조(전처리문 규칙·패턴 A/B·기존 iOS/Android 분기 주의·에디터 섀도잉 금지·전처리문 3박자 규칙·타이밍 이슈 주의·MonoBehaviour 스텁 패턴·불필요한 주석 금지). `{PLATFORM_SYMBOL}` = `WEBGL_PUREWEB`로 치환.
 
-> **전처리문 규칙**: WebGL 플랫폼 심볼(`WEBGL_PUREWEB`, `WEBGL_TOSS` 등)은 단독 사용 금지.
-> 항상 `UNITY_WEBGL`과 조합해야 한다. 이유: `UNITY_WEBGL` 없으면 에디터·Android 빌드에서도 분기가 활성화됨.
+> **pureweb 고유 — 광고·IAP는 원본 네이티브 호출부에 직접 분기를 추가한다** (5·6단계) — `#if UNITY_WEBGL && WEBGL_PUREWEB { 즉시지급 } #else { 기존 네이티브 로직 } #endif`. 이 포터가 최우선 실행이라 이 시점엔 HLSDK 통합이 아직 없다. platform-porter가 나중에 같은 지점의 `#else` 앞에 `#elif UNITY_WEBGL`(HLSDK 경유)을 끼워넣어 3-way 분기를 완성한다 — `#else`(순수 네이티브)는 건드리지 않는다.
 
-**기존 코드 삭제 금지 → 전처리 분기로 묶기**
-
-> **광고·IAP는 원본 네이티브 호출부에 직접 분기를 추가한다** (5·6단계) — `#if UNITY_WEBGL && WEBGL_PUREWEB { 즉시지급 } #else { 기존 네이티브 로직 } #endif`. 이 포터가 최우선 실행이라 이 시점엔 HLSDK 통합이 아직 없다. platform-porter가 나중에 같은 지점의 `#else` 앞에 `#elif UNITY_WEBGL`(HLSDK 경유)을 끼워넣어 3-way 분기를 완성한다 — `#else`(순수 네이티브)는 건드리지 않는다.
-
-**WebGL 공통 처리 (SafeArea 제거, 서버 저장 차단 등)**
-
-코드 수정 전 반드시 기존 플랫폼 분기 현황을 확인한다:
-
-```bash
-grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
-```
-
-| 기존 분기 현황 | 적용 패턴 |
-|---|---|
-| 분기 없음 | `#if !UNITY_WEBGL` 래핑 |
-| `UNITY_IOS` / `UNITY_ANDROID` 등 이미 나뉨 | 기존 구조 유지 + 맨 앞에 `#if UNITY_WEBGL` 분기 추가 |
-
-```csharp
-// ✅ 기존 분기 없음 → !UNITY_WEBGL 래핑
-#if !UNITY_WEBGL
-    NativeOnlyLogic();
-#endif
-
-// ✅ 기존에 iOS/Android 분기 있음 → UNITY_WEBGL을 맨 앞에 삽입
-#if UNITY_WEBGL
-    // WebGL 처리 (또는 비워두면 해당 기능 비활성화)
-#elif UNITY_IOS
-    IOSLogic();
-#elif UNITY_ANDROID
-    AndroidLogic();
-#endif
-
-// ❌ 잘못된 방법 — 기존 iOS/Android 분기를 !UNITY_WEBGL로 통으로 감싸면
-//    iOS와 Android 로직이 하나의 블록으로 뭉개짐
-```
-
-> **에디터 섀도잉 금지 (불변식)**: 포팅은 기존 define 조합이 타던 분기를 바꾸지 않는다 — 새 분기는 WebGL 런타임에서만 활성화돼야 한다.
-> 에디터(WebGL 빌드타겟)에서는 `UNITY_EDITOR`와 `UNITY_WEBGL`이 동시 정의되므로, 기존 체인에 `UNITY_EDITOR`를 언급하는 분기가 있는데 그 앞에 WebGL 분기를 삽입하면 에디터가 원래 타던 분기를 새 분기가 가로챈다. 이 경우 새 분기 조건에 `&& !UNITY_EDITOR`를 추가한다:
->
-> ```csharp
-> #if UNITY_WEBGL && !UNITY_EDITOR
->     // WebGL 처리
-> #elif UNITY_EDITOR || UNITY_IPHONE
->     EditorOrIphoneLogic(); // 에디터가 원래 타던 분기 — 계속 타야 한다
-> #endif
-> ```
->
-> 커밋 전 `--mode check-editor-shadow`로 기계 검증한다 (아래 검증 섹션).
-
-> **전처리문 3박자 규칙**: 기능을 WebGL용으로 *교체*할 때는 반드시 `#else`에 원본 코드를 보존한다. 기능을 *제거*할 때는 else 없이 가드만으로 충분하다.
->
-> ```csharp
-> // ✅ 교체 — #else 필수 (원본 보존)
-> #if UNITY_WEBGL
->     PlayerPrefs.SetString(key, value);
->     return;
-> #else
->     // 기존 서버 저장 로직
-> #endif
->
-> // ✅ 제거 — #else 불필요
-> #if !UNITY_WEBGL
->     ApplySafeArea();
-> #endif
-> ```
-
-> **타이밍 이슈 주의**: 콘텐츠 코드 수정 시 삽입 위치 결정 전 Unity 라이프사이클 의존성을 확인한다.
-> - `Awake`/`Start` 순서: 삽입 코드가 참조하는 컴포넌트가 이미 초기화됐는지 확인
-> - `OnEnable`/`OnDisable`: 오브젝트 active 상태 변경 순서와 호출 타이밍이 맞는지 확인
-> - 부모-자식 active 의존: 부모가 비활성 상태면 자식의 `Start`/`Awake`가 지연됨
+에디터 섀도잉 검사(check-editor-shadow) 실행 절차는 아래 `## 검증` 섹션 참조.
 
 ---
 
@@ -963,19 +815,13 @@ python ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
 
 ### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
 
-이번 작업에서 수정·추가한 .cs 파일만 검사한다. 원본의 기존 WEBGL 체인은 불변식의 기준선이므로 검사 대상에 넣지 않는다.
+이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
 
 ```bash
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
       --platform WEBGL_PUREWEB --mode check-editor-shadow
 ```
-
-| 출력 | 대응 |
-|---|---|
-| `EDITOR_SHADOWED` | 지목된 분기 조건에 `&& !UNITY_EDITOR` 추가 후 재검사 (exit 1 — 통과 전 커밋 금지) |
-| `EVAL_FAILED` | 해당 라인을 Read로 직접 확인해 섀도잉 여부를 수동 판정 |
-| `✅ 섀도잉 없음` | 커밋 진행 |
 
 결과 처리:
 
