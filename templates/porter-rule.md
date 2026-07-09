@@ -48,7 +48,18 @@ tools: Read, Bash, Edit, Write, Agent
 
 > **불필요한 주석 금지**: 코드가 스스로 설명되면 주석을 달지 않는다. 주석은 "왜"가 코드만 보고는 드러나지 않을 때만(숨은 제약, 특정 버그 우회, 비직관적 동작) 추가한다. "무엇을 하는지" 설명하는 주석, 이번 포팅 작업을 언급하는 주석(예: "여기서부터 {PLATFORM_SYMBOL} 처리", "이슈 처리")은 달지 않는다 — 이 문서 안의 `/* */`·`// 예시` 표기는 삽입 위치·형식을 보여주기 위한 표기일 뿐, 실제 게임 코드에 그대로 옮기는 텍스트가 아니다.
 
-> **에디터 섀도잉 금지 (불변식)**: 포팅은 기존 define 조합이 타던 분기를 바꾸지 않는다 — 새 분기는 WebGL 런타임에서만 활성화돼야 한다. 커밋 전 검사 절차는 아래 "## 코딩 컨벤션" § 에디터 섀도잉 검사 참조.
+> **에디터 섀도잉 금지 (불변식)**: 포팅은 기존 define 조합이 타던 분기를 바꾸지 않는다 — 새 분기는 WebGL 런타임에서만 활성화돼야 한다.
+> 에디터(WebGL 빌드타겟)에서는 `UNITY_EDITOR`와 `UNITY_WEBGL`이 동시 정의되므로, 기존 체인에 `UNITY_EDITOR`를 언급하는 분기가 있는데 그 앞에 WebGL 분기를 삽입하면 에디터가 원래 타던 분기를 새 분기가 가로챈다. 이 경우 새 분기 조건에 `&& !UNITY_EDITOR`를 추가한다:
+>
+> ```csharp
+> #if UNITY_WEBGL && !UNITY_EDITOR
+>     // WebGL 처리
+> #elif UNITY_EDITOR || UNITY_IPHONE
+>     EditorOrIphoneLogic(); // 에디터가 원래 타던 분기 — 계속 타야 한다
+> #endif
+> ```
+>
+> 커밋 전 `--mode check-editor-shadow`로 기계 검증한다 (아래 "## 코딩 컨벤션" § 에디터 섀도잉 검사 참조).
 
 ---
 
@@ -224,16 +235,33 @@ HLSDK wrapper(`HLSDK.Instance.GetTime()` 등)와 `NeptuneAPI.Instance.GetTimeAsy
 - WebGL 분기 없고 이 플랫폼 전용 기능 → 패턴 A
 
 > **주의 — 기존 iOS/Android 분기가 나뉜 경우**: `#if !UNITY_WEBGL`로 통으로 감싸면 iOS·Android 로직이 뭉개진다.
-> 기존에 `UNITY_IOS` / `UNITY_ANDROID` 분기가 있으면 `#if UNITY_WEBGL && {PLATFORM_SYMBOL}`를 맨 앞에 삽입하고 기존 분기를 `#elif`로 유지한다:
+> 코드 수정 전 반드시 기존 플랫폼 분기 현황을 확인한다:
+> ```bash
+> grep -n "UNITY_IOS\|UNITY_ANDROID\|UNITY_STANDALONE\|UNITY_WEBGL" {파일경로}
+> ```
+>
+> | 기존 분기 현황 | 적용 패턴 |
+> |---|---|
+> | 분기 없음 | `#if !UNITY_WEBGL` 래핑(제거) 또는 `#if UNITY_WEBGL && {PLATFORM_SYMBOL}`(패턴 A/B) |
+> | `UNITY_IOS` / `UNITY_ANDROID` 등 이미 나뉨 | 기존 구조 유지 + 맨 앞에 `#if UNITY_WEBGL && {PLATFORM_SYMBOL}` 분기 추가, 기존 분기는 `#elif`로 유지 |
 >
 > ```csharp
+> // ✅ 기존 분기 없음 → !UNITY_WEBGL 래핑(기능 제거인 경우)
+> #if !UNITY_WEBGL
+>     NativeOnlyLogic();
+> #endif
+>
+> // ✅ 기존에 iOS/Android 분기 있음 → 플랫폼 분기를 맨 앞에 삽입
 > #if UNITY_WEBGL && {PLATFORM_SYMBOL}
->     // 플랫폼 처리
+>     // 플랫폼 처리 (또는 비워두면 해당 기능 비활성화)
 > #elif UNITY_IOS
 >     IOSLogic();
 > #elif UNITY_ANDROID
 >     AndroidLogic();
 > #endif
+>
+> // ❌ 잘못된 방법 — 기존 iOS/Android 분기를 !UNITY_WEBGL로 통으로 감싸면
+> //    iOS와 Android 로직이 하나의 블록으로 뭉개짐
 > ```
 
 > **전처리문 3박자 규칙**: 기능을 WebGL용으로 *교체*할 때는 반드시 `#else`에 원본 코드를 보존한다. 기능을 *제거*할 때는 else 없이 가드만으로 충분하다.
