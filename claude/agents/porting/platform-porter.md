@@ -18,78 +18,13 @@ effort: high
 
 > **전처리문 추가 전 필수 확인**: 새 `#if` 전처리문을 추가하기 전에 사용할 심볼을 반드시 사용자에게 먼저 물어본다.
 
-> **탐색 기본 원칙 — 모든 스텝 예외 없이 적용**:
-> 파일·클래스·메서드를 찾아야 할 때는 반드시 아래 순서를 따른다.
-> 1. `Docs/porting/PORTING_VOCAB.md`에서 해당 플레이스홀더(`{LOAD_METHOD}`, `{SAVE_METHOD}` 등) 행의 파일:라인 확인
-> 2. 파일:라인이 있으면 → 바로 Read
-> 3. 없거나 "확인 필요"이면 → grep fallback
-> 4. grep fallback도 0건이고 이 단계에 이미 명시된 처리(스킵 등)가 없으면 — 추측으로 진행하지 않는다. `platform-checklist.md` `## 확인 필요`에 `- [ ] {대상} — grep fallback 0건, 수동 확인 필요` 형식으로 기록하고 이 단계는 스킵, 다음 단계로 진행한다.
->
-> grep을 **첫 번째** 수단으로 쓰지 않는다. VOCAB에 없을 때만 쓴다.
->
-> **VOCAB 업데이트 원칙**: grep fallback으로 발견한 파일:라인은 작업 완료 후 `Docs/porting/PORTING_VOCAB.md` `## 포터 기록` 섹션에 추가한다. 다음 포터 실행 시 재탐색 없이 바로 Read할 수 있도록.
-
-> **`{SCRIPTS_PATH}` 확정**: 작업 시작 시 `head -5 Docs/porting/NATIVE_BASELINE.md`로 헤더의 `스크립트 경로:` 값을 읽어 본문의 모든 `{SCRIPTS_PATH}`를 대체한다. 헤더에 없으면 사용자에게 확인 — `Assets/Scripts`로 임의 가정하지 않는다.
-> 같은 헤더의 `부속 경로:`(EXTRA_PATHS)가 "없음"이 아니면, 본문의 모든 grep 탐색을 그 경로들에도 반복 실행한다 — SCRIPTS_PATH만 검색하면 부속 코드 폴더의 SDK 참조·이슈를 놓친다.
-
-> **결정 필요 라우팅 — 사람 결정이 필요한 지점의 공통 처리**: 이 에이전트는 서브에이전트라 실행 중 사용자에게 질문할 수 없다. 본문에서 "→ 결정 필요 라우팅({항목})"을 만나면:
-> 1. `platform-checklist.md` `## 확인 필요`에 `- [ ] {결정 항목} — {선택지·판단 맥락}` 기록 (체크리스트가 정본 — 이슈에는 기록하지 않는다).
-> 2. 그 결정이 필요한 세부 작업만 스킵하고(코드 삽입 지점이 확정돼 있으면 `// TODO: {항목}` 주석 삽입) 나머지 작업은 계속 진행한다.
->
-> 확정 답변은 h5-port 후속 모드(재실행 시 미확정 재질문 → 부분 수정 재호출)가 수집·반영한다.
-
-> **완료 여부 사전 확인 — 사용자 선작업 인식**: 사용자가 이 섹션의 작업을 포터 실행 전에 이미 직접 처리했을 수 있다. 각 섹션 착수 전, 본문에 표시된 "**완료 신호**"로 이미 반영됐는지 확인한다.
-> 1. 완료 신호와 **정확히 일치**(해당 API 호출·패턴이 코드에 이미 존재)하면 → 코드 수정 없이 스킵. `platform-checklist.md` `## 단계 진행`에 `- [x] {단계} — ⏭️ 스킵: 이미 처리됨 확인({파일}:{라인})`으로 기록하고 다음 섹션으로 진행한다.
-> 2. 부분 일치·모호(관련 코드는 있으나 완료 신호와 다름)하면 → 스킵하지 않고 섹션의 원래 절차대로 진행한다. 과잉 스킵으로 필요한 포팅이 누락되는 게, 이미 된 걸 다시 확인하는 것보다 위험하다.
-> 3. 완료 신호가 명시되지 않은 섹션(사람 결정·수동 작업 전용)은 이 확인을 적용하지 않는다.
-
-> **문서 오류 → 코드 기준 교정 기록**: NATIVE_BASELINE.md·PORTING_VOCAB.md·체크리스트의 기존 기술 내용이 실제 코드와 다르다는 것을 발견하고, 문서가 아닌 **코드를 기준으로 판단해 다르게 처리**했다면 `platform-checklist.md` `## 교정 기록`에 아래 형식으로 append한다:
-> `- {단계} — 문서: {틀렸던 문서·항목}, 실제: {코드 근거 파일:라인}, 처리: {실제로 한 조치}`
-> grep fallback 0건 등 단순 탐색 실패는 대상이 아니다(그건 `## 확인 필요` 몫) — 문서에 내용이 있었는데 그게 틀렸을 때만 해당한다.
+> **공용 규칙 — `templates/porter-rule.md`를 Read해서 따른다**: 탐색 기본 원칙(VOCAB-first)·`{SCRIPTS_PATH}`/EXTRA_PATHS 확정·결정 필요 라우팅·완료 여부 사전 확인·문서 오류 교정 기록·컴파일 체크 자동화·worktree 병렬 작업 방침·HLSDK API 참조·코딩 컨벤션(전처리문 규칙·패턴 A/B·에디터 섀도잉 금지·전처리문 3박자·불필요한 주석 금지)은 전부 이 문서가 단일 소스다. `{PLATFORM_SYMBOL}`은 고정 심볼이 없으므로(여러 플랫폼 공통) `$(cat .porting-context 2>/dev/null || echo TOSS)`로 현재 선택된 플랫폼을 읽어 사용, `{platform}-checklist.md` = `platform-checklist.md`로 치환해서 읽는다.
 
 ---
 
 ## 컴파일 체크 자동화
 
-`.cs` 파일 수정 시 PostToolUse hook이 자동으로 컴파일을 검사한다. hook 출력 신호에 즉시 반응한다:
-
-| 신호 | 대응 |
-|---|---|
-| `✅ [COMPILE_OK]` | 단계 완료 조건 충족 시 커밋 → 다음 단계 진행 |
-| `❌ [COMPILE_ERROR]` | 에러 즉시 수정 → 수정 파일 저장 시 자동 재검사 |
-| `⚠️ [COMPILE_REQUIRED]` | **즉시 중단** — 아래 처리 |
-
-**단계 커밋 기준** — 아래 조건을 모두 충족하면 즉시 커밋:
-1. `✅ [COMPILE_OK]` 확인
-2. 해당 단계에 결정 필요 항목이 없거나 모두 라우팅(체크리스트 기록) 완료됨
-3. 👤 수동 작업 항목은 사용자가 완료 확인 후
-
-```bash
-# CLAUDE.md prefix 중 단계 성격에 맞게 선택:
-# [웹지엘] — WebGL 공통 변경 (모든 플랫폼에 영향, 대부분의 단계)
-# [공통] — 플랫폼 무관 변경
-# [수정] — 버그 수정
-git commit -m "[{prefix}] {단계명}"
-```
-
-`⚠️ [COMPILE_REQUIRED]` 발생 시:
-
-1. 표준 스크립트로 실행 (사전 점검·부수효과 되돌리기 내장). `.porting-context`는 실제 선택된 플랫폼(TOSS 등)을 담고 있으므로 그대로 사용한다:
-   ```bash
-   PLATFORM=$(cat .porting-context 2>/dev/null || echo TOSS)
-   bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh "$PLATFORM"
-   ```
-2. 출력 판정:
-   - `✅` → 계속 진행
-   - `❌` → 출력된 에러 목록 수정 후 재실행
-   - `⛔ STOP`(에디터 열림) → 서브에이전트는 실행 중 메인 세션에 알림을 보낼 방법이 없다 — blind 대기는 알림을 그만큼 늦추는 것과 같으므로, 빠르게 실패해 즉시 반환하는 것이 사용자에게 가장 빨리 알리는 방법이다. `Temp/UnityLockfile`을 5초 간격 2회만 재확인(`lsof Temp/UnityLockfile`, 트랜지언트 락 배제용). 그래도 잠겨 있으면 체크리스트 `## 확인 필요`에 "⛔ 에디터 열림 — 컴파일 체크 불가, 에디터 닫고 재실행 필요" 기록 후 즉시 작업 중단·반환한다. 재실행 시 "실행 범위 결정"이 `## 단계 진행`의 미완료 단계부터 자동 재개하므로 재대기 손해가 없다.
-
-> hook 미설정 시 → Unity 메뉴 **Tools/H5/Compile Check** 수동 실행
-
-> 각 단계의 담당 표시:
-> - 🤖 **AI 자동** — grep 탐색 + 코드 수정까지 진행
-> - ❓ **판단 필요** — AI가 탐색 후 결정 필요 라우팅(체크리스트 기록)으로 사람 결정 대기
-> - 👤 **사람 결정** — AI는 현황만 리포트, 결정·실행은 사람
+`templates/porter-rule.md` § 컴파일 체크 자동화 참조. `{PLATFORM_SYMBOL}`은 `.porting-context`로 현재 선택된 플랫폼(TOSS 등)을 읽어 사용, hook 미설정 시 Unity 메뉴 **Tools/H5/Compile Check** 수동 실행, git commit prefix는 `[웹지엘]`(대부분)/`[공통]`/`[수정]`.
 
 ---
 
@@ -146,22 +81,7 @@ git commit -m "[{prefix}] {단계명}"
 
 ## worktree 병렬 작업 방침
 
-수정 대상 파일이 겹치지 않는 태스크 그룹은 worktree로 병렬 실행한다.
-
-- **파일 겹침 없음** → worktree로 병렬 실행
-- **파일 겹침 있음** → 순차 처리 (같은 worktree)
-
-```bash
-# worktree 생성
-git worktree add ../{이름} -b {브랜치명}
-
-# worktree 안에서 단계 완료 시 커밋 (prefix는 위 기준 참조)
-git commit -m "[{prefix}] {단계명}"
-
-# main worktree로 돌아와서 merge 후 제거
-git merge {브랜치명}
-git worktree remove ../{이름}
-```
+`templates/porter-rule.md` § worktree 병렬 작업 방침 참조.
 
 ---
 
@@ -179,64 +99,15 @@ git worktree remove ../{이름}
 
 ## HLSDK API 참조
 
-SDK 위치: `Assets/HyperLane/` — **직접 수정 금지**
-
-### HLSDK 접근
-
-```csharp
-HLSDK.Instance // 싱글톤, 자동 생성
-await HLSDK.Instance.Initialize(); // 앱 시작 시 1회 필수
-```
-
-> `HLSDK.Instance.Provider`를 구체 타입(`TossHandler` 등)으로 캐스팅해야 하는 API(배너·Managed 프로모션 등)는 이 에이전트의 범위가 아니다 — 개별 플랫폼 포터(toss-porter 등)가 담당한다.
-
-### 주요 이벤트
-
-```csharp
-// "1" = 백그라운드, "0" = 포그라운드
-HLSDK.Instance.OnApplicationPause += (string pauseStr) => { };
-```
-
-### 주요 API
-
-| 메서드 | 용도 |
-|---|---|
-| `HLSDK.Instance.QuickLogin(Action<bool>)` | 빠른 로그인 |
-| `HLSDK.Instance.IsAdSupported()` | 광고 지원 여부 |
-| `HLSDK.Instance.LoadInterstitialAd(Action<bool>)` | 전면 광고 로드 |
-| `HLSDK.Instance.ShowInterstitialAd(start, success, close, fail)` | 전면 광고 노출 |
-| `HLSDK.Instance.LoadRewardedAd(Action<bool>)` | 보상형 광고 로드 |
-| `HLSDK.Instance.ShowRewardedAd(start, success, close, fail)` | 보상형 광고 노출 |
-| `HLSDK.Instance.GetProducts(Action<bool>)` | 상품 목록 조회 |
-| `HLSDK.Instance.GetProductInfoByOriginalPID(string)` | 상품 정보 조회 |
-| `HLSDK.Instance.PurchaseByOriginalPID(pid, giveCallback, purchaseCallback)` | IAP 구매 |
-| `HLSDK.Instance.SubmitLeaderBoard(int, Action<SubmitLeaderBoardResult>?)` | 리더보드 점수 제출 |
-| `HLSDK.Instance.OpenLeaderBoard()` | 리더보드 UI 표시 |
-| `HLSDK.Instance.GenerateHapticFeedback(string type)` | 햅틱 피드백 |
-| `HLSDK.Instance.GetDeviceOS()` | 기기 OS 조회 (`DeviceOS.ANDROID` 등) — 햅틱 타입 등 플랫폼별 분기에 사용 |
-| `HLSDK.Instance.ShareLink(string message)` | 공유하기 |
-| `HLSDK.Instance.GetSafeAreaTop()` | SafeArea 상단 px |
-| `HLSDK.Instance.GetSafeAreaBottom()` | SafeArea 하단 px |
-| `HLSDK.Instance.LogDailyLogin()` | 로그인 로그 (세션당 1회, 중복 방지 내장) |
-| `await HLSDK.Instance.GetTime()` | 서버 시간 조회 |
-| `await HLSDK.Instance.GetUserData()` | 서버 유저 데이터 로드 |
-| `await HLSDK.Instance.SetUserData(saveData, timestamp, extraData)` | 서버 유저 데이터 저장 |
-| `HLSDK.Instance.GetUserKey()` | UID 조회 |
-
-### NeptuneAPI 직접 접근 (필요 시)
-
-HLSDK wrapper(`HLSDK.Instance.GetTime()` 등)와 `NeptuneAPI.Instance.GetTimeAsync()` 중 프로젝트 관행에 맞는 쪽 사용.
-`LogPurchaseAsync`는 SDK 자동 처리 없음 — 구매 성공/실패 콜백 안에서 게임 코드가 직접 호출해야 한다.
+`templates/porter-rule.md` § HLSDK API 참조 참조.
 
 ---
 
 ## 코딩 컨벤션
 
-> **불필요한 주석 금지**: 코드가 스스로 설명되면 주석을 달지 않는다. 주석은 "왜"가 코드만 보고는 드러나지 않을 때만(숨은 제약, 특정 버그 우회, 비직관적 동작) 추가한다. "무엇을 하는지" 설명하는 주석, 이번 포팅 작업을 언급하는 주석(예: "여기서부터 HLSDK 연동", "이슈 처리")은 달지 않는다 — 아래 예시 코드의 `/* */`·`// 예시` 표기는 이 문서 안에서 삽입 위치·형식을 보여주기 위한 표기일 뿐, 실제 게임 코드에 그대로 옮기는 텍스트가 아니다.
+`templates/porter-rule.md` § 코딩 컨벤션 참조(전처리문 규칙·불필요한 주석 금지·에디터 섀도잉 금지·전처리문 3박자 규칙·타이밍 이슈 체크리스트·DEV 우회 패턴·MonoBehaviour 스텁 패턴). 이 에이전트는 HLSDK 공통 API를 다루므로 `{PLATFORM_SYMBOL}` 없이 `UNITY_WEBGL` 단독으로 충분한 경우가 대부분이다 — 아래 platform-porter 고유 패턴 참조.
 
 **기존 코드 삭제 금지 → 전처리 분기로 묶기**
-
-> **전처리문 규칙**: WebGL 플랫폼 심볼은 단독 사용 금지. 항상 `UNITY_WEBGL`과 조합해야 한다. 이유: `UNITY_WEBGL` 없으면 에디터·Android 빌드에서도 분기가 활성화됨.
 
 **기본 패턴 — HLSDK 공통 API** (이 에이전트가 다루는 모든 API는 특정 플랫폼 캐스팅 없이 호출 가능)
 
@@ -272,80 +143,7 @@ HLSDK wrapper(`HLSDK.Instance.GetTime()` 등)와 `NeptuneAPI.Instance.GetTimeAsy
 > #endif
 > ```
 
-> **에디터 섀도잉 금지 (불변식)**: 포팅은 기존 define 조합이 타던 분기를 바꾸지 않는다 — 새 분기는 WebGL 런타임에서만 활성화돼야 한다.
-> 에디터(WebGL 빌드타겟)에서는 `UNITY_EDITOR`와 `UNITY_WEBGL`이 동시 정의되므로, 기존 체인에 `UNITY_EDITOR`를 언급하는 분기가 있는데 그 앞에 WebGL 분기를 삽입하면 에디터가 원래 타던 분기를 새 분기가 가로챈다. 이 경우 새 분기 조건에 `&& !UNITY_EDITOR`를 추가한다:
->
-> ```csharp
-> #if UNITY_WEBGL && !UNITY_EDITOR
->     // WebGL 처리
-> #elif UNITY_EDITOR || UNITY_IPHONE
->     EditorOrIphoneLogic(); // 에디터가 원래 타던 분기 — 계속 타야 한다
-> #endif
-> ```
->
-> 커밋 전 `--mode check-editor-shadow`로 기계 검증한다 (아래 검증 섹션).
-
-> **전처리문 3박자 규칙**: 기능을 WebGL용으로 *교체*할 때는 반드시 `#else`에 원본 코드를 보존한다. 기능을 *제거*할 때는 else 없이 가드만으로 충분하다.
->
-> ```csharp
-> // ✅ 교체 — #else 필수 (원본 보존)
-> #if UNITY_WEBGL
->     HLSDK.Instance.ShareLink(msg);
-> #else
->     NativeShare.Share(msg);
-> #endif
->
-> // ✅ 제거 — #else 불필요
-> #if !UNITY_WEBGL
->     ratingsButton.SetActive(true);
-> #endif
-> ```
-
-> **타이밍 이슈 체크리스트** — 코드를 삽입하기 전과 수정한 후 모두 확인한다.
->
-> **삽입 전 — 삽입 위치 결정 시:**
-> - [ ] 삽입 코드가 참조하는 컴포넌트가 해당 시점에 이미 초기화됐는가? (`Awake` → `Start` 순서)
-> - [ ] `OnEnable`/`OnDisable` 타이밍: 오브젝트 active 상태 변경 순서와 호출 순서가 맞는가?
-> - [ ] 부모-자식 active 의존: 부모가 비활성 상태면 자식의 `Start`/`Awake`가 지연됨
->
-> **수정 후 — 코드 삽입 완료 시:**
-> - [ ] 삽입한 코드 블록 안에서 null 참조가 발생할 수 있는 라이프사이클 시점이 없는가?
-> - [ ] 씬 전환·오브젝트 파괴 시점에 콜백이 살아있는 경우 처리됐는가?
-
-**DEV 우회 패턴**
-
-```csharp
-#if UNITY_WEBGL && WEBGL_DEV_VER
-    onResult?.Invoke(true);
-#else
-    // 실제 로직
-#endif
-```
-
-**MonoBehaviour 스텁 패턴 — "script missing" 방지**
-
-`#if`로 MonoBehaviour 클래스 전체를 제거하면 씬/프리팹에 컴포넌트로 붙어 있던 경우 Unity가 "script missing" 경고를 띄운다.
-
-판단 기준:
-- 씬/프리팹에 컴포넌트로 붙어 있는 클래스 → `#else` 빈 스텁 추가
-- `Instantiate`/`AddComponent`로만 동적 생성되는 클래스 → 스텁 불필요
-
-```csharp
-#if !UNITY_WEBGL
-public class GPGSManager : MonoBehaviour
-{
-    // 기존 로직
-}
-#else
-public class GPGSManager : MonoBehaviour { } // script missing 방지
-#endif
-```
-
-씬/프리팹 첨부 여부 확인:
-```bash
-grep -rln "GPGSManager" Assets --include="*.unity" --include="*.prefab" 2>/dev/null
-```
-결과 있으면 스텁 필요, 없으면 생략.
+> 에디터 섀도잉 금지·전처리문 3박자 규칙·타이밍 이슈 체크리스트·DEV 우회 패턴·MonoBehaviour 스텁 패턴은 `templates/porter-rule.md` § 코딩 컨벤션 참조. 이 에이전트는 대부분 `UNITY_WEBGL` 단독으로 충분하므로(`{PLATFORM_SYMBOL}` 불필요) 예시 코드에서 `{PLATFORM_SYMBOL}` 부분은 생략하고 읽는다. 에디터 섀도잉 검사(check-editor-shadow) 실행 절차는 아래 `## 검증` 섹션 참조.
 
 **디버그 로그 prefix 규칙**
 
@@ -1535,19 +1333,14 @@ grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
 
 ### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
 
-이번 작업에서 수정·추가한 .cs 파일만 검사한다. 원본의 기존 WEBGL 체인은 불변식의 기준선이므로 검사 대상에 넣지 않는다.
+이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). `.porting-context`로 현재 선택된 플랫폼을 읽어 `--platform`에 반드시 전달한다(누락 시 플랫폼별 판정이 부정확해짐). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
 
 ```bash
+PLATFORM=$(cat .porting-context 2>/dev/null || echo TOSS)
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-      --mode check-editor-shadow
+      --platform "$PLATFORM" --mode check-editor-shadow
 ```
-
-| 출력 | 대응 |
-|---|---|
-| `EDITOR_SHADOWED` | 지목된 분기 조건에 `&& !UNITY_EDITOR` 추가 후 재검사 (exit 1 — 통과 전 커밋 금지) |
-| `EVAL_FAILED` | 해당 라인을 Read로 직접 확인해 섀도잉 여부를 수동 판정 |
-| `✅ 섀도잉 없음` | 커밋 진행 |
 
 ---
 
