@@ -945,7 +945,7 @@ TOSS_HANDLER_METHODS = [
 def main():
     arg_parser = argparse.ArgumentParser(description="H5 포팅 검증 — C# 전처리문 구조 파서")
     arg_parser.add_argument("--platform", required=True,
-                            choices=["WEBGL_PUREWEB", "WEBGL_TOSS"])
+                            choices=["WEBGL_PUREWEB", "WEBGL_TOSS", "WEBGL_LIVE_VER"])
     arg_parser.add_argument("--vocab", default="Docs/porting/PORTING_VOCAB.md")
     arg_parser.add_argument("--scripts", action="append", default=None, metavar="PATH",
                             help="스크립트 폴더 경로. 여러 번 지정 가능 (기본: Assets/Scripts)")
