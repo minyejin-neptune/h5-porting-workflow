@@ -575,33 +575,29 @@ STEP 1~2 완료. 포터는 준비되면 아래 명령으로 실행하세요:
 
 ## STEP 4 — 포팅 검증
 
-STEP 3 포터 완료 후 h5-port-verify.py로 플랫폼별 처리 누락을 최종 검증한다.
+STEP 3 포터 완료 후 `porting-verify` 스킬로 플랫폼별 처리 누락을 최종 검증한다.
 
-`{SCRIPTS_PATH}`는 NATIVE_BASELINE.md 헤더의 `스크립트 경로:` 값에서 확인해 `--scripts` 인자로 전달한다:
+`{SCRIPTS_PATH}`는 NATIVE_BASELINE.md 헤더의 `스크립트 경로:` 값에서 확인한다:
 
 ```bash
 head -5 Docs/porting/NATIVE_BASELINE.md
 ```
 
-```bash
+`Skill` 도구로 `porting-verify` 호출(메인 세션에서 직접 호출하므로 `⚠️` 발생 시 AskUserQuestion으로 그 자리에서 확인 가능):
+
+```
 # 퓨어웹 포팅인 경우
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-  --platform WEBGL_PUREWEB \
-  --vocab Docs/porting/PORTING_VOCAB.md \
-  --scripts {SCRIPTS_PATH}
+WEBGL_PUREWEB full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md pureweb-checklist.md
 
 # 토스 포팅인 경우
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-  --platform WEBGL_TOSS \
-  --vocab Docs/porting/PORTING_VOCAB.md \
-  --scripts {SCRIPTS_PATH}
+WEBGL_TOSS full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md toss-checklist.md
 ```
 
 | 결과 | 대응 |
 |---|---|
 | `✅ 이상 없음` | 포팅 완료 |
 | `❌ 미처리` | 해당 파일 수정 후 재실행 |
-| `⚠️ 확인 필요` | 포터 에이전트 검증 섹션의 verify-exceptions 절차 참조 |
+| `⚠️ 확인 필요` | 스킬이 자체적으로 패턴 분석·AskUserQuestion·exceptions 기록까지 처리 — 완료 후 재실행 결과만 확인 |
 
 ### STEP 4-A. 포팅 이슈 종료 처리 (스텝별)
 
