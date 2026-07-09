@@ -10,6 +10,18 @@ $ARGUMENTS 프로젝트의 H5 포팅을 순서대로 실행한다.
 
 ---
 
+## 진입 — SDK 업데이트 단독 요청
+
+`$ARGUMENTS`가 SDK/HyperLane 업데이트 의도로만 해석되면(예: "sdk 업데이트", "hyperlane 업데이트해줘"), 아래 인자 파싱·후속 모드 감지·STEP 0-A 설치확인을 모두 건너뛰고 즉시 실행한다:
+
+```bash
+bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-update.sh
+```
+
+완료되면 결과만 보여주고 종료한다 — STEP 0~4 파이프라인으로 이어지지 않는다.
+
+---
+
 ## 인자 파싱
 
 `$ARGUMENTS`로 시작 스텝 또는 플랫폼을 지정할 수 있다. 번호와 키워드 둘 다 인식한다.
