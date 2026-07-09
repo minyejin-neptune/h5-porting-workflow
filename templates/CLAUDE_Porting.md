@@ -30,6 +30,23 @@ Details: [.md/PROJECT.md](.md/PROJECT.md)
 
 ---
 
+## Porting Workflow Overview
+
+포팅 작업은 아래 파이프라인을 따른다. 보통 `h5-port`로 시작하면 나머지는 자동으로 이어진다.
+
+| 순서 | 커맨드/스킬 | 역할 | 호출 주체 |
+|---|---|---|---|
+| 1 | `h5-port` | 오케스트레이터 — STEP 0~4 전체 파이프라인 순차 실행 | 사용자가 시작 |
+| 2 | `porting-scan` | 사전 분석 — NATIVE_BASELINE·VOCAB·체크리스트 생성 | h5-port가 자동 호출 |
+| 3 | `porting-scan-verify` | 스캔 검증 — 산출물이 실제 코드와 일치하는지 확인 | h5-port가 자동 호출 |
+| 4 | 포터(pureweb/platform/toss-porter) | 실제 코드 포팅 수행 | h5-port가 자동 호출 |
+| 5 | `porting-verify` | 검증(❌ 미처리/⚠️ 확인 필요/✅ 이상 없음 판정 + exceptions 처리) | 포터·h5-port STEP4가 내부적으로 호출 |
+| - | `platform-decisions` | platform-porter가 이관한 사람 판단 항목(햅틱·랭킹버튼·공유하기·UID/version·UI삭제·로컬라이제이션) 처리 | 사용자가 직접 호출, 또는 h5-port 완료 보고가 안내 |
+
+`platform-decisions`는 서브에이전트(platform-porter)가 할 수 없는 AskUserQuestion이 필요한 지점이라 별도로 분리돼 있다 — h5-port 완료 보고에 대기 항목이 남아있으면 실행하라고 안내한다.
+
+---
+
 ## Pre-Analysis Reference
 
 Before any code analysis, check if the following files exist and read them first.
@@ -94,7 +111,7 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 - **Porting must not change which branch existing define combinations take** (editor shadowing invariant). In the editor with WebGL build target, `UNITY_EDITOR` and `UNITY_WEBGL` are both defined — when inserting a new WebGL arm in front of a chain that mentions `UNITY_EDITOR` below, add `&& !UNITY_EDITOR` to the new arm. Verify modified files before committing: `h5-port-verify.py --mode check-editor-shadow --files <changed .cs>`.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
 - Prefer explicit types over `var`.
-- **Porters (subagents) cannot ask the user mid-run — never block on a question.** Where a documented fixed policy exists, apply it without asking (e.g., encryption must be removed for SetUserData — notify, don't ask; VOCAB gate failure always stops, no risk-accepting bypass). Otherwise record the decision in the porting issue `## 확인 필요 / 미확정` (+ checklist `## 확인 필요`) and skip only the dependent sub-task — h5-port's follow-up mode collects answers and re-runs partially.
+- **Porters (subagents) cannot ask the user mid-run — never block on a question.** Where a documented fixed policy exists, apply it without asking (e.g., encryption must be removed for SetUserData — notify, don't ask; VOCAB gate failure always stops, no risk-accepting bypass). Otherwise record the decision in the porting issue `## 확인 필요 / 미확정` (+ checklist `## 확인 필요`) and skip only the dependent sub-task — h5-port's follow-up mode collects answers and re-runs partially. For platform-porter's 6 judgment steps (haptic, ranking button, share text, UID/version placement, unnecessary-UI removal, localization), skip and defer to the `platform-decisions` skill instead — it runs in the main session and can ask directly.
 - After completing porting-related code changes (WebGL preprocessors, SDK handling, compile/runtime issue fixes): check off the corresponding item in the checklist (`Docs/porting/pureweb-checklist.md` `## 이슈` or the step table) with the commit hash. If a method name or file path was newly confirmed, add it to `Docs/porting/PORTING_VOCAB.md` as well. Do not edit `NATIVE_BASELINE.md` (frozen after scan-verify).
 - After completing each porting task, run compile check before committing (Unity menu **Tools/H5/Compile Check**, or `bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh <TOSS|PUREWEB>`).
 - **Compress step-transition reports to 2–3 lines** (✅/⏳ markers) — put full detail in the checklist/VOCAB doc, not the chat.

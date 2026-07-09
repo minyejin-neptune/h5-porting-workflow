@@ -1,5 +1,5 @@
 ---
-description: platform-porter의 스텝 중 사람 판단이 필요한 6개(햅틱·랭킹버튼·공유하기·UID/version·불필요UI삭제·로컬라이제이션)를 사용자가 직접 호출해 처리하는 스킬. 메인 세션에서 도니 AskUserQuestion을 바로 쓸 수 있다.
+description: TRIGGER — platform-porter 포팅 중 햅틱·랭킹버튼·공유하기·UID/version·UI삭제·로컬라이제이션 관련 사람 판단(삽입 위치·문구·Tier 확정)이 필요할 때, 또는 사용자가 이 항목들에 대해 직접 질문/요청할 때 사용. 메인 세션에서 도니 AskUserQuestion을 바로 쓸 수 있다(platform-porter 서브에이전트는 불가).
 effort: high
 ---
 

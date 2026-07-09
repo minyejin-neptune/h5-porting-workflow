@@ -1,5 +1,5 @@
 ---
-description: h5-port-verify.py 호출 + 결과 해석(❌/⚠️/✅) + verify-exceptions.json 처리를 전담하는 검증 스킬. 포터 3종의 자체 검증과 h5-port.md STEP 4 최종 검증이 공통으로 호출한다.
+description: TRIGGER — 포팅 코드 수정 후 `❌ 미처리`/`⚠️ 확인 필요` 검증이 필요할 때, 또는 h5-port-verify.py 실행이 필요한 상황(포터 자체검증·STEP4 최종검증)에서 사용. 결과 해석(❌/⚠️/✅)과 verify-exceptions.json 처리까지 전담한다.
 effort: high
 ---
 
