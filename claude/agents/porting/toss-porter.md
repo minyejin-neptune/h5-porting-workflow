@@ -502,7 +502,7 @@ grep -rn "#if WEBGL_TOSS\|#elif WEBGL_TOSS" {SCRIPTS_PATH} --include="*.cs" | gr
 hook이 각 `.cs` 수정 시 자동 실행했으므로 마지막 컴파일 결과만 확인한다:
 
 ```bash
-grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
+grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -3
 ```
 
 - 에러 없음 → ✅ 완료 리포트 출력
@@ -514,36 +514,26 @@ grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -10
 
 ## 완료 후 채팅 출력
 
-작업 완료 후 아래 형식으로 리포트를 출력한다.
+상세 항목별 처리 내역(✅/⏭️, 근거 파일:라인)은 `toss-checklist.md`에 이미 기록돼 있다 — 채팅에 다시 나열하지 않는다.
+채팅에는 체크리스트에 남지 않는 것만 출력한다: **CompileChecker 결과**, 그리고 이번 실행에서 실제로 해당한 **🔍 수동 테스트 필요** / **👤 직접 처리 필요** 항목만. 각 구획은 해당 항목이 있을 때만 출력하고(해당 없으면 구획째 생략), ✅만인 항목은 어느 구획에도 넣지 않는다.
 
 ```
-✅ toss-porter 완료 — 포팅 체크리스트 리포트
-
-범례: ✅ 코드 처리 완료 | 🔍 수동 테스트 필요 | ⚠️ 주의 필요 | ⏭️ 스킵 | 👤 직접 처리 필요
-
-────────────────────────────────────────────────────────────────
-카테고리 항목 결과
-────────────────────────────────────────────────────────────────
-광고 SDK 배너 광고 추가 ✅ Initialize+Attach 연결 / ⏭️ 스킵
-             근거: InitializeAppsInTossBannerAd → 1회 init 보장
-광고 SDK 배너 광고 위치 조정 👤 직접 처리 필요
-             👤 배너 하단 여백 확인 후 오프셋 직접 조정 필요
-             🔍 실제 배너 표시 위치·크기 확인 필요
-광고 SDK 배너 init 중복 방지 ✅ isBannerInitialized 가드 / ✅ 이미 처리됨
-
-인앱 SDK DEV 뒤로가기 강제 지급 ✅ WEBGL_DEV_VER 강제 지급 분기
-
-프로모션 트리거 포인트 ✅ Managed / ✅ V1 / 👤 방식 직접 결정 필요
-             🔍 프로모션 실제 지급 및 중복 수령 불가 확인 필요
-
-로컬라이제이션 ✅ platform-porter 처리로 충분 / 👤 Toss 전용 문구 추가 작업 필요
-────────────────────────────────────────────────────────────────
+✅ toss-porter 완료 — 상세: Docs/porting/toss-checklist.md
 
 CompileChecker: 통과 / 에러 N건
 → Unity 메뉴: Tools/H5/Compile Check (TOSS) 로 확인
 
+🔍 수동 테스트 필요:
+- 배너 광고 — 실제 표시 위치·크기 확인
+- 프로모션 — 실제 지급 및 중복 수령 불가 확인
+
+👤 직접 처리 필요:
+- {해당하는 항목명, 예: 배너 하단 여백 오프셋 조정, 프로모션 방식(Managed/V1) 결정, Toss 전용 로컬라이제이션 문구 추가}
+
 다음 단계: 👤 직접 처리 필요 항목 완료 후 빌드 배포 → 🔍 항목 수동 테스트
 ```
+
+위 🔍/👤 목록은 예시다 — 이번 실행에서 실제로 해당하는 항목만 나열한다.
 
 `$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_TOSS full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md toss-checklist.md`.
 h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
