@@ -106,10 +106,18 @@ private async UniTask<bool> InitPlatform()
 
 ## 3-A. 로그인 로그 삽입
 
+기존 분기 없는 경우의 기본형(패턴 B 계층 구조 — 코딩 컨벤션 참조). 실제 삽입 위치에 이미 `#if UNITY_WEBGL { ... }` 등 다른 계층이 있으면 그 구조에 맞춰 끼워 넣는다(플랫 `&&` 조건으로 새로 쓰지 않는다).
+
 ```csharp
 // 로비 진입 완료 시점 (Start, OnEnable, 초기화 콜백 등)
 #if UNITY_WEBGL
-    HLSDK.Instance.LogDailyLogin();
+    #if WEBGL_PUREWEB
+        // PureWeb — 실사용자 세션 없음(QuickLogin이 항상 성공만 반환하는 스텁)이라 DAU 로그 제외
+    #else
+        #if !UNITY_EDITOR
+        HLSDK.Instance.LogDailyLogin();
+        #endif
+    #endif
 #endif
 ```
 
