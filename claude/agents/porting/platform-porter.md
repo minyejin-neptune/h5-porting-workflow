@@ -959,61 +959,11 @@ grep -n "class.*Data\|public int\|public long" {SAVE_METHOD_FILE} | grep -iE "co
 
 ---
 
-### 8. 햅틱 🤖
+### 8. 햅틱 🤖 → `/platform-decisions` 이관
 
 **완료 신호**: 대상 위치에 `HapticController.Generate(` 호출 이미 존재 → 스킵.
 
-> `platform-checklist.md` `## 확인 필요`의 `[사람 준비]` 태그 항목 중 **햅틱 타입** 값을 먼저 확인한다 — 미체크(`[ ]` 미확정)이면 진입점의 미확정 처리 목록을 따른다.
-
-**탐색:** VOCAB `{HAPTIC_FILE}` → Read → grep fallback
-
-```bash
-grep -rn "Vibrate\|Haptic\|haptic\|vibrate" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-grep -rn "GenerateHapticFeedback\|HapticController" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-```
-
-**HapticController 유틸 준비**
-
-iOS·Android는 같은 의도(약함·중간 등)라도 `tick`·`basic` 타입의 체감 강도가 반대로 느껴진다 — 플랫폼별로 다른 타입을 배정해야 한다. 이 매핑을 `HapticTier` enum으로 추상화한 공용 템플릿을 쓴다.
-
-- 위 grep에서 이미 `HapticController`(또는 유사 Tier 기반 유틸)가 있으면 → 재사용, 아래 복사 생략.
-- 없으면 공용 템플릿을 프로젝트로 **복사**한다 (SafeAreaAdjuster와 동일 방식 — 9단계 참조).
-
-> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `~/github/h5-porting-workflow/templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다.
-
-- 템플릿 위치: `~/github/h5-porting-workflow/templates/Runtime/HapticController.cs`
-- `.cs`를 복사한다. `.meta`는 Unity가 프로젝트 로컬에 생성한다:
-  ```bash
-  mkdir -p {SCRIPTS_PATH}/Utility
-  cp ~/github/h5-porting-workflow/templates/Runtime/HapticController.cs \
-     {SCRIPTS_PATH}/Utility/HapticController.cs
-  ```
-- 사용 가능한 Tier(정의는 템플릿이 유일한 소스): `Weak`·`WeakStrong`·`Medium`·`MediumStrong`·`Soft`·`Tap`·`Success`·`Confetti`. 필요한 효과가 없으면 `HLSDK.Instance.GenerateHapticFeedback("{타입}")`을 직접 호출한다(예외적인 경우로 한정).
-- 복사 방식이라 프로젝트마다 사본이 생긴다. 템플릿을 고치면 각 프로젝트에서 재복사해야 반영된다.
-
-**탐색 결과에 따라 분기:**
-
-**기존 진동 호출 있는 경우** → 기존 호출의 세기 표현(주석·변수명·컨텍스트)을 참고해 적절한 Tier를 판단하고 아래 패턴으로 교체.
-
-**기존 진동 호출 없는 경우** (VOCAB `{HAPTIC_FILE}` 이 "역기획 필요"):
-
-이 포터는 **API(HapticController 유틸)만 준비**한다. 삽입 위치·시점은 사람이 결정한다 — 다른 단계와 동일한 결정 필요 라우팅을 그대로 따른다(예외 아님).
-
-1. content-analyze 스킬로 인게임 이벤트 후보를 조사한다(코드 삽입 없이 조사만):
-   ```
-   /analyze:content-analyze 인게임 로직 --docs 역기획서
-   ```
-2. 조사 결과를 후보로 정리한다.
-
-   | 위치(파일:라인) | 이벤트 | 제안 Tier | 쿨다운 |
-   |---|---|---|---|
-   | ... | ... | ... | 없음 / N초 |
-
-3. → 결정 필요 라우팅(햅틱 삽입 위치·Tier 확정 — 위 후보 표 첨부). `platform-checklist.md` `## 확인 필요`에 후보 표를 기록하고 **코드는 삽입하지 않는다**. 확정 답변이 오기 전까지 이 단계는 스킵 — HapticController 유틸 복사까지만 완료 처리한다.
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "8. 햅틱"
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "8. 햅틱"
+판단(삽입 위치·Tier 확정)이 필요한 스텝이라 이 포터는 실행하지 않는다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 8. 햅틱 — ⏭️ 스킵: /platform-decisions 햅틱 로 처리 필요`로 기록하고 다음 단계로 진행한다.
 
 ---
 
@@ -1055,24 +1005,11 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" {SCRIPTS_PATH} --inc
 
 ---
 
-### 10-1. 랭킹 접근 버튼 확인 ❓
+### 10-1. 랭킹 접근 버튼 확인 ❓ → `/platform-decisions` 이관
 
 **완료 신호**: 랭킹 버튼 오브젝트에 `#if UNITY_WEBGL` 표시 분기 이미 존재 → 스킵.
 
-**탐색:** VOCAB `{RANKING_FILE}` → Read → grep fallback
-
-```bash
-grep -rn "OpenLeaderBoard\|LeaderBoard\|Leaderboard\|RankButton\|OnClickRank" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-```
-
-탐색 결과로 자동 분기한다 (grep으로 판별 가능한 사실 — 질문 불필요):
-
-- 기존 버튼 있음(grep 히트) → `HLSDK.Instance.OpenLeaderBoard()` 연결
-- 신규 추가 필요(0건) → `platform-checklist.md` `## 확인 필요`에서 **랭킹 버튼 위치** 값을 확인한다. 확정값 있으면 그 위치에 구현(기존 UI 관리 클래스에 삽입 또는 별도 버튼 오브젝트 + 클릭 핸들러), 없으면 → 결정 필요 라우팅(랭킹 버튼 추가 위치). 확정 전까지 버튼 신규 추가는 스킵.
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "10-1. 랭킹 접근 버튼 확인"
-
-> 특정 플랫폼에서만 숨겨야 한다는 사실이 확인되면(예: 그 플랫폼이 `OpenLeaderBoardAsync`를 no-op으로 구현) 위 분기를 좁힌다 — 개별 플랫폼 포터가 필요 시 조정.
+기존 버튼 없을 때 신규 위치 판단이 필요한 스텝이라 이 포터는 실행하지 않는다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 10-1. 랭킹 접근 버튼 확인 — ⏭️ 스킵: /platform-decisions 랭킹버튼 로 처리 필요`로 기록하고 다음 단계로 진행한다. 10-2~10-4는 10-1 완료(스킬 처리 후 재실행) 후에 이어서 처리한다.
 
 ### 10-2. 랭킹 보드 연동 🤖
 
@@ -1113,93 +1050,33 @@ grep -rn "SubmitLeaderBoard" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
 
 ---
 
-### 11. 공유하기 ❓
+### 11. 공유하기 ❓ → `/platform-decisions` 이관
 
 **완료 신호**: `HLSDK.Instance.ShareLink(` 호출 이미 존재 → 스킵.
 
-> `platform-checklist.md` `## 확인 필요`의 `[사람 준비]` 태그 항목 중 **공유하기 문구** 값을 먼저 확인한다 — 미체크(`[ ]` 미확정)이면 아래 기존 폴백(플레이스홀더+TODO)을 그대로 적용한다.
-
-**탐색:** VOCAB `{SHARE_FILE}` → Read → grep fallback
-
-```bash
-grep -rn "NativeShare\|ShareLink\|OnClickShare\|UIButtonShare\|ShareButton" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-```
-
-탐색 결과를 기반으로 분기:
-
-**A. 기존 버튼 있음 — 기존 함수 내부에 전처리문 삽입**
-
-클릭 핸들러를 Read해서 함수 본문 확인. 공유 문구 확정 여부를 실시간으로 물어볼 수 없으므로 플레이스홀더로 삽입 후 `// TODO: 공유 문구 기획 확인 필요` 주석을 추가하고, `platform-checklist.md` `## 확인 필요`에도 기록한다.
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "11. 공유하기"
-
-**B. 기존 버튼 없음** 👤
-
-버튼 삽입 위치(씬·화면)와 구현 방식(기존 UI 클래스 삽입 vs 전용 클래스 신규)은 사람 결정이다 → 결정 필요 라우팅(공유 버튼 신규 구현 위치·방식 — 후보 클래스 목록 첨부). 확정 전까지 버튼 신규 구현은 스킵.
-
-공유 문구는 `platform-checklist.md` `## 확인 필요`에서 확정값을 따른다 — 미확정이면 플레이스홀더로 삽입 후 `// TODO: 공유 문구 기획 확인 필요` 주석 추가.
-
-`HLSDK.Instance.ShareLink(/* 공유 문구 */)` 를 `#if UNITY_WEBGL` 가드 안에 구현.
-
-**검토 포인트:**
-- 공유 버튼이 파생 클래스 구조면 기반 클래스 클릭 로직은 수정하지 않고 문구 인자만 화면별로 교체
-- `#if UNITY_WEBGL` 가드 안에서만 호출되는지 확인
+공유 문구 확정이 항상 필요한 스텝이라(버튼 유무와 무관) 이 포터는 실행하지 않는다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 11. 공유하기 — ⏭️ 스킵: /platform-decisions 공유 로 처리 필요`로 기록하고 다음 단계로 진행한다.
 
 ---
 
-### 13. UID / version 추가 ❓
+### 13. UID / version 추가 ❓ → `/platform-decisions` 이관
 
 **완료 신호**: `HLSDK.Instance.GetUserKey()` 호출 이미 존재 → 스킵.
 
-**탐색:** VOCAB `{UID_VERSION_FILE}` → Read → grep fallback
-
-```bash
-# 버전/빌드 정보 표시 위치
-grep -rn "version\|Version\|buildNumber\|AppVersion" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane | grep -iv "//.*version"
-
-# UID 표시 위치
-grep -rn "uid\|userId\|UserID\|GetUserKey\|userKey" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-```
-
-탐색 결과로 분기한다(결정 필요 없이 기계적으로 판단 가능):
-
-> - 기존 표시 UI가 있음 → 해당 UI에 `#if UNITY_WEBGL` 분기로 HLSDK 값 표시하고 바로 진행
-> - 기존 표시 UI가 없음 → 어느 화면에 추가할지는 사람 판단이 필요하므로 `platform-checklist.md` `## 확인 필요`에 "UID/version 표시 위치 확인 필요" 기록 후 이 단계 스킵
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "13. UID / version 추가"
+기존 표시 UI 없을 때 신규 위치 판단이 필요한 스텝이라 이 포터는 실행하지 않는다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 13. UID / version 추가 — ⏭️ 스킵: /platform-decisions UID 로 처리 필요`로 기록하고 다음 단계로 진행한다.
 
 ---
 
-### 14. 불필요한 UI 삭제 👤🤖
+### 14. 불필요한 UI 삭제 👤🤖 → `/platform-decisions` 이관
 
-WebGL에서 의미 없는 네이티브 전용 UI를 비활성화한다.
+WebGL에서 의미 없는 네이티브 전용 UI를 비활성화한다. `{REMOVE_UI_LIST}`가 "없음"이면 대상 자체가 없으니 스킵(스킬 이관 불필요).
 
-**탐색:** VOCAB `{REMOVE_UI_LIST}` → scan이 찾은 **후보** 목록 확인 (scan은 확정하지 않는다)
-
-`{REMOVE_UI_LIST}` 가 "없음"이면 이 단계 스킵.
-
-**삭제 대상 결정** 👤
-
-비활성화 항목 선택은 사람 결정이다 (일부는 법적/정책 요구사항일 수 있음) → 결정 필요 라우팅(비활성화할 UI 항목 선택 — VOCAB `{REMOVE_UI_LIST}` 파일:라인 후보 목록 첨부). 확정 전까지 이 단계는 스킵.
-
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "14. 불필요한 UI 삭제"
+대상이 있으면 삭제 항목 선택(법적/정책 요구사항일 수 있어 항상 사람 결정)이 필요한 스텝이라 이 포터는 실행하지 않는다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 14. 불필요한 UI 삭제 — ⏭️ 스킵: /platform-decisions UI삭제 로 처리 필요`로 기록하고 다음 단계로 진행한다.
 
 ---
 
-### 15. 로컬라이제이션 ❓
+### 15. 로컬라이제이션 ❓ → `/platform-decisions` 이관
 
-**완료 신호**: `WebUtil.Instance.GetSystemLang()` 사용 이미 존재 → 스킵.
-
-**탐색:** VOCAB `{LOCALIZATION_FILE}` → Read → grep fallback
-
-```bash
-grep -rn "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLanguage\|WebUtil.*Lang" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
-```
-
-탐색 결과로 분기한다(어느 쪽이든 결정이 필요 없어 확인 없이 진행):
-
-> - 이미 구현됨 → WebGL에서 `WebUtil.Instance.GetSystemLang()` 사용 여부만 확인
-> - 미구현 → `platform-checklist.md` `## 확인 필요`에 "로컬라이제이션 미구현 — 범위 결정 후 별도 작업" 기록
+판단 지점은 아니지만(두 분기 다 확인 없이 진행), 이 기능 자체를 이번 포팅에서 다룰지는 사용자가 상황을 보고 직접 선택한다 — 이 포터의 자동 파이프라인에서 제외한다. `platform-checklist.md` `## 단계 진행`에 `- [ ] 15. 로컬라이제이션 — ⏭️ 스킵: 필요 시 /platform-decisions 로컬라이제이션 로 처리`로 기록하고 다음 단계로 진행한다.
 
 ---
 
