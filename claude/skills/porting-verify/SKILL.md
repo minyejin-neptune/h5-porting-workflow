@@ -1,6 +1,6 @@
 ---
 description: TRIGGER — 포팅 코드 수정 후 `❌ 미처리`/`⚠️ 확인 필요` 검증이 필요할 때, 또는 h5-port-verify.py 실행이 필요한 상황(포터 자체검증·STEP4 최종검증)에서 사용. 결과 해석(❌/⚠️/✅)과 verify-exceptions.json 처리까지 전담한다.
-effort: high
+effort: max
 ---
 
 # porting-verify

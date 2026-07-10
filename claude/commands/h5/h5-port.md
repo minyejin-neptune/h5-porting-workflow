@@ -1,6 +1,6 @@
 ---
 description: H5 포팅 오케스트레이터 — STEP 0~4 전체 파이프라인(인코딩·스캔·검증·포터·최종검증) 순차 실행
-effort: high
+effort: max
 ---
 
 # H5 포팅 오케스트레이터
