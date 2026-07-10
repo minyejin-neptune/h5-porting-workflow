@@ -23,7 +23,7 @@
 | F | 실결제 IAP 연동 | 스토어/상품 테이블 컬럼(reward_list, enable, purchase_limit, reset_type 등) 참조 또는 전용 IAP 팝업 존재 | 이 콘텐츠가 실제 현금 결제 상품과 연결됨 | content-analyze.md:121-124 |
 | G-1 | 자동 노출 팝업 | 팝업 매니저 호출이 **조건부 분기 안에서** 발생 (사용자 액션 없이 자동 실행) | 특정 조건 달성 시 강제로 알려주는 흐름 | content-analyze.md:125-129 |
 | G-2 | 메뉴 진입형 팝업 | 팝업 매니저 호출이 **버튼 클릭 핸들러**에서만 발생, 조건부 자동 실행 없음 | 사용자가 능동적으로 여는 일반 UI 패널 (G-1과 다른 하위 유형) | 파일럿에서 신규 구분(`UIManager.cs:1247-1260,1351-1365`) |
-| H | 버프/모디파이어 참조 | **다른 시스템의 계산식(가격·확률·수량 등)이 이 콘텐츠의 데이터 필드를 직접 읽어 수치를 바꿈 — 방향: 다른 시스템→이 콘텐츠(H-A). 반대로 이 콘텐츠가 다른 시스템의 재화·수치를 읽어 자신의 계산에 쓰는 경우도 동일 구조 코드 패턴으로 나타남 — 방향: 이 콘텐츠→다른 시스템(H-B)** | 이 콘텐츠가 다른 시스템의 수치 밸런스에 영향을 줌(H-A) 또는 이 콘텐츠가 다른 시스템의 재화·수치에 의존함(H-B) | 파일럿 신규 발견(`BuyInfo.cs`,`ProductionArea.cs`,`AnimalAI.cs` 등, H-A). **Phase 4 dry-run에서 H-B 확인**: `PetInfo.cs:39-41`(Pet 구매가 DecoManager의 ticket을 차감), `TrophyManager.cs:215`·`Trophy.cs:45`(Trophy 보상이 BuyMananger의 dicTierStandardPrice를 읽음) — Pet·Trophy 둘 다 동일 방향으로 나타나 우연이 아님 |
+| H | 버프/모디파이어 참조 | **화살표 관례(고정): `X→Y` = "X의 데이터가 Y의 계산식에 영향을 준다"(영향이 흘러가는 방향 — 읽는 주체 방향이 아님).** 다른 시스템의 계산식(가격·확률·수량 등)이 이 콘텐츠의 데이터 필드를 직접 읽어 수치를 바꿈 — **이 콘텐츠→다른 시스템(H-A)**. 반대로 이 콘텐츠의 계산식이 다른 시스템의 재화·수치를 읽어 자신의 수치를 바꾸는 경우도 동일 구조 코드 패턴으로 나타남 — **다른 시스템→이 콘텐츠(H-B)** | 이 콘텐츠의 데이터가 다른 시스템의 수치 밸런스에 영향을 줌(H-A) 또는 다른 시스템의 데이터가 이 콘텐츠의 수치에 영향을 줌(H-B) | 파일럿 신규 발견(`BuyInfo.cs`,`ProductionArea.cs`,`AnimalAI.cs` 등, H-A). **Phase 4 dry-run에서 H-B 확인**: `PetInfo.cs:39-41`(Pet 구매가 DecoManager의 ticket을 차감), `TrophyManager.cs:215`·`Trophy.cs:45`(Trophy 보상이 BuyMananger의 dicTierStandardPrice를 읽음) — Pet·Trophy 둘 다 동일 방향으로 나타나 우연이 아님. **박물관(Museum) dry-run에서 서브에이전트가 구 표기(읽는 방향 기준)를 표준 관례(영향 방향 기준)로 오해해 "확인 필요" 처리 — 화살표 관례를 표준(영향 방향)으로 통일해 재발 방지** |
 | I | 저장 데이터 포함 여부 | 이 콘텐츠의 상태값이 저장/로드 데이터 구조체의 필드로 정의되고, 저장·로드 함수에서 해당 필드가 실제로 오가는지 | 이 콘텐츠의 진행 상태가 영구 저장됨 | 파일럿 신규 발견(`GameData.cs:20,89-109`, `DataController.cs`). **Phase 4 dry-run 재확인**: Pet(`GameData.cs:22,145`, `DataController.cs:69-71,270,371,425`) — 일반화 확인됨 |
 | J | 치트/디버그 연동 | 치트·디버그 매니저에서 이 콘텐츠 데이터 필드를 직접 읽거나 씀 | 이 콘텐츠가 QA·치트로 강제 조작 가능함 | 파일럿 신규 발견(`CheatManager.cs:23-62`). **Phase 4 dry-run 재확인**: Pet(`CheatCommand.cs:10` — 별도 치트 파일이지만 동일 패턴) — 일반화 확인됨, 단 치트 파일 자체가 프로젝트마다 다를 수 있음(CheatManager vs CheatCommand) — 파일명을 하드코딩하지 않고 "치트/디버그 성격의 매니저"로 탐지해야 함 |
 | K | 알림 뱃지 연동 | **확인 완료** — `{콘텐츠명}Notice`류 명명의 GameObject 필드를 조건에 따라 `SetActive(true/false)`로 토글하는 코드 | 이 콘텐츠에 새 소식(보상 획득 가능·신규 항목 등)이 있을 때 UI에 알림 뱃지가 표시됨 | Phase 4 dry-run 확인(fallback 아님 — 실제 코드로 검증됨): `UIManager.cs:45,1356`(`SkillNotice`), `TrophyManager.cs:74,231`(`TrophyNotice`) — 서로 다른 두 콘텐츠에서 반복 확인되어 우연이 아님 |
@@ -60,6 +60,6 @@
 
 ## Phase 2(content-scan)에 넘기는 것
 
-- 위 표의 카테고리 ID(A~J, G-1/G-2)를 엣지 종류로 그대로 사용
+- 위 표의 카테고리 ID(A~K, G-1/G-2)를 엣지 종류로 그대로 사용
 - 제외 규칙 3항목을 노드 확장 시 필터로 적용
 - `확인 필요` 판정 순서 3단계를 그대로 적용
