@@ -66,7 +66,9 @@ ls Docs/design/{콘텐츠명}/{콘텐츠명}_연관그래프.md 2>/dev/null && e
 - 없음 → `/analyze:content-scan {콘텐츠명}`을 먼저 실행하도록 안내하고 대기
 - 있음 → content-scan STEP 0과 동일한 방식으로 신선도 판정(기준 커밋 대비 `*.cs` 변경 0건이면 신선). 신선하면 **재탐색 없이 그래프를 Read해서 그대로 소비**한다 — `--docs`를 나눠 여러 번 실행하거나 STEP 3 수정 루프로 재진입해도 이 단계에서 매번 재탐색하지 않는다. 낡았으면 content-scan 재실행을 안내한다.
 
-`Agent` 도구로 `ANALYST_AGENT`(46행에서 확정된 값)를 **`effort: max`**로 호출한다 — 기획자 관점 서술·해석 판단이 몰리는 단계라 정확도를 우선한다 (content-scan의 기계적 탐색 단계는 기본 effort를 쓰는 것과 대비됨).
+`Agent` 도구로 `ANALYST_AGENT`(46행에서 확정된 값)를 호출한다. 기획자 관점 서술·해석 판단이 몰리는 단계라 정확도가 중요하다(content-scan의 기계적 탐색 단계와 대비됨) — 단, `Agent` 도구 자체엔 effort 파라미터가 없다(`Workflow`의 `agent()` 함수 전용 옵션). 정확도를 높이려면:
+- `ANALYST_AGENT`가 프로젝트 전용 커스텀 에이전트(자체 파일 보유)면, 그 파일의 frontmatter에 `effort: max`를 추가한다(이 repo의 `platform-porter.md` 등과 동일한 관례 — 호출 시점 파라미터가 아니라 에이전트 파일 자체 설정).
+- `ANALYST_AGENT`가 `general-purpose`(기본값)면 편집 가능한 파일이 없어 이 방법이 불가하다. 이 경우 세션 기본 effort로 호출한다 — `Agent` 도구의 `model` 파라미터로 상향(예: opus)하는 건 effort와 다른 결정(비용·성격 차이)이라 임의로 하지 않는다.
 
 `--docs`에 명시된 문서만 작성한다. 생략 시 역기획서만 작성.
 각 문서 섹션의 분석 항목을 읽고 코드·데이터를 탐색하면서 해당 문서에 바로 작성한다. 연관그래프에 이미 있는 근거는 재탐색하지 않고 그대로 인용한다.
