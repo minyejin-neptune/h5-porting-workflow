@@ -480,16 +480,16 @@ public void {IAP_METHOD}(string productId, Action OnSuccess, Action OnFailed = n
 
 ## 7-0. 치트 — 서버/로컬 초기화
 
-기존 치트 클래스가 없는 경우, 아래 전부를 신규 `CheatCommands` 클래스 하나에 담는다(게임 진입점 클래스 등 기존 코드에 끼워 넣지 않는다). 기존 치트 클래스가 있으면 이 내용을 그 클래스에 추가하고 `CheatCommands`는 새로 만들지 않는다.
+기존 치트 클래스가 없는 경우, 아래 전부를 신규 `CheatCommand` 클래스 하나에 담는다(게임 진입점 클래스 등 기존 코드에 끼워 넣지 않는다). 기존 치트 클래스가 있으면 이 내용을 그 클래스에 추가하고 `CheatCommand`는 새로 만들지 않는다.
 
 ```csharp
 #if WEBGL_DEBUG_CONSOLE
-    CheatCommands.RegisterCheats();
+    CheatCommand.RegisterCheats();
 #endif
 ```
 
 ```csharp
-public static class CheatCommands
+public static class CheatCommand
 {
     public static void RegisterCheats()
     {

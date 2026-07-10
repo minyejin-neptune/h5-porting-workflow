@@ -806,7 +806,7 @@ grep -rn "{SAVE_METHOD}\|SaveLocal\|SaveData" {SCRIPTS_PATH} --include="*.cs" | 
 
 **기존 치트 코드 확인**: PORTING_VOCAB.md `## 포터 기록`에서 scan이 찾은 기존 치트/디버그 시스템 파일:라인을 먼저 확인한다(재탐색 없이).
 - 기존 치트 클래스 있음 → 그 클래스 안에 `RegisterCheats()`와 아래 치트 등록 코드를 추가한다(새 클래스를 만들지 않는다).
-- "없음" → 신규 `CheatCommands` 클래스를 만들어 `RegisterCheats()`와 치트 등록 코드를 그 안에 둔다(코드 패턴 참조). 기존 코드 아무 데나 끼워 넣지 않는다.
+- "없음" → 신규 `CheatCommand` 클래스를 만들어 `RegisterCheats()`와 치트 등록 코드를 그 안에 둔다(코드 패턴 참조). 기존 코드 아무 데나 끼워 넣지 않는다.
 
 **씬 설정 (👤 수동):**
 
