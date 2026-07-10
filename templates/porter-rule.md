@@ -126,8 +126,11 @@ git commit -m "[{prefix}] {단계명}"
 **`{platform}-checklist.md`는 여러 worktree가 동시에 쓰지 않는다** — 서로 다른 브랜치가 같은 파일을 각자 수정하면, 건드리는 줄이 달라도 git merge 충돌이 잦다(베이스가 갈라진 시점·인접 줄 등 이유로). 대신 각 worktree는 자기 브랜치 전용 상태 파일에 checklist 줄을 그대로 적어두고, 실제 checklist.md 반영은 merge가 끝난 뒤 메인 세션이 한 번에 처리한다:
 
 ```bash
-# worktree 생성
-git worktree add ../{이름} -b {브랜치명}
+# worktree 생성 — 표준 스크립트 사용(git worktree add + Library 복사를 함께 처리).
+# 표준출력의 절대경로로 반드시 cd한다 — 이후 모든 bash 명령(특히 compile-check.sh처럼
+# 현재 디렉토리 기준 상대경로로 동작하는 스크립트)이 이 디렉토리를 기준으로 실행된다.
+WORKTREE_DIR=$(bash ~/github/h5-porting-workflow/templates/scripts/worktree-setup.sh {이름} {브랜치명})
+cd "$WORKTREE_DIR"
 
 # worktree 안에서는 checklist.md를 건드리지 않는다.
 # 단계 완료 시 코드만 커밋하고, checklist에 적을 줄은 브랜치 전용 상태 파일에 적어 함께 커밋한다

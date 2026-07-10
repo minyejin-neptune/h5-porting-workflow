@@ -130,8 +130,11 @@ Progress large tasks in the following order.
 **Always separate directories using worktree, or stack commits on each branch before switching.**
 
 ```bash
-# Create a new worktree (with a new branch)
-git worktree add ../{project-name}-<suffix> -b <branch-name>
+# Create a new worktree — standard script (git worktree add + copies Library to avoid
+# re-import cost and Temp/UnityLockfile sharing between worktrees). Prints the new
+# worktree's absolute path — cd there before running anything else.
+WORKTREE_DIR=$(bash ~/github/h5-porting-workflow/templates/scripts/worktree-setup.sh <suffix> <branch-name>)
+cd "$WORKTREE_DIR"
 
 # List worktrees
 git worktree list
@@ -161,6 +164,18 @@ If changes are already mixed on the same branch — before committing:
 1. Commit on the current branch first (to diverge the branch HEAD).
 2. `git checkout <target-branch>` — files are now separated.
 3. Manually apply only the target files, then commit.
+
+#### Standard Scripts (`~/github/h5-porting-workflow/templates/scripts/`)
+
+Use these instead of writing ad-hoc equivalent commands — they already handle the sharp edges (pre-checks, Editor-open detection, etc.).
+
+| Script | Purpose | When |
+|---|---|---|
+| `compile-check.sh <TOSS\|PUREWEB\|ANDROID>` | Unity batchmode compile check — detects if the Editor already has this project open and fails fast instead of hanging | After any `.cs` change during porting |
+| `worktree-setup.sh <name> <branch>` | `git worktree add` + copies `Library` (avoids slow re-import and Temp/UnityLockfile sharing across worktrees) | Before starting worktree-parallel work |
+| `h5-port-verify.py` | Gating/gap verification | Not called directly — invoked through the `porting-verify` skill |
+| `hyperlane-init.sh` | HyperLane SDK install/setup | `h5-port` STEP 0-A |
+| `hyperlane-update.sh` | HyperLane SDK update on an already-set-up project | When bumping the SDK version |
 
 ### Build / Deploy Rules
 
