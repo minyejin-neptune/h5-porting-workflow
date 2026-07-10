@@ -106,20 +106,16 @@ private async UniTask<bool> InitPlatform()
 
 ## 3-A. 로그인 로그 삽입
 
-기존 분기 없는 경우의 기본형(패턴 B 계층 구조 — 코딩 컨벤션 참조). 실제 삽입 위치에 이미 `#if UNITY_WEBGL { ... }` 등 다른 계층이 있으면 그 구조에 맞춰 끼워 넣는다(플랫 `&&` 조건으로 새로 쓰지 않는다).
+`HLSDK.Instance.LogDailyLogin()` 호출이 실제로 만족해야 하는 조건은 3가지뿐이다 — **WebGL 빌드일 것 · PureWeb은 제외 · 에디터는 제외**. 이 3가지만 지키면 되고, 표현 형태(플랫 `&&`인지 중첩 `#if`인지)는 그 위치에 이미 있는 전처리문 구조를 보고 자연스럽게 맞추면 된다 — 아래는 그 중 한 가지 예시일 뿐, 그대로 베끼는 게 목적이 아니다.
 
 ```csharp
-// 로비 진입 완료 시점 (Start, OnEnable, 초기화 콜백 등)
-#if UNITY_WEBGL
-    #if WEBGL_PUREWEB
-        // PureWeb — 제외
-    #else
-        #if !UNITY_EDITOR
-        HLSDK.Instance.LogDailyLogin();
-        #endif
-    #endif
+// 예시 — 기존 계층이 없을 때 이렇게 쓸 수도 있다는 참고용
+#if UNITY_WEBGL && !WEBGL_PUREWEB && !UNITY_EDITOR
+    HLSDK.Instance.LogDailyLogin();
 #endif
 ```
+
+이미 그 자리에 `#if UNITY_WEBGL { #if WEBGL_PUREWEB ... #else ... #endif }` 같은 계층이 있다면(다른 기능 때문에 먼저 생겼을 수 있음), 위 예시를 새로 쓰지 말고 그 계층의 `#else`(PureWeb 아님이 이미 확정된 자리) 안에 `!UNITY_EDITOR` 조건만 추가하는 식으로 자연스럽게 맞춘다.
 
 ## 4. 백그라운드 사운드 처리
 
