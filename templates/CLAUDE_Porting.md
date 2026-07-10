@@ -90,6 +90,7 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 ### General Coding Rules
 
 - Do NOT delete original comments. If deletion is necessary, always ask first.
+- **Do not add unnecessary comments.** Only comment when the *why* isn't obvious from the code itself (a hidden constraint, a workaround, non-intuitive behavior). Do not add comments that state *what* the code does, or that reference this task/porting/an agent name — code readable without them doesn't need them.
 - **After changing code, always update the affected docs** (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
 - Prefer explicit types over `var`.
