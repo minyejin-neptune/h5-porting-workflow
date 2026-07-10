@@ -89,7 +89,15 @@ cd ~/github/h5-porting-workflow && git pull
 `~/.claude` 는 심볼릭이라 **재설치 없이** 즉시 반영. 템플릿(`templates/`)도 repo 실파일이라 pull하면 바로 최신.
 단, 이미 포팅한 프로젝트에 **복사된** Editor/Runtime 스크립트는 자동 갱신 안 됨(복사본) — 갱신하려면 porting-init 재실행 또는 수동 재복사.
 
-## 사용
+## 처음 사용하기
+
+1. **설치**(위 "설치" 절 참조, 최초 1회) 후 Claude Code 재시작.
+2. **포팅할 게임 프로젝트 폴더에서** Claude Code를 연다 — 이 워크플로우 repo 안에서가 아니라 게임 프로젝트 쪽에서 실행한다.
+3. `/h5:h5-port` 실행 — STEP 0~4 전체 파이프라인이 순서대로 자동 진행된다. 플랫폼을 이미 정했으면 `/h5:h5-port toss` 또는 `/h5:h5-port pureweb`로 바로 시작해도 된다.
+4. 중간에 사람 확인이 필요한 지점(HyperLane SDK 설치 여부, IAP PID 매핑 등)은 AskUserQuestion으로 그 자리에서 물어본다 — 미리 준비할 건 없고 물어보면 답하면 된다.
+5. 포터 완료 보고에 `⏭️ 스킵: /platform-decisions ...`가 보이면, 그 항목은 사람 판단(햅틱·랭킹버튼·공유문구·UID/version·UI삭제·로컬라이제이션)이 필요해 이관된 것이다 — `/platform-decisions`를 인자 없이 실행하면 대기 중인 항목을 전부 보여준다.
+6. 완료 보고의 `🔍 수동 테스트 필요` 항목은 빌드 배포 후 브라우저에서 직접 확인해야 하는 것들이다.
+7. 진행 상황이 궁금하거나 뭔가 이상하면 채팅 로그를 뒤지지 말고 **`Docs/porting/{platform}-checklist.md`**를 연다 — 정본이다(자세한 내용은 아래 "상태 관리" 참조).
 
 ```bash
 /h5:h5-port            # 전체 오케스트레이터 (STEP 0~4)
@@ -99,6 +107,8 @@ cd ~/github/h5-porting-workflow && git pull
 ```
 
 개별 포터를 직접 호출할 수도 있다(`Agent 도구, subagent_type: "pureweb-porter"` 등) — 이 경우 각 포터가 선행 포터 완료 여부를 진입점에서 스스로 확인하고, 안 됐으면 대신 실행하지 않고 안내만 한 뒤 반환한다.
+
+막히면: `templates/README.md`(산출물 전체 목록), `docs/기준-체크리스트.md`(사람 수동 체크 기준표) 참조.
 
 ## 상태 관리
 
