@@ -995,25 +995,12 @@ grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" {SCRIPTS_PATH} --inc
 
 **기존 SafeArea 클래스 있음** → 레이아웃 적용 함수(`ApplyOffset()` 등)의 `#if UNITY_WEBGL` 분기 안에서 `HLSDK.Instance.GetSafeAreaTop()` / `GetSafeAreaBottom()` inset을 기존 BasePadding에 더해 `offsetMin` / `offsetMax`에 반영한다.
 
-**기존 SafeArea 클래스 없음** → 공용 템플릿 `SafeAreaAdjuster`를 프로젝트로 **복사**한다 (Editor 스크립트와 동일한 porting-init 방식). 신규 코드를 프로젝트마다 새로 작성하지 않는다.
+**기존 SafeArea 클래스 없음** → HLSDK는 `GetSafeAreaTop()`/`GetSafeAreaBottom()` raw inset 값만 제공하고 적용 컴포넌트는 갖고 있지 않다(SDK 쪽에 없음, 확인 완료). 신규 어댑터 클래스를 만들지 않는다 — 화면 전체 레이아웃에 영향을 주는 기존 코드(캔버스 루트, 최상단 레이아웃 스크립트 등)를 찾아 그 안에 두 값을 직접 반영한다:
+- **RectTransform(UI)** → 기존 패딩/앵커 로직에 inset을 더해 `offsetMin`/`offsetMax`에 반영.
+- **일반 Transform(SpriteRenderer 등 월드 오브젝트)** → 기존 좌표 계산 로직에 맞춰 inset만큼 이동.
+- 삽입할 만한 기존 코드가 없으면 임의로 새 컴포넌트를 만들지 말고 `platform-checklist.md` `## 확인 필요`에 "SafeArea 적용 지점 확인 필요 — 마땅한 기존 레이아웃 코드 없음"으로 기록 후 사람 판단으로 넘긴다.
 
-> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `~/github/h5-porting-workflow/templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다. (템플릿 갱신 시 재복사 필요. 자주 바뀌면 회사 SDK 병합으로 대체 예정)
-
-- 템플릿 위치: `~/github/h5-porting-workflow/templates/Runtime/SafeAreaAdjuster.cs`
-- `.cs`를 복사한다. `.meta`는 Unity가 프로젝트 로컬에 생성한다:
-  ```bash
-  mkdir -p {SCRIPTS_PATH}/UI
-  cp ~/github/h5-porting-workflow/templates/Runtime/SafeAreaAdjuster.cs \
-     {SCRIPTS_PATH}/UI/SafeAreaAdjuster.cs
-  ```
-- 템플릿의 `OffsetPaddingTop` / `OffsetPaddingBottom`은 `const`가 아니라 `[SerializeField]` 필드다. `#if UNITY_WEBGL` 분기로 기본값(Top=50f)이 지정되며, 프로젝트별 최종값은 인스펙터에서 조정한다 (기획 확인 후 설정 👤).
-- 템플릿은 대상 유형으로 분기한다:
-  - **RectTransform(UI)** → `offsetMin/offsetMax`로 inset 적용 (기존 동작).
-  - **일반 Transform(SpriteRenderer 등 월드 오브젝트)** → orthographic 카메라(`_worldCamera` 비면 `Camera.main`)로 px→월드 유닛 변환 후, 인스펙터의 `_worldAnchor`(Top/Bottom)가 가리키는 가장자리 방향으로 `localPosition`을 이동. perspective 카메라면 변환 근거가 없어 건너뛴다.
-- 복사 방식이라 프로젝트마다 사본이 생긴다. 템플릿을 고치면 각 프로젝트에서 재복사해야 반영된다.
-- 기존 UI 매니저에 직접 삽입하는 방식이 필요하면 어느 파일·메서드에 넣을지 확인 후 삽입.
-
-> 배너 높이 반영(플랫폼 전용 배너가 있는 경우)은 개별 플랫폼 포터가 이 클래스 완성 후 추가로 처리한다.
+> 배너 높이 반영(플랫폼 전용 배너가 있는 경우)은 SafeArea 적용 완료 후 개별 플랫폼 포터가 추가로 처리한다.
 
 ---
 
