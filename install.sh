@@ -25,7 +25,14 @@ while IFS= read -r src; do
   rel="${src#"$REPO"/claude/}"
   dst="$CLAUDE_DIR/$rel"
   mkdir -p "$(dirname "$dst")"
+  # 부모 디렉토리가 이미 repo를 가리키는 심볼릭 링크인 경우, $dst와 $src가
+  # 물리적으로 같은 파일일 수 있다 — 이때 mv+ln을 그대로 하면 자기 자신을
+  # 가리키는 심볼릭 링크가 만들어진다(실제로 발생했던 버그). 같은 파일이면 건너뛴다.
   if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+    if [ "$(cd "$(dirname "$dst")" && pwd -P)/$(basename "$dst")" = "$(cd "$(dirname "$src")" && pwd -P)/$(basename "$src")" ]; then
+      echo "  ↷ 이미 동일 파일(상위 디렉토리가 심볼릭) — 건너뜀: $dst"
+      continue
+    fi
     mv "$dst" "$dst.bak"
     echo "  ⚠ 기존 실파일 백업: $dst.bak"
   fi
