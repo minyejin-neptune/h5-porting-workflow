@@ -588,9 +588,14 @@ head -5 Docs/porting/NATIVE_BASELINE.md
 # 퓨어웹 포팅인 경우
 WEBGL_PUREWEB full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md pureweb-checklist.md
 
+# 플랫폼 공통(HLSDK) — platform-porter는 모든 경우에 항상 실행되므로 이 호출도 항상 실행한다
+WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS) full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md
+
 # 토스 포팅인 경우
 WEBGL_TOSS full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md toss-checklist.md
 ```
+
+> platform-porter는 `--orchestrated`로 실행되면 자기 검증을 생략하고 이 STEP 4가 대신 검증하는 구조다(진입점 prompt 참조) — 이 두 번째 호출을 빠뜨리면 platform-porter의 작업이 오케스트레이션 흐름에서 한 번도 검증되지 않는다.
 
 | 결과 | 대응 |
 |---|---|
