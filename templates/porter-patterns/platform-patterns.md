@@ -480,79 +480,84 @@ public void {IAP_METHOD}(string productId, Action OnSuccess, Action OnFailed = n
 
 ## 7-0. 치트 — 서버/로컬 초기화
 
+기존 치트 클래스가 없는 경우, 아래 전부를 신규 `CheatCommands` 클래스 하나에 담는다(게임 진입점 클래스 등 기존 코드에 끼워 넣지 않는다). 기존 치트 클래스가 있으면 이 내용을 그 클래스에 추가하고 `CheatCommands`는 새로 만들지 않는다.
+
 ```csharp
 #if WEBGL_DEBUG_CONSOLE
-    RegisterCheats();
+    CheatCommands.RegisterCheats();
 #endif
 ```
 
 ```csharp
-void RegisterCheats()
+public static class CheatCommands
 {
-    CheatRegister.ClearAll();
+    public static void RegisterCheats()
+    {
+        CheatRegister.ClearAll();
 
-    // DEV/LIVE 키는 리터럴로 직접 참조한다 — SAVE_KEY 상수는 빌드 시점에
-    // 둘 중 하나로만 고정되므로(8-A 패턴), 지금 빌드가 아닌 쪽 키를 지우려면
-    // 상수가 아니라 두 리터럴 문자열이 둘 다 필요하다.
-    const string SAVE_KEY_DEV = "{GameName}_Data_DEV";
-    const string SAVE_KEY_LIVE = "{GameName}_Data_LIVE";
+        // DEV/LIVE 키는 리터럴로 직접 참조한다 — SAVE_KEY 상수는 빌드 시점에
+        // 둘 중 하나로만 고정되므로(8-A 패턴), 지금 빌드가 아닌 쪽 키를 지우려면
+        // 상수가 아니라 두 리터럴 문자열이 둘 다 필요하다.
+        const string SAVE_KEY_DEV = "{GameName}_Data_DEV";
+        const string SAVE_KEY_LIVE = "{GameName}_Data_LIVE";
 
-    CheatRegister.Register(
-        "Reset Local (DEV)",
-        "Reset local data for DEV build",
-        Color.yellow,
-        () => ResetLocal(SAVE_KEY_DEV)
-    );
+        CheatRegister.Register(
+            "Reset Local (DEV)",
+            "Reset local data for DEV build",
+            Color.yellow,
+            () => ResetLocal(SAVE_KEY_DEV)
+        );
 
-    CheatRegister.Register(
-        "Reset Local+Server (DEV)",
-        "Reset local and server data for DEV build",
-        Color.red,
+        CheatRegister.Register(
+            "Reset Local+Server (DEV)",
+            "Reset local and server data for DEV build",
+            Color.red,
 #if !UNITY_EDITOR
-        () =>
-        {
-            ResetLocal(SAVE_KEY_DEV);
-            ResetServerAsync(SAVE_KEY_DEV).Forget();
-        }
+            () =>
+            {
+                ResetLocal(SAVE_KEY_DEV);
+                ResetServerAsync(SAVE_KEY_DEV).Forget();
+            }
 #else
-        () => ResetLocal(SAVE_KEY_DEV)
+            () => ResetLocal(SAVE_KEY_DEV)
 #endif
-    );
+        );
 
-    CheatRegister.Register(
-        "Reset Local (LIVE)",
-        "Reset local data for LIVE build",
-        Color.yellow,
-        () => ResetLocal(SAVE_KEY_LIVE)
-    );
+        CheatRegister.Register(
+            "Reset Local (LIVE)",
+            "Reset local data for LIVE build",
+            Color.yellow,
+            () => ResetLocal(SAVE_KEY_LIVE)
+        );
 
-    CheatRegister.Register(
-        "Reset Local+Server (LIVE)",
-        "Reset local and server data for LIVE build. Temporary/on-demand tool — use only when actually needed.",
-        Color.red,
-        () =>
-        {
-            ResetLocal(SAVE_KEY_LIVE);
-            ResetServerAsync(SAVE_KEY_LIVE).Forget();
-        }
-    );
+        CheatRegister.Register(
+            "Reset Local+Server (LIVE)",
+            "Reset local and server data for LIVE build. Temporary/on-demand tool — use only when actually needed.",
+            Color.red,
+            () =>
+            {
+                ResetLocal(SAVE_KEY_LIVE);
+                ResetServerAsync(SAVE_KEY_LIVE).Forget();
+            }
+        );
 
-    CheatRegister.Build(); // 반드시 마지막에 호출 — 미호출 시 UI에 표시 안 됨
-}
+        CheatRegister.Build(); // 반드시 마지막에 호출 — 미호출 시 UI에 표시 안 됨
+    }
 
-async UniTaskVoid ResetServerAsync(string key)
-{
-    string empty = /* 검수받은 빈 데이터 직렬화 */;
-    string timestamp = new System.DateTimeOffset(System.DateTime.UtcNow).ToUnixTimeSeconds().ToString();
-    NTH5Response<SetUserDataResponse> result = await HLSDK.Instance.SetUserData(empty, timestamp, "");
-    Debug.Log($"[CHEAT] {key} server reset: " + (result.success ? "success" : "failed - " + result.error));
-}
+    static async UniTaskVoid ResetServerAsync(string key)
+    {
+        string empty = /* 검수받은 빈 데이터 직렬화 */;
+        string timestamp = new System.DateTimeOffset(System.DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+        NTH5Response<SetUserDataResponse> result = await HLSDK.Instance.SetUserData(empty, timestamp, "");
+        Debug.Log($"[CHEAT] {key} server reset: " + (result.success ? "success" : "failed - " + result.error));
+    }
 
-// 게임 정지(재시작 전 자동 저장 등이 덮어쓰는 것 방지) + VOCAB 저장 방식에 따른 실제 로컬 삭제
-void ResetLocal(string key)
-{
-    Time.timeScale = 0f;
-    // VOCAB 저장 방식에 따른 로컬 초기화 코드 — key 대상
+    // 게임 정지(재시작 전 자동 저장 등이 덮어쓰는 것 방지) + VOCAB 저장 방식에 따른 실제 로컬 삭제
+    static void ResetLocal(string key)
+    {
+        Time.timeScale = 0f;
+        // VOCAB 저장 방식에 따른 로컬 초기화 코드 — key 대상
+    }
 }
 ```
 
