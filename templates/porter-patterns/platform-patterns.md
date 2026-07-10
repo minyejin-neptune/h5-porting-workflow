@@ -516,14 +516,7 @@ void RegisterCheats()
         () =>
         {
             ResetLocal(SAVE_KEY_DEV);
-            async UniTaskVoid ResetServerAsync()
-            {
-                string empty = /* 검수받은 빈 데이터 직렬화 */;
-                string timestamp = new System.DateTimeOffset(System.DateTime.UtcNow).ToUnixTimeSeconds().ToString();
-                NTH5Response<SetUserDataResponse> result = await HLSDK.Instance.SetUserData(empty, timestamp, "");
-                Debug.Log("[CHEAT] DEV server reset: " + (result.success ? "success" : "failed - " + result.error));
-            }
-            ResetServerAsync().Forget();
+            ResetServerAsync(SAVE_KEY_DEV).Forget();
         }
 #else
         () => ResetLocal(SAVE_KEY_DEV)
@@ -539,12 +532,24 @@ void RegisterCheats()
 
     CheatRegister.Register(
         "Reset Local+Server (LIVE)",
-        "Reset local data only. LIVE server data is NOT reset (production safety).",
+        "Reset local and server data for LIVE build. Temporary/on-demand tool — use only when actually needed.",
         Color.red,
-        () => ResetLocal(SAVE_KEY_LIVE)
+        () =>
+        {
+            ResetLocal(SAVE_KEY_LIVE);
+            ResetServerAsync(SAVE_KEY_LIVE).Forget();
+        }
     );
 
     CheatRegister.Build(); // 반드시 마지막에 호출 — 미호출 시 UI에 표시 안 됨
+}
+
+async UniTaskVoid ResetServerAsync(string key)
+{
+    string empty = /* 검수받은 빈 데이터 직렬화 */;
+    string timestamp = new System.DateTimeOffset(System.DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+    NTH5Response<SetUserDataResponse> result = await HLSDK.Instance.SetUserData(empty, timestamp, "");
+    Debug.Log($"[CHEAT] {key} server reset: " + (result.success ? "success" : "failed - " + result.error));
 }
 
 // 게임 정지(재시작 전 자동 저장 등이 덮어쓰는 것 방지) + VOCAB 저장 방식에 따른 실제 로컬 삭제
