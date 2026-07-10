@@ -888,7 +888,7 @@ grep -n "Encrypt\|Decrypt\|AES\|DES\|Cipher\|CryptoStream\|Convert\.ToBase64\|Co
 ```
 
 - 암호화 없음(정상 — pureweb-porter가 이미 제거함) → 3단계로
-- **암호화가 여전히 있음 → 제거 (고정 정책 — 대안 없음)**: pureweb-porter가 놓쳤거나 이 포터를 단독 실행한 경우다. SetUserData는 평문(또는 Base64)만 허용하므로 확인 없이 암호화 로직을 `#if !UNITY_WEBGL`로 격리하고 WebGL 분기에서 제거한다. 보안 관련 변경이므로 알림을 반드시 남긴다 — `platform-checklist.md` `## 확인 필요`에 `- [x] 🔐 암호화 제거됨 — {발견 메서드명}, WebGL 분기는 Base64만 사용` 기록(체크된 상태 — close를 막지 않는 알림) + `## 교정 기록`에도 기록.
+- **암호화가 여전히 있음 → 제거 (고정 정책 — 대안 없음)**: 이 경우가 실제로 발생하는 이유는, 이 파일 앞부분의 "0-C단계 — pureweb-porter 완료 여부 게이트"가 pureweb-porter의 **0번 스텝(SDK 초기화, `HLSDK.Instance.Initialize()` 존재 여부)만** 확인하기 때문이다 — pureweb-porter의 **8번 스텝(서버 저장 차단, 암호화 제거가 실제로 일어나는 지점)까지 끝났는지는 이 게이트가 보장하지 않는다. 그래서 정상적인 파이프라인 순서를 따르는 중에도(pureweb-porter가 0번은 끝냈지만 아직 8번 전이거나, 8번에서 실수로 놓친 경우) 이 지점에서 암호화가 남아있는 채로 platform-porter에 도달할 수 있다. 원인이 무엇이든 SetUserData는 평문(또는 Base64)만 허용하므로 확인 없이 암호화 로직을 `#if !UNITY_WEBGL`로 격리하고 WebGL 분기에서 제거한다. 보안 관련 변경이므로 알림을 반드시 남긴다 — `platform-checklist.md` `## 확인 필요`에 `- [x] 🔐 암호화 제거됨 — {발견 메서드명}, WebGL 분기는 Base64만 사용` 기록(체크된 상태 — close를 막지 않는 알림) + `## 교정 기록`에도 기록.
 
 **3단계 — Base64 인코딩 (저장↔불러오기 대칭, 필수)**
 
