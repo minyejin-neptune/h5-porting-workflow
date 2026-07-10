@@ -123,17 +123,29 @@ git commit -m "[{prefix}] {단계명}"
 - **파일 겹침 없음** → worktree로 병렬 실행
 - **파일 겹침 있음** → 순차 처리 (같은 worktree)
 
+**`{platform}-checklist.md`는 여러 worktree가 동시에 쓰지 않는다** — 서로 다른 브랜치가 같은 파일을 각자 수정하면, 건드리는 줄이 달라도 git merge 충돌이 잦다(베이스가 갈라진 시점·인접 줄 등 이유로). 대신 각 worktree는 자기 브랜치 전용 상태 파일에 checklist 줄을 그대로 적어두고, 실제 checklist.md 반영은 merge가 끝난 뒤 메인 세션이 한 번에 처리한다:
+
 ```bash
 # worktree 생성
 git worktree add ../{이름} -b {브랜치명}
 
-# worktree 안에서 단계 완료 시 커밋 (prefix는 위 "단계 커밋 기준" 참조)
+# worktree 안에서는 checklist.md를 건드리지 않는다.
+# 단계 완료 시 코드만 커밋하고, checklist에 적을 줄은 브랜치 전용 상태 파일에 적어 함께 커밋한다
+# (파일명에 브랜치명이 들어가 다른 worktree와 절대 겹치지 않음 → merge 시 "신규 파일"로만 인식돼 충돌 없음)
+echo "- [x] {단계} — ✅ commit {해시7자리}" >> .worktree-status-{브랜치명}.md
+git add .worktree-status-{브랜치명}.md
 git commit -m "[{prefix}] {단계명}"
 
-# main worktree로 돌아와서 merge 후 제거
+# main worktree로 돌아와서 merge
 git merge {브랜치명}
-git worktree remove ../{이름}
 ```
+
+**모든 worktree merge 완료 후, 메인 세션이 한 번에 처리한다**(단일 writer라 충돌 없음):
+
+1. merge로 들어온 `.worktree-status-*.md` 파일을 전부 Read한다.
+2. 각 파일에 적힌 줄을 그대로 `{platform}-checklist.md` `## 단계 진행`의 해당 스텝 행에 반영한다 — 추측하지 않고 파일에 적힌 내용을 그대로 옮긴다.
+3. 반영이 끝나면 `.worktree-status-*.md` 파일을 전부 삭제하고 커밋한다 — 남겨두지 않는다.
+4. `git worktree remove ../{이름}`로 각 worktree 디렉토리를 제거한다.
 
 구체적인 태스크 그룹 분류는 아래 **의존성 파악 및 병렬 작업 계획** 섹션을 따른다.
 
