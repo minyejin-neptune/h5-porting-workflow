@@ -91,7 +91,7 @@ cd ~/github/h5-porting-workflow && git pull
 
 ## 처음 사용하기
 
-1. **설치**(위 "설치" 절 참조, 최초 1회) 후 Claude Code 재시작.
+1. **[설치](#설치-각자-1회)**(최초 1회) 후 Claude Code 재시작.
 2. **포팅할 게임 프로젝트 폴더에서** Claude Code를 연다 — 이 워크플로우 repo 안에서가 아니라 게임 프로젝트 쪽에서 실행한다.
 3. `/h5:h5-port` 실행 — STEP 0~4 전체 파이프라인이 순서대로 자동 진행된다. 플랫폼을 이미 정했으면 `/h5:h5-port toss` 또는 `/h5:h5-port pureweb`로 바로 시작해도 된다.
 4. 중간에 사람 확인이 필요한 지점(HyperLane SDK 설치 여부, IAP PID 매핑 등)은 AskUserQuestion으로 그 자리에서 물어본다 — 미리 준비할 건 없고 물어보면 답하면 된다.
