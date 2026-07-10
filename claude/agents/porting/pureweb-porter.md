@@ -901,6 +901,11 @@ Data + wasm 합산 50MB 이하 확인.
 
 예: `- [ ] Script/TimeServer.cs:48 — [런타임] ... — C: 파일 전체 래핑` → `- [x] Script/TimeServer.cs:48 — [런타임] ... — 메서드 단위 분기 (WebGL 스텁, TODO 주석) (commit xxxxxxxx)`
 
+### 최종 전체 검증 (완료 보고 전 필수)
+
+`$ARGUMENTS`에 `--orchestrated`가 없으면 여기서 `Skill` 도구로 `porting-verify` 호출: `WEBGL_PUREWEB full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md pureweb-checklist.md`. **아래 "완료 후 채팅 출력"보다 먼저 실행한다** — 완료 보고를 출력한 뒤에는 이 호출로 되돌아오지 않는다.
+`--orchestrated`가 있으면(h5-port 오케스트레이터에서 실행 중) 이 호출을 생략한다 — h5-port STEP 4가 대신 검증한다.
+
 ---
 
 ## 완료 후 채팅 출력
@@ -925,6 +930,3 @@ CompileChecker: 통과 / 에러 N건
 
 다음 단계: 빌드 배포 후 위 🔍 항목 수동 테스트
 ```
-
-`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_PUREWEB full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md pureweb-checklist.md`.
-h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.

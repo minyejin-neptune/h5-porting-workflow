@@ -510,6 +510,21 @@ grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -3
 
 > hook 미설정 시 → Unity 메뉴 **Tools/H5/Compile Check (TOSS)** 수동 실행. 결과 확인 전 완료 리포트 출력 금지.
 
+### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
+
+이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
+
+```bash
+git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
+  | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
+      --platform WEBGL_TOSS --mode check-editor-shadow
+```
+
+### 최종 전체 검증 (완료 보고 전 필수)
+
+`$ARGUMENTS`에 `--orchestrated`가 없으면 여기서 `Skill` 도구로 `porting-verify` 호출: `WEBGL_TOSS full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md toss-checklist.md`. **아래 "완료 후 채팅 출력"보다 먼저 실행한다** — 완료 보고를 출력한 뒤에는 이 호출로 되돌아오지 않는다.
+`--orchestrated`가 있으면(h5-port 오케스트레이터에서 실행 중) 이 호출을 생략한다 — h5-port STEP 4가 대신 검증한다.
+
 ---
 
 ## 완료 후 채팅 출력
@@ -534,16 +549,3 @@ CompileChecker: 통과 / 에러 N건
 ```
 
 위 🔍/👤 목록은 예시다 — 이번 실행에서 실제로 해당하는 항목만 나열한다.
-
-`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_TOSS full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md toss-checklist.md`.
-h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
-
-### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
-
-이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
-
-```bash
-git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
-  | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
-      --platform WEBGL_TOSS --mode check-editor-shadow
-```

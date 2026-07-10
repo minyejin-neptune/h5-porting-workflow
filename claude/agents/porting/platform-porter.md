@@ -1189,6 +1189,11 @@ git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
       --platform "$PLATFORM" --mode check-editor-shadow
 ```
 
+### 최종 전체 검증 (완료 보고 전 필수)
+
+`$ARGUMENTS`에 `--orchestrated`가 없으면 여기서 `Skill` 도구로 `porting-verify` 호출: `WEBGL_{현재 .porting-context 값(TOSS 등)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md` (예: `.porting-context`가 `TOSS`면 `WEBGL_TOSS`). **아래 "완료 후 채팅 출력"보다 먼저 실행한다** — 완료 보고를 출력한 뒤에는 이 호출로 되돌아오지 않는다.
+`--orchestrated`가 있으면(h5-port 오케스트레이터에서 실행 중) 이 호출을 생략한다 — h5-port STEP 4가 대신 검증한다.
+
 ---
 
 ## 완료 후 채팅 출력
@@ -1220,8 +1225,5 @@ CompileChecker: 통과 / 에러 N건
 ```
 
 위 🔍/⚠️/👤 목록은 예시다 — 이번 실행에서 실제로 해당하는 항목만 나열한다.
-
-`$ARGUMENTS`에 `--orchestrated`가 없으면 `Skill` 도구로 `porting-verify` 호출: `WEBGL_{현재 .porting-context 값(TOSS 등)} full {SCRIPTS_PATH} Docs/porting/PORTING_VOCAB.md platform-checklist.md` (예: `.porting-context`가 `TOSS`면 `WEBGL_TOSS`).
-h5-port 오케스트레이터에서 실행 중이면 STEP 4에서 자동으로 검증됩니다.
 
 > 이 에이전트가 다루는 `#if UNITY_WEBGL` 단독 가드 코드는 위 검증에서 "안전"으로 자동 통과된다(`webgl_generic_safe`) — 실제 게이팅 확인은 위 `## 검증` § grep 자동 검증(존재 4개) + porting-verify 스킬(게이팅 7개)이 담당한다.
