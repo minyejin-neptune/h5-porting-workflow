@@ -311,6 +311,8 @@ git worktree add ../worktree-sdk -b pureweb/sdk
 
 ## 작업 순서
 
+> **단계 전환 전 커밋 확인**: 다음 단계로 넘어가기 전, 방금 끝낸 단계가 `porter-rule.md` § 단계 커밋 기준을 충족하고도 아직 커밋 안 됐으면 먼저 커밋한다. 여러 단계를 모아뒀다가 마지막에 한 번에 커밋하지 않는다.
+
 ### 0. SDK 초기화
 
 **완료 신호**: `HLSDK.Instance.Initialize(` 호출 이미 존재 → 스킵.
