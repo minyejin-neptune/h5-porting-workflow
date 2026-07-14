@@ -139,7 +139,9 @@ echo "- [x] {단계} — ✅ commit {해시7자리}" >> .worktree-status-{브랜
 git add .worktree-status-{브랜치명}.md
 git commit -m "[{prefix}] {단계명}"
 
-# main worktree로 돌아와서 merge
+# main worktree로 돌아와서 merge — 사용자가 명시적으로 머지를 지시한 경우에만 실행한다.
+# 지시가 없으면 AskUserQuestion으로 "머지 준비 완료 — {브랜치명}, 머지할까요?"를 물어보고 답을 기다린다.
+# (서브에이전트는 AskUserQuestion을 쓸 수 없으므로 대신 checklist `## 확인 필요`에 기록하고 멈춘다.)
 git merge {브랜치명}
 ```
 
