@@ -5,7 +5,7 @@
 ### Response Rules
 - **Always respond in Korean** in chat, regardless of the language used in instructions or code.
 - Before any code analysis response, ask the user to choose the output format (save as `.md` file / print in chat).
-    - If `.md` file is chosen: always ask the user where to save it — never assume a default location. Do NOT duplicate output in chat.
+    - If `.md` file is chosen: default location is under `Docs/` (see "Documentation Rules" below for the subfolder by type) — confirm this with the user rather than picking a path on your own, and never suggest a location outside `Docs/` (e.g. next to a script) unless the user asks for one. Do NOT duplicate output in chat.
     - If chat is chosen: print directly in chat.
 - **No inference**: Only present facts confirmed by directly reading the code. Do not assert causes using speculative expressions like "it is likely that~" or "it may be because~". If no evidence is found in the code, explicitly state "코드에서 근거를 찾지 못했습니다".
     - **Never state a count, enum list, or logic conclusion** without first verifying it from the actual code. Show the exact command and output used as evidence.
