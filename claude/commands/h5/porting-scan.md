@@ -615,11 +615,80 @@ grep -rln "Cheat\|DebugConsole\|DevMenu\|GMMode\|CheatConsole" {SCRIPTS_PATH} --
 - 결과 있음 → 파일:라인을 VOCAB `## 포터 기록`에 기록 (platform-porter 7-0이 읽기 참조)
 - 결과 없음 → "없음"으로 기록
 
-#### 4-I. 플랫폼별 스캔 — Toss
+#### 4-I. 플랫폼 공통 · Toss 전용 스캔
 
 > 플랫폼이 **Toss 또는 전체**인 경우에만 실행한다.
 
-Toss 포터만 필요한 항목. 결과는 PORTING_VOCAB.md `## Toss 전용` 섹션에 기록한다. 각 항목은 grep으로 후보 파일을 찾은 뒤 **Read해서 실제 코드 위치(파일:라인)를 확정**한다 — 파일명 나열만으로 VOCAB 행을 채우지 않는다.
+두 그룹으로 나눠 스캔한다. 각 항목은 grep으로 후보 파일을 찾은 뒤 **Read해서 실제 코드 위치(파일:라인)를 확정**한다 — 파일명 나열만으로 VOCAB 행을 채우지 않는다. **그룹마다 기록 대상 VOCAB 섹션이 다르다**:
+> - **A. 플랫폼 공통** → VOCAB `## 플랫폼 공통` 섹션. 모든 WebGL 플랫폼에 동일하게 적용되는 HLSDK 로직이라 **platform-porter**가 읽는다.
+> - **B. Toss 전용** → VOCAB `## Toss 전용` 섹션. TossHandler 직접 연동이 필요해 **toss-porter**만 읽는다.
+
+##### A. 플랫폼 공통 (platform-porter 입력)
+
+**햅틱/진동**
+```bash
+grep -rln "Vibrate\|Haptic\|haptic\|vibrate" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 진동 호출부(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `햅틱/진동` 행. 0건이면 `역기획 필요`로 기록한다.
+
+**가격 표시 UI**
+```bash
+grep -rln "price\|Price\|productPrice\|priceText\|PriceText\|costText" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 가격 표시 클래스·`SetPrice` 존재 여부(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `가격 표시 UI` 행.
+
+**랭킹**
+```bash
+grep -rln "Leaderboard\|LeaderBoard\|SubmitScore\|RankButton" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 랭킹 연동 클래스(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `랭킹 연동` 행. 없으면 "없음".
+
+**공유하기**
+```bash
+grep -rln "NativeShare\|ShareLink\|OnClickShare" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 공유 호출부(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `공유하기` 행. 없으면 "없음".
+
+**SafeArea 클래스**
+```bash
+grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 클래스 위치(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `SafeArea 클래스` 행(있음/없음-신규필요).
+
+**UID / version 표시**
+```bash
+grep -rln "version\|Version\|buildNumber\|AppVersion\|uid\|userId\|UserID\|GetUserKey\|userKey" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane | grep -iv "//.*version"
+```
+히트 파일을 Read해 표시 UI 위치(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `UID/version 표시` 행.
+
+**불필요 UI 후보** (WebGL에서 숨겨야 하는 네이티브 전용 UI)
+```bash
+grep -rln "RestorePurchase\|Restore\|ContactUs\|RateApp\|StoreLink\|AppStore\|GooglePlay\|CrossPromo\|CrossPromotion\|FreeCache\|Anzu\|anzu\|CloudSave\|CloudLoad\|ICloudStorage" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 각 항목의 파일:라인을 확정 → VOCAB `## 플랫폼 공통` `불필요 UI 목록` 행에 **후보**로 기록(복수 가능). 제거 확정은 이 단계에서 하지 않는다 — platform-porter가 제거 전 사용자에게 확인한다(이슈 #44, 14번 이관).
+
+**로컬라이제이션**
+```bash
+grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLanguage\|WebUtil.*Lang" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 클래스 위치(파일:라인)를 확정 → VOCAB `## 플랫폼 공통` `로컬라이제이션` 행. 없으면 "없음".
+
+**리뷰 팝업** (플랫폼 무관 — 메인 표에 기록)
+```bash
+grep -rln "Review\|Rating\|StoreReview\|RequestReview" \
+  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
+```
+히트 파일을 Read해 위치(파일:라인)만 메인 표 `리뷰 팝업` 행에 기록한다(위 두 섹션이 아니다). 발동조건은 여기서 분석하지 않는다 — pureweb-porter가 제거 직전에 파악해 pureweb-checklist `## 기획자 보고`에 테스트 항목으로 기록한다(플랫폼 무관 WebGL 공통 처리 — 이슈 #10). 결과가 없으면 → "없음"으로 기록.
+
+##### B. Toss 전용 (toss-porter 입력)
 
 **광고 — 배너**
 ```bash
@@ -628,75 +697,12 @@ grep -rln "BannerAd\|ShowBanner\|LoadBanner\|BannerView\|HideBanner\|DestroyBann
 ```
 히트 파일을 Read해 배너 호출부(파일:라인)를 확정 → VOCAB `## Toss 전용` `배너 광고` 행. 없으면 "없음".
 
-**햅틱/진동**
-```bash
-grep -rln "Vibrate\|Haptic\|haptic\|vibrate" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 진동 호출부(파일:라인)를 확정 → VOCAB `햅틱/진동` 행. 0건이면 `역기획 필요`로 기록한다.
-
-**가격 표시 UI**
-```bash
-grep -rln "price\|Price\|productPrice\|priceText\|PriceText\|costText" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 가격 표시 클래스·`SetPrice` 존재 여부(파일:라인)를 확정 → VOCAB `가격 표시 UI` 행.
-
-**랭킹**
-```bash
-grep -rln "Leaderboard\|LeaderBoard\|SubmitScore\|RankButton" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 랭킹 연동 클래스(파일:라인)를 확정 → VOCAB `랭킹 연동` 행. 없으면 "없음".
-
-**공유하기**
-```bash
-grep -rln "NativeShare\|ShareLink\|OnClickShare" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 공유 호출부(파일:라인)를 확정 → VOCAB `공유하기` 행. 없으면 "없음".
-
 **프로모션**
 ```bash
 grep -rln "ClaimPromotion\|PromotionReward\|promotionId" \
   {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
 ```
-히트 파일을 Read해 프로모션 트리거 위치(파일:라인)를 확정 → VOCAB `프로모션 방식` 행에 위치만 기록(Managed/V1 판별은 toss-porter 12단계 담당).
-
-**리뷰 팝업**
-```bash
-grep -rln "Review\|Rating\|StoreReview\|RequestReview" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 위치(파일:라인)만 메인 표 `리뷰 팝업` 행에 기록한다. 발동조건은 여기서 분석하지 않는다 — pureweb-porter가 제거 직전에 파악해 pureweb-checklist `## 기획자 보고`에 테스트 항목으로 기록한다(플랫폼 무관 WebGL 공통 처리 — 이슈 #10). 결과가 없으면 → "없음"으로 기록.
-
-**SafeArea 클래스**
-```bash
-grep -rln "SafeArea\|safeArea\|GetSafeArea\|SafeAreaInsets" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 클래스 위치(파일:라인)를 확정 → VOCAB `SafeArea 클래스` 행(있음/없음-신규필요).
-
-**UID / version 표시**
-```bash
-grep -rln "version\|Version\|buildNumber\|AppVersion\|uid\|userId\|UserID\|GetUserKey\|userKey" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane | grep -iv "//.*version"
-```
-히트 파일을 Read해 표시 UI 위치(파일:라인)를 확정 → VOCAB `UID/version 표시` 행.
-
-**불필요 UI 후보** (WebGL에서 숨겨야 하는 네이티브 전용 UI)
-```bash
-grep -rln "RestorePurchase\|Restore\|ContactUs\|RateApp\|StoreLink\|AppStore\|GooglePlay\|CrossPromo\|CrossPromotion\|FreeCache\|Anzu\|anzu\|CloudSave\|CloudLoad\|ICloudStorage" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 각 항목의 파일:라인을 확정 → VOCAB `불필요 UI 목록` 행에 **후보**로 기록(복수 가능). 제거 확정은 이 단계에서 하지 않는다 — platform-porter가 제거 전 사용자에게 확인한다(이슈 #44, 14번 이관).
-
-**로컬라이제이션**
-```bash
-grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLanguage\|WebUtil.*Lang" \
-  {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane
-```
-히트 파일을 Read해 클래스 위치(파일:라인)를 확정 → VOCAB `로컬라이제이션` 행. 없으면 "없음".
+히트 파일을 Read해 프로모션 트리거 위치(파일:라인)를 확정 → VOCAB `## Toss 전용` `프로모션 방식` 행에 위치만 기록(Managed/V1 판별은 toss-porter 12단계 담당).
 
 #### 4-J. PORTING_VOCAB.md 저장
 
@@ -736,20 +742,29 @@ grep -rln "Localization\|LocalizationManager\|I2Loc\|GetSystemLang\|systemLangua
 | 저장 키 | ... | ... | — | 저장 방식 / 키 패턴 / 게임별 구분 여부 |
 | 저장 인코딩 | ... | ... | — | 데이터 형식: JSON/Binary/XML/key-value / Base64: 있음(메서드명) / 없음 — 포터에서 래핑 필요 / 암호화: 있음(방식)/없음 |
 
-## Toss 전용
+## 플랫폼 공통
+
+> platform-porter가 읽는다 — 모든 WebGL 플랫폼(Toss/Kakao/CrazyGames)에 동일하게 적용되는 HLSDK 로직. (STEP 4-I A그룹)
 
 | 시스템 | 파일:라인 | 플레이스홀더 | 비고 |
 |---|---|---|---|
-| 배너 광고 | ... | `{BANNER_FILE}` | 없으면 "없음" |
 | 햅틱/진동 | ... | `{HAPTIC_FILE}` | 없으면 "없음" / 역기획 필요 |
 | 가격 표시 UI | ... | `{PRICE_UI_CLASS}` | SetPrice 메서드 존재 여부 |
 | 랭킹 연동 | ... | `{RANKING_FILE}` | 없으면 "없음" |
 | 공유하기 | ... | `{SHARE_FILE}` | 없으면 "없음" |
-| 프로모션 방식 | ... | `{PROMOTION_TYPE}` | Managed / V1 / 없음 |
 | SafeArea 클래스 | ... | `{SAFEAREA_CLASS}` | 있음(파일명) / 없음-신규필요 |
 | UID/version 표시 | ... | `{UID_VERSION_FILE}` | 있음(파일명) / 없음 |
 | 불필요 UI 목록 | ... | `{REMOVE_UI_LIST}` | **후보** 파일:라인 목록 (복수 가능) / 없음 — 제거 확정은 포터가 사용자에게 확인 |
 | 로컬라이제이션 | ... | `{LOCALIZATION_FILE}` | 있음(파일명) / 없음 |
+
+## Toss 전용
+
+> toss-porter만 읽는다 — TossHandler 직접 연동이 필요한 항목. (STEP 4-I B그룹)
+
+| 시스템 | 파일:라인 | 플레이스홀더 | 비고 |
+|---|---|---|---|
+| 배너 광고 | ... | `{BANNER_FILE}` | 없으면 "없음" |
+| 프로모션 방식 | ... | `{PROMOTION_TYPE}` | Managed / V1 / 없음 |
 
 ## 포터 기록
 
@@ -941,7 +956,8 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 - **STEP 4-D**: Addressables
 - **STEP 4-E**: 저장키
 - **STEP 4-H**: 치트
-- **STEP 4-I (Toss 전용)**: 배너 · 햅틱 · 가격UI · 랭킹 · 공유 · 프로모션 · SafeArea클래스 · UID표시 · 불필요UI · 로컬라이제이션
+- **STEP 4-I A (플랫폼 공통 → `## 플랫폼 공통`)**: 햅틱 · 가격UI · 랭킹 · 공유 · SafeArea클래스 · UID표시 · 불필요UI · 로컬라이제이션 (+ 리뷰팝업은 메인 표)
+- **STEP 4-I B (Toss 전용 → `## Toss 전용`)**: 배너 · 프로모션
 
 ---
 
