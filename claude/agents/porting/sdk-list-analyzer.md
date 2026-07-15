@@ -62,7 +62,7 @@ git status --porcelain --untracked-files=no 2>/dev/null | grep -q . && echo "dir
 ```
 
 - SCRIPTS_PATH가 여러 개면 모두 기록한다. 0개면 헤더에 `SCRIPTS_PATH: 확인 필요`로 표기한다.
-- `Assets/HyperLane`은 제외한다 (회사 SDK — 읽기 권한 제한, 포팅 처리 대상 아님).
+- `Assets/HyperLane`은 제외한다 (회사 SDK — 통합 대상이지 포팅 처리 대상 아님).
 - **SDK 단위 묶기**: 바이너리 폴더가 여러 개여도 경로상 최상위 SDK 폴더 기준으로 하나의 SDK로 묶는다.
   예: `Assets/GoogleMobileAds/Plugins/Android/`와 `Assets/GoogleMobileAds/Api/` → SDK `GoogleMobileAds` 1행, 폴더 열에 병기.
   `Assets/Plugins/` 직하 바이너리는 파일명·인접 폴더로 소속 SDK를 판단하고, 판단 불가 시 별도 행 + 용도 "확인 필요".
