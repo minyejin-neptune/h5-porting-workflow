@@ -128,9 +128,9 @@ sed -n '{라인}p' {파일경로} 2>/dev/null
 - 기록된 메서드/클래스명이 해당 라인에 있으면 → ✅ 정확
 - 라인 내용이 다르거나 파일이 없으면 → ❌ 불일치. PORTING_VOCAB.md 해당 행을 "확인 필요"로 수정
 
-**2단계 — 공통 플레이스홀더 미채움 확인**
+**2단계 — 공통 · 플랫폼 공통 플레이스홀더 미채움 확인**
 
-플레이스홀더 목록을 여기서 따로 유지하지 않는다 — 메인 표에서 "미채움(`...`)이면서 플레이스홀더(`{...}`)가 배정된 행"을 직접 찾는다. 목록이 아니라 실제 생성된 파일을 기계적으로 스캔하므로, porting-scan.md의 VOCAB 템플릿이 바뀌어도(행 추가·제거) 이 검사는 그대로 유효하다.
+플레이스홀더 목록을 여기서 따로 유지하지 않는다 — 메인 표와 `## 플랫폼 공통` 섹션에서 "미채움(`...`)이면서 플레이스홀더(`{...}`)가 배정된 행"을 직접 찾는다(아래 sed 범위가 `## Toss 전용` 직전까지라 두 구획을 모두 포함한다). 목록이 아니라 실제 생성된 파일을 기계적으로 스캔하므로, porting-scan.md의 VOCAB 템플릿이 바뀌어도(행 추가·제거) 이 검사는 그대로 유효하다.
 
 ```bash
 sed -n '/^| 시스템 | 메서드\/클래스명/,/^## Toss 전용/p' Docs/porting/PORTING_VOCAB.md | grep -E '\.\.\..*\{[A-Z_]+\}'
@@ -142,16 +142,16 @@ sed -n '/^| 시스템 | 메서드\/클래스명/,/^## Toss 전용/p' Docs/portin
 
 **3단계 — Toss 전용 플레이스홀더 미채움 확인**
 
-`## Toss 전용` 섹션에서 플레이스홀더 열이 `...`인 행을 추출한다.
+`## Toss 전용` 섹션(배너·프로모션)에서 플레이스홀더 열이 `...`인 행을 추출한다. `## 포터 기록` 직전까지로 범위를 한정해 다음 섹션을 오탐하지 않는다.
 
 ```bash
-grep -A20 "## Toss 전용" Docs/porting/PORTING_VOCAB.md | grep "\.\.\."
+sed -n '/^## Toss 전용/,/^## 포터 기록/p' Docs/porting/PORTING_VOCAB.md | grep -E '\.\.\..*\{[A-Z_]+\}'
 ```
 
 `없음`은 정상. `...`만 미채움으로 처리한다.
 
 미채움 행이 있으면:
-> "Toss 전용 VOCAB 행이 비어있습니다. porting-scan 4-I를 재실행하거나 직접 입력해주세요:"
+> "Toss 전용 VOCAB 행이 비어있습니다. porting-scan 4-I B그룹을 재실행하거나 직접 입력해주세요:"
 > - `{BANNER_FILE}` ← 배너 광고 행 미채움
 > *(해당 항목만 나열)*
 
@@ -277,7 +277,7 @@ Unity 메뉴: Tools/H5/Compile Check
 |---|---|
 | VERIFY-A | A_MISSING 1건 이상 |
 | VERIFY-D | WebGL 비활성화 미처리 1건 이상 |
-| VERIFY-VOCAB | 파일:라인 불일치 1건 이상, 또는 공통/Toss 전용 플레이스홀더 미채움 1건 이상 |
+| VERIFY-VOCAB | 파일:라인 불일치 1건 이상, 또는 공통·플랫폼 공통·Toss 전용 플레이스홀더 미채움 1건 이상 |
 | VERIFY-STORAGE | 가드 누락 1건 이상 |
 | VERIFY-RUNTIME | 라인 참조 오류 1건 이상 |
 | VERIFY-VOID | CONTROL_FLOW·STATE_UNDEF 미처리 1건 이상 |
@@ -303,7 +303,7 @@ Unity 메뉴: Tools/H5/Compile Check
 - VERIFY-A: 누락 N건 / CALLER_MISSING N건 / INTERNAL_UNGUARDED N건 / 이상 없음
 - VERIFY-D: 미처리 N건 / 이상 없음
 - VERIFY-BUILD-SCRIPT: 신규 발견 N건 / 이상 없음
-- VERIFY-VOCAB: spot-check N건 중 불일치 N건 / 공통 플레이스홀더 미채움 N건 / Toss 전용 미채움 N건 / 빌드 씬 누락 N건
+- VERIFY-VOCAB: spot-check N건 중 불일치 N건 / 공통·플랫폼 공통 플레이스홀더 미채움 N건 / Toss 전용 미채움 N건 / 빌드 씬 누락 N건
 - VERIFY-STORAGE: 가드 누락 N건 / 이상 없음
 - VERIFY-RUNTIME: 기록 정확 N건 / 라인 오류 N건 / 이미 처리됨 N건
 - VERIFY-VOID: CONTROL_FLOW N건 / STATE_UNDEF N건 / 신규 발견 N건 / 이상 없음
