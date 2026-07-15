@@ -496,9 +496,9 @@ STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STE
 
 포터는 서브에이전트라 실행 중 사용자에게 물어볼 수 없다 — 사람이 준비해야 하는 항목을 포터 실행 전에 여기서 수집한다. 퓨어웹 포팅이면 이 단계를 건너뛴다(사람 준비 항목 없음).
 
-`PORTING_VOCAB.md` `## Toss 전용` 섹션을 읽어 실제로 필요한 항목만 추린다:
+`PORTING_VOCAB.md`를 읽어 실제로 필요한 항목만 추린다(배너·프로모션은 `## Toss 전용` 섹션, IAP는 메인 표 `{IAP_METHOD}` 행 기준):
 
-| 항목 | 노출 조건 (VOCAB `## Toss 전용` 기준) | 기록 대상 (담당 포터) |
+| 항목 | 노출 조건 (VOCAB 기준) | 기록 대상 (담당 포터) |
 |---|---|---|
 | 배너 광고 위치 — 상단/하단 | 배너 행이 "없음"이 아님 | `toss-checklist.md` (toss-porter) |
 | IAP PID 매핑 — 기존 PID ↔ Toss 상품 description | IAP 사용 (`{IAP_METHOD}` 행 있음) | `platform-checklist.md` (platform-porter) |
