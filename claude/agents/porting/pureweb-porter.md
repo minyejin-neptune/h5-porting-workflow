@@ -158,8 +158,6 @@ effort: max
 ## 진입점 — NATIVE_BASELINE.md 읽기
 
 > **이 포터가 최우선 실행된다** — h5-port 파이프라인은 `pureweb-porter → platform-porter → toss/kakao-porter` 순서다(2026-07-08 재배치, 이슈 #44). 선행 게이트 없음 — 항상 바로 진행한다.
->
-> **담당자 기록 시 주의 — `.porting-context`(TOSS/KAKAO 등)는 최종 타겟 플랫폼일 뿐, 다음 담당 포터가 아니다.** 체크리스트에 "이 항목은 다음에 누가 처리한다"를 적을 때, HLSDK 공통 로직(로그인·광고 Load/Show·IAP·저장·랭킹·햅틱·공유 등)은 `.porting-context` 값과 상관없이 항상 **platform-porter**가 다음 담당이다 — toss/kakao-porter가 아니다. toss/kakao-porter는 platform-porter 완료 후 그 플랫폼 고유 작업(배너·프로모션 등)만 이어받는다.
 
 **교정 기록 읽기 — 착수 전 필수**: `pureweb-checklist.md` `## 교정 기록`을 Read한다. 이전 실행에서 문서-코드 불일치가 발견된 지점이 기록돼 있으면, 아래 단계 중 같은 파일:라인·같은 문서 항목을 다시 만났을 때 원본 문서(VOCAB·NATIVE_BASELINE 등) 대신 이 기록의 판단을 신뢰하고 재탐색·재작업하지 않는다.
 
