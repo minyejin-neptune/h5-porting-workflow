@@ -366,9 +366,20 @@ ls Assets/HyperLane 2>/dev/null && echo "HLSDK 있음" || echo "HLSDK 없음"
 
 **HLSDK 있음 →** 단계 2로 진행.
 
-**단계 2 — HLSDK ShowAd 콜백 내부 AudioListener 처리 여부 확인**
+**단계 2 — HLSDK 광고 표시 경로가 오디오를 자동 처리하는지 확인 (HyperLane 소스 Read)**
 
-CLAUDE.md 규칙상 HyperLane은 사전 허락 없이 읽지 않는다. 서브에이전트는 실시간으로 허락을 물어볼 수 없으므로 허락을 받지 못한 것으로 간주하고 아래를 그대로 적용한다: **5-3을 그대로 진행하되, 완료 후 테스트 항목에 "광고 중 BGM이 두 번 멈추지 않는지" 확인을 추가한다.**
+`Assets/HyperLane/`는 읽기 허용이다(수정만 금지). 광고 표시 중 BGM이 자동으로 꺼지는지 직접 읽어 확인한다 — 확인 없이 5-3에서 BGM 차단을 넣으면 자동 처리와 겹쳐 소리가 두 번 멈출 수 있다.
+
+```bash
+# 광고 표시 경로·일시정지 처리가 AudioListener를 건드리는지 확인
+grep -rn "AudioListener\|SetPauseHandler\|OnApplicationPause\|ShowRewardedAdAsync\|ShowInterstitialAdAsync\|NotifyGameStop" Assets/HyperLane --include="*.cs"
+```
+
+발견 지점을 Read해 판정한다:
+- **광고 표시(Show*Ad) 경로, 또는 광고 노출이 트리거하는 일시정지 핸들러에서 `AudioListener.pause/volume`을 자동 제어함** → "HLSDK 자동 처리"로 판정. 5-3에서 BGM 차단 로직을 **추가하지 않는다**(스킵). `platform-checklist.md` `## 단계 진행` 5-3 행에 근거(파일:라인)와 함께 기록한다.
+- **광고 표시 경로가 오디오를 건드리지 않음** → 5-3에서 BGM 차단을 정상 삽입한다.
+
+(위 356행대로 4번 `OnApplicationPause` 구독은 이 판정과 무관하게 항상 진행한다.)
 
 ---
 
