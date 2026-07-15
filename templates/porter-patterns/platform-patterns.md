@@ -76,8 +76,12 @@ private IEnumerator InitPlatform()
 
 **UniTask 패턴** (`Initialize()` 없음 케이스 — 있으면 `InitPlatform()` 관련 부분만 발췌 적용):
 
+> **반환형 주의** — `{GAME_INIT_METHOD}`가 Unity 메시지 메서드(`Start`/`Awake`) **자체**이면 반환형은 `async void`를 쓴다. `async UniTask Start()`는 Unity가 반환값을 await하지 않아 경고가 발생한다. `Start()`에서 `.Forget()`으로 호출하는 **별도 초기화 메서드**(`InitAsync()` 등)일 때만 `async UniTask`를 유지한다.
+
 ```csharp
-private async UniTask {GAME_INIT_METHOD}()
+// 진입점이 Start/Awake 자체이면: private async void {GAME_INIT_METHOD}()
+// 별도 초기화 메서드이면:        private async UniTask {GAME_INIT_METHOD}()
+private async void {GAME_INIT_METHOD}()
 {
 #if UNITY_WEBGL
     await HLSDK.Instance.Initialize();
