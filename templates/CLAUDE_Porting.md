@@ -72,15 +72,14 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 
 ### Excluded from Analysis / Modification
 
-#### Internal Company SDK — No modification / Request permission before reading
+#### Internal Company SDK — No modification
 
 | Path | Rule |
 |---|---|
-| `Assets/HyperLane/` | No code modification. **If reading (Read/grep) is needed, request permission via AskUserQuestion first.** |
+| `Assets/HyperLane/` | No code modification. Company SDK — an integration target, not a porting/modification target. |
 
 - Modification (Edit/Write) is forbidden under any circumstances.
-- Reading (Read/grep) is allowed only after permission is granted, for the purpose of understanding the API.
-- Do not read automatically without permission.
+- It is the SDK being integrated (via `HLSDK.Instance.*`), not game code to port — so porting-scan/sdk-list-analyzer do not treat it as a scan/port target.
 
 ### Code Modification Rules
 
