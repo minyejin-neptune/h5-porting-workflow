@@ -11,6 +11,10 @@
     - **Never state a count, enum list, or logic conclusion** without first verifying it from the actual code. Show the exact command and output used as evidence.
     - Before concluding that something "does not exist," run an exhaustive search (grep/find) and show the search commands.
 - **Insufficient data**: If the information needed to make a judgment is not present in the code, explicitly state "insufficient data".
+- **Compress step-transition reports to 2–3 lines** (✅/⏳ markers) — put full detail in the checklist/VOCAB doc, not the chat.
+- **List-type results (e.g. compile errors): show a count + at most 3 representative items** in chat; write the full list to the checklist `## 이슈`.
+- **Skip filler progress messages** (e.g. "확인 중입니다", "잠시만 기다려주세요") — report only the result.
+- **When quoting a subagent's completion report, extract only the essentials** (scope done, error count, `## 확인 필요` items) — do not re-paste the full report.
 
 ---
 
@@ -48,7 +52,7 @@ Do not re-analyze content already documented there.
 |---|---|
 | `Docs/FRAMEWORK_REFERENCE.md` | Entry points, systems, utilities, helpers, reusable APIs — read before any code exploration |
 | `Docs/porting/NATIVE_BASELINE.md` | Pre-porting native snapshot (immutable) — SDK inventory, project info, game structure |
-| `Docs/porting/pureweb-checklist.md` | Work list (mutable) — compile/runtime/void issues, status |
+| `Docs/porting/{pureweb\|platform\|toss}-checklist.md` | Work list (mutable) — compile/runtime/void issues, status; which file(s) exist depends on the porting target |
 | `Docs/porting/PORTING_VOCAB.md` | Method/class vocabulary (location index) — check before grepping |
 
 After completing analysis of any game system, check the relevant doc in `Docs/`.
@@ -58,12 +62,12 @@ If the doc is outdated or contradicts the code — update it and report what cha
 
 When looking for a file, class, or method, always follow this order. Actively use VOCAB (the location index).
 
-1. Check the item's file:line in `Docs/porting/PORTING_VOCAB.md` first — if present, Read it directly (no grep).
+1. Check the item's file:line in `Docs/porting/PORTING_VOCAB.md` first — if present, Read the target file at that file:line directly, skipping the grep/find step below.
 2. If the row is missing or marked "확인 필요" → grep/find fallback.
-3. If the grep/find fallback also finds nothing and this step has no already-specified handling (e.g., skip) — do not guess. Record it in the project's checklist `## 확인 필요` section for human review, and move to the next step.
+3. If the grep/find fallback also finds nothing: when this search happens as part of a specific porting step (e.g. a step in `h5-port`, `porting-scan`, or a porter agent) that already defines its own fallback (e.g. "skip and move on"), follow that instead. Otherwise, do not guess — record it in the project's checklist `## 확인 필요` section for human review, and move on.
 4. Add any file:line newly confirmed via grep fallback to VOCAB `## 포터 기록`, so it is never re-searched.
 
-Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Response Rules above.)
+**Required**: Do not use grep as the first resort — if VOCAB has the answer, use it. (Before concluding something "does not exist", follow the exhaustive-search rule in Response Rules above.)
 
 ---
 
@@ -82,20 +86,17 @@ Do not use grep as the **first** resort — if VOCAB has the answer, use it. (Be
 
 ### Code Modification Rules
 
-- **Prefer reusing existing public methods** over editing internal keys or values directly (e.g., use `PopupManager.ShowAlertAsync` instead of editing popup key strings).
+- Reuse an existing public method if it fits (e.g. `PopupManager.ShowAlertAsync`) instead of editing internal keys/values directly; if none fits without violating OOP, add a new one.
 - Before modifying shared/global variables or prefixes: check all usages first. If the variable is reused elsewhere, introduce a new one instead.
+- Do NOT delete original comments — i.e. comments already present at the baseline commit recorded in `NATIVE_BASELINE.md`'s header (`기준 커밋`); if unsure whether a comment predates porting, check with `git show {기준 커밋}:{파일 경로}`. If deletion is necessary, always ask first.
+
+**Required**: After changing code, always update the affected docs (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
 
 ### General Coding Rules
 
-- Do NOT delete original comments. If deletion is necessary, always ask first.
-- **Do not add unnecessary comments.** Only comment when the *why* isn't obvious from the code itself (a hidden constraint, a workaround, non-intuitive behavior). Do not add comments that state *what* the code does, or that reference this task/porting/an agent name — code readable without them doesn't need them.
-- **After changing code, always update the affected docs** (dead-document prevention) — checklist, VOCAB, FRAMEWORK_REFERENCE, design docs, whichever the change touches.
+- Do not add unnecessary comments. Only comment when the *why* isn't obvious from the code itself (a hidden constraint, a workaround, non-intuitive behavior). Do not add comments that state *what* the code does, or that reference this task/porting/an agent name — code readable without them doesn't need them.
 - No column alignment in variable declarations — do not use space padding to vertically align types/names.
 - Prefer explicit types over `var`.
-- **Compress step-transition reports to 2–3 lines** (✅/⏳ markers) — put full detail in the checklist/VOCAB doc, not the chat.
-- **List-type results (e.g. compile errors): show a count + at most 3 representative items** in chat; write the full list to the checklist `## 이슈`.
-- **Skip filler progress messages** (e.g. "확인 중입니다", "잠시만 기다려주세요") — report only the result.
-- **When quoting a subagent's completion report, extract only the essentials** (scope done, error count, `## 확인 필요` items) — do not re-paste the full report.
 
 ### Porting Behavior Rules
 

@@ -16,6 +16,8 @@ $ARGUMENTS로 지정한 콘텐츠의 코드 연관을 추적해 그래프를 생
 
 인자가 비어 있으면 멈추고 "분석할 콘텐츠명을 인자로 입력해주세요 (예: `/analyze:content-scan 스킬`, 영문 식별자를 알면 `/analyze:content-scan 스킬(Skill)`)" 라고 안내한다.
 
+`--base-commit {해시}` 플래그를 함께 받으면(예: `/analyze:content-scan 스킬 --base-commit abc1234`) STEP 1의 `기준 커밋` 자동 감지를 생략하고 이 값을 그대로 쓴다 — 콘텐츠명 파싱에서는 이 플래그와 그 값을 제외한 나머지를 콘텐츠명으로 취급한다.
+
 ---
 
 ## STEP 0 — 신선도 판정
@@ -46,8 +48,9 @@ ls "$GRAPH_FILE" 2>/dev/null && echo "EXISTS" || echo "NONE"
 | `UI_PATH` | SCRIPTS_PATH 하위 `UI` 또는 `ui` 디렉토리 |
 | `DATA_FILE` | 1차: `find . -path "*/Resources/*" \( -iname "*data*" -o -iname "*table*" \) -type f 2>/dev/null` — 0건이면 STEP 4 Zero-Hit Fallback 절차를 적용, 그래도 못 찾으면 "확인 필요" (특정 파일명을 하드코딩하지 않는다) |
 | `DATA_DECODE_CMD` | `Tools/` 디렉토리 또는 CLAUDE.md에서 디코딩 도구 확인 — 없으면 "직접 파싱" |
+| `기준 커밋` | `--base-commit` 인자가 있으면 그 값 사용. 없으면 `Docs/porting/NATIVE_BASELINE.md`가 존재할 때 그 헤더의 `기준 커밋` 값을 재사용(같은 프로젝트 내 산출물들이 서로 다른 기준점을 갖지 않도록). 둘 다 없으면 `git rev-parse HEAD 2>/dev/null \|\| echo "NO_GIT"`로 직접 캡처 |
 
-감지 결과를 사용자에게 한 번에 보여주고 확인받은 뒤 진행한다. 이 값들(SCRIPTS_PATH·DATA_FILE·DATA_DECODE_CMD)은 STEP 5 산출물 헤더에 그대로 기록한다 — `content-analyze`가 이 콘텐츠를 재분석할 때 재감지 없이 그래프 헤더에서 재사용한다.
+감지 결과를 사용자에게 한 번에 보여주고 확인받은 뒤 진행한다. 이 값들(SCRIPTS_PATH·DATA_FILE·DATA_DECODE_CMD·기준 커밋)은 STEP 5 산출물 헤더에 그대로 기록한다 — `content-analyze`가 이 콘텐츠를 재분석할 때 재감지 없이 그래프 헤더에서 재사용한다.
 
 ---
 

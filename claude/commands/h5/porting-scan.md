@@ -814,6 +814,14 @@ grep -rn ":\s*I[A-Z][a-zA-Z]*\b" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null \
 
 `Docs/porting/` 디렉토리가 없으면 `mkdir -p Docs/porting` 후 아래 4파일을 저장한다 (형식은 "출력 문서 형식" 1~3 + VOCAB 참조):
 
+NATIVE_BASELINE.md 헤더의 `기준 커밋`은 새로 캡처하지 않고, STEP 1에서 sdk-list-analyzer가 `.sdk-list.md`에 이미 기록해둔 값을 그대로 이어받는다 — 같은 스캔 흐름의 산출물들이 서로 다른 커밋을 기준점으로 갖지 않도록:
+
+```bash
+grep -oE "기준 커밋: [0-9a-f]+|NO_GIT" Docs/porting/.sdk-list.md | head -1
+# .sdk-list.md가 없으면(예: BASELINE이 이미 있어 STEP 1에서 재분석 생략된 경우) 대체:
+# git rev-parse HEAD 2>/dev/null || echo "NO_GIT"
+```
+
 1. `NATIVE_BASELINE.md` — 불변 스냅샷 (`## 외부 SDK 목록`은 STEP 1 수용본 기재)
 2. `PORTING_VOCAB.md` — 위치 사전 (신규 또는 기존 갱신)
 3. `pureweb-checklist.md` — 기반 작업목록 (STEP 2·3·6에서 발견한 이슈 포함)
@@ -835,7 +843,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 ```markdown
 # 네이티브 베이스라인 — {프로젝트 루트 폴더명}
 
-> 생성일: {날짜} | 스크립트 경로: {SCRIPTS_PATH} | 부속 경로: {EXTRA_PATHS 또는 "없음"}
+> 생성일: {날짜} | 기준 커밋: {커밋 해시 | NO_GIT} | 스크립트 경로: {SCRIPTS_PATH} | 부속 경로: {EXTRA_PATHS 또는 "없음"}
 > 포팅 전 네이티브 스냅샷 — scan-verify 후 동결. 이슈·진행 상태는 pureweb/toss-checklist.md 참조.
 
 ## 프로젝트 정보
