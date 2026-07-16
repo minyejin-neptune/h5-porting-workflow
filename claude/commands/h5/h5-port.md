@@ -23,6 +23,25 @@ bash $H5PW_ROOT/templates/scripts/hyperlane-update.sh
 
 ---
 
+## 진입 — 후속 모드 감지 (재실행)
+
+인자 파싱보다 먼저 실행한다 — 후속 모드는 스텝 점프가 아니라 별도 실행 경로이므로, 인자를 해석하기 전에 어느 모드인지부터 판정해야 한다. 이 프로젝트에 이미 열린 포팅 이슈가 있는지 확인한다:
+
+```bash
+gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
+```
+
+- 결과 없음(또는 gh remote 없음) → 일반 실행 — 아래 인자 파싱대로 진행.
+- **open 포팅 이슈 있음 → 후속 모드**:
+  1. STEP 0~2(초기 설정·인코딩·스캔·검증)는 재실행하지 않는다 — 이미 완료된 프로젝트다.
+  2. 이슈 제목(`[포팅] {PLATFORM} {STEP_ID} — {스텝명}`, 스텝별로 여러 개 존재)에서 `{PLATFORM}`을 확인한다(전부 같은 값이어야 정상 — 다르면 이전에 "둘 다" 선택했던 것이니 각 플랫폼별로 아래를 반복). `pureweb-checklist.md`(기반)와 `{PLATFORM}-checklist.md`(플랫폼 전용)의 `## 확인 필요`에서 미체크(`- [ ]`) 항목을 추출한다 — 이슈 본문이 아니라 체크리스트 파일이 정본이다. `{PLATFORM}`이 TOSS면 `platform-checklist.md`(HLSDK 공통, 존재하는 경우만)도 함께 확인한다.
+  3. 추출한 항목만 AskUserQuestion으로 재질문한다 (여전히 미확정이면 미확정 유지 허용).
+  4. 확정된 답변은 해당 체크리스트 파일에 직접 반영한다(Edit, `- [ ]` → `- [x]` + 확정값).
+  5. 새로 확정된 항목이 1건 이상이면 STEP 3-B를 다시 실행해 스텝ID:이슈번호 매핑을 최신화(기존 open 이슈는 재사용, 신규 스텝만 생성)한 뒤 STEP 3-C로 가서 포터를 **부분 수정 모드**로 재호출한다 (prompt 형식은 STEP 3-C 참조). 확정된 항목이 없으면 "미확정 항목 변동 없음 — 종료"를 출력하고 끝낸다.
+  6. 포터 완료 후 STEP 4-A의 기존 종료 처리(검증 통과 + 미확정 없음 → 완료 스텝 이슈만 개별 close)를 그대로 적용한다. 이슈는 DoD 체크박스(단계 진행) 동기화 대상일 뿐, 확인 필요 상태 판정에는 쓰지 않는다.
+
+---
+
 ## 인자 파싱
 
 `$ARGUMENTS`로 시작 스텝 또는 플랫폼을 지정할 수 있다. 번호와 키워드 둘 다 인식한다.
@@ -54,25 +73,6 @@ bash $H5PW_ROOT/templates/scripts/hyperlane-update.sh
 1. 아래 VOCAB 변수 매핑 컨벤션 섹션을 읽는다
 2. `Docs/porting/PORTING_VOCAB.md`가 있으면 읽어 플레이스홀더를 확정한다
 3. 지정된 스텝으로 점프한다
-
----
-
-## 진입 — 후속 모드 감지 (재실행)
-
-인자 파싱 전에, 이 프로젝트에 이미 열린 포팅 이슈가 있는지 확인한다:
-
-```bash
-gh issue list --state open --search "[포팅]" --json number,title 2>/dev/null
-```
-
-- 결과 없음(또는 gh remote 없음) → 일반 실행 — 인자 파싱대로 진행.
-- **open 포팅 이슈 있음 → 후속 모드**:
-  1. STEP 0~2(초기 설정·인코딩·스캔·검증)는 재실행하지 않는다 — 이미 완료된 프로젝트다.
-  2. 이슈 제목(`[포팅] {PLATFORM} {STEP_ID} — {스텝명}`, 스텝별로 여러 개 존재)에서 `{PLATFORM}`을 확인한다(전부 같은 값이어야 정상 — 다르면 이전에 "둘 다" 선택했던 것이니 각 플랫폼별로 아래를 반복). `pureweb-checklist.md`(기반)와 `{PLATFORM}-checklist.md`(플랫폼 전용)의 `## 확인 필요`에서 미체크(`- [ ]`) 항목을 추출한다 — 이슈 본문이 아니라 체크리스트 파일이 정본이다. `{PLATFORM}`이 TOSS면 `platform-checklist.md`(HLSDK 공통, 존재하는 경우만)도 함께 확인한다.
-  3. 추출한 항목만 AskUserQuestion으로 재질문한다 (여전히 미확정이면 미확정 유지 허용).
-  4. 확정된 답변은 해당 체크리스트 파일에 직접 반영한다(Edit, `- [ ]` → `- [x]` + 확정값).
-  5. 새로 확정된 항목이 1건 이상이면 STEP 3-B를 다시 실행해 스텝ID:이슈번호 매핑을 최신화(기존 open 이슈는 재사용, 신규 스텝만 생성)한 뒤 STEP 3-C로 가서 포터를 **부분 수정 모드**로 재호출한다 (prompt 형식은 STEP 3-C 참조). 확정된 항목이 없으면 "미확정 항목 변동 없음 — 종료"를 출력하고 끝낸다.
-  6. 포터 완료 후 STEP 4-A의 기존 종료 처리(검증 통과 + 미확정 없음 → 완료 스텝 이슈만 개별 close)를 그대로 적용한다. 이슈는 DoD 체크박스(단계 진행) 동기화 대상일 뿐, 확인 필요 상태 판정에는 쓰지 않는다.
 
 ---
 
@@ -328,12 +328,14 @@ git commit -m "[수정] Android 컴파일 오류 수정"
 
 포팅 중 `.cs` 파일 수정 시마다 자동 컴파일 체크가 실행되려면 hook이 필요하다.
 
+컴파일 체크 hook만 특정해 확인한다 — `PostToolUse` 키워드로만 판정하면 다른 PostToolUse hook(커밋 프리픽스 등)이 있을 때 오탐하므로, 실제 컴파일 hook 명령(`compile-check.sh` 또는 구형 `CompileChecker`)의 존재를 확인한다:
+
 ```bash
-cat ~/.claude/settings.json 2>/dev/null | grep -A3 "PostToolUse\|CompileChecker" || echo "NOT_FOUND"
+grep -q "compile-check\.sh\|CompileChecker" ~/.claude/settings.json 2>/dev/null && echo "FOUND" || echo "NOT_FOUND"
 ```
 
-- hook 있음 → STEP 2로
-- **hook 없음** → AskUserQuestion:
+- `FOUND` → STEP 2로
+- **`NOT_FOUND`** → AskUserQuestion:
 
 > "`.cs` 파일 수정 시 자동 컴파일 체크를 위한 PostToolUse hook이 설정되어 있지 않습니다.
 > Claude Code 설정(`~/.claude/settings.json`)에 아래 hook을 추가하면 코드 수정 후 즉시 오류를 감지할 수 있습니다.
