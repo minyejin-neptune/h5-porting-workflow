@@ -66,6 +66,36 @@ while IFS= read -r src; do
   echo "  ✓ $dst"
 done < <(find "$REPO/claude" -type f)
 
+# 3) 컴파일 체크 hook — templates/ 밑에 있어 위 claude/ 루프가 걸지 않으므로 따로 건다.
+#    settings.json이 이 고정 경로를 참조하게 해두면 repo를 옮겨도(재설치만 하면)
+#    settings.json을 손대지 않아도 된다. 스크립트는 인자 없이 호출되면 hook 모드로 동작.
+echo "▶ 컴파일 체크 hook 심볼릭 링크"
+HOOK_SRC="$REPO/templates/scripts/compile-check.sh"
+HOOK_DST="$CLAUDE_DIR/hooks/compile-check.sh"
+if [ ! -f "$HOOK_SRC" ]; then
+  echo "✗ 에러: $HOOK_SRC 가 없습니다. repo가 손상되었을 수 있습니다." >&2
+  exit 1
+fi
+mkdir -p "$(dirname "$HOOK_DST")"
+if [ -e "$HOOK_DST" ] && [ ! -L "$HOOK_DST" ]; then
+  if [ -e "$HOOK_DST.bak" ]; then
+    echo "✗ 에러: 백업 대상이 이미 존재합니다: $HOOK_DST.bak" >&2
+    echo "   기존 .bak을 직접 확인 후 옮기거나 삭제하고 재실행하세요." >&2
+    exit 1
+  fi
+  mv "$HOOK_DST" "$HOOK_DST.bak"
+  echo "  ⚠ 기존 실파일 백업: $HOOK_DST.bak"
+fi
+ln -sfn "$HOOK_SRC" "$HOOK_DST"
+echo "  ✓ $HOOK_DST"
+if grep -q "compile-check\.sh" "$CLAUDE_DIR/settings.json" 2>/dev/null; then
+  echo "  ✓ settings.json에 hook 등록돼 있음"
+else
+  echo "  ⚠ settings.json에 컴파일 체크 hook이 없습니다 — 자동 컴파일 체크가 동작하지 않습니다."
+  echo "     ~/.claude/settings.json 의 hooks.PostToolUse 에 아래를 추가하세요(기존 hook과 병합):"
+  echo "       { \"matcher\": \"Edit|Write\", \"hooks\": [ { \"type\": \"command\", \"command\": \"$HOOK_DST\" } ] }"
+fi
+
 echo ""
 echo "✅ 설치 완료. 터미널 재시작(또는 셸 rc 재로드) 후 Claude Code 사용."
 echo "   업데이트: 이 repo에서 git pull"

@@ -75,12 +75,30 @@ cd ~/github/h5-porting-workflow
 ```
 
 `install.sh` 가 하는 일:
-- `claude/` 의 모든 파일 → `~/.claude/` 에 심볼릭 (agents·commands)
+- `$H5PW_ROOT` 를 셸 rc에 등록 (실제 clone 경로 감지)
+- `claude/` 의 모든 파일 → `~/.claude/` 에 심볼릭 (agents·commands·skills)
+- `templates/scripts/compile-check.sh` → `~/.claude/hooks/compile-check.sh` 에 심볼릭 (컴파일 체크 hook)
 - 기존 실제 파일이 있으면 `.bak` 으로 백업
 
 > `templates/` 는 심볼릭하지 않는다. 워크플로우가 `$H5PW_ROOT/templates/` 를 직접 참조한다.
+> 단 컴파일 체크 hook만 예외 — settings.json이 참조할 고정 경로가 필요해서 `~/.claude/hooks/` 로 건다.
+> repo를 옮겨도 `install.sh` 재실행이면 링크가 갱신되므로 settings.json은 손대지 않아도 된다.
 
 설치 후 Claude Code 재시작.
+
+**컴파일 체크 hook 등록** (`.cs` 수정 시 자동 컴파일 검사 — 선택이지만 권장):
+`~/.claude/settings.json` 의 `hooks.PostToolUse` 에 아래를 추가한다(기존 hook과 병합). `jq` 가 필요하다.
+
+```json
+{
+  "matcher": "Edit|Write",
+  "hooks": [
+    { "type": "command", "command": "~/.claude/hooks/compile-check.sh" }
+  ]
+}
+```
+
+미등록 시엔 포팅 중 Unity 메뉴 **Tools/H5/Compile Check** 를 직접 실행해야 한다. `h5-port` STEP 1-B가 등록 여부를 확인하고 안내한다.
 
 ## 업데이트
 
