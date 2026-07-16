@@ -37,8 +37,7 @@ When a request is porting-related, follow this order — proactively suggest it 
 
 1. For a new porting session, start with `h5-port` — it runs STEP 0–4 (encoding fix, `porting-scan`, `porting-scan-verify`, porter execution, `porting-verify` final check) in sequence automatically. If the user asks for a specific step only, jump straight there (e.g., "redo just the porter" → STEP 3).
 2. After modifying porting-related code, verify with the `porting-verify` skill before committing (it owns interpreting the result — `❌ 미처리` / `⚠️ 확인 필요` / `✅ 이상 없음` — plus exceptions handling) — do not run `h5-port-verify.py` directly.
-3. If `platform-checklist.md` `## 단계 진행` shows `⏭️ 스킵: /platform-decisions ...로 처리 필요`, or the user asks directly about haptics, ranking button, share text, UID/version, unnecessary-UI removal, or localization, run the `platform-decisions` skill (no argument shows what's pending) — platform-porter (a subagent) can't ask these questions itself, which is why they're split out.
-4. If h5-port's completion report lists pending judgment items, suggest running `platform-decisions` right away without waiting to be asked.
+3. If `platform-checklist.md` `## 단계 진행` shows `⏭️ 스킵: /platform-decisions ...로 처리 필요` (including when `h5-port`'s completion report surfaces these pending judgment items), or the user asks directly about haptics, ranking button, share text, UID/version, unnecessary-UI removal, or localization, run the `platform-decisions` skill (no argument shows what's pending) — suggest it right away without waiting to be asked, since platform-porter (a subagent) can't ask these questions itself, which is why they're split out.
 
 ### Pre-Analysis Reference
 
