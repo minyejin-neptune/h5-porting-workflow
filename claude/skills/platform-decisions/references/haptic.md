@@ -11,24 +11,12 @@ grep -rn "Vibrate\|Haptic\|haptic\|vibrate" {SCRIPTS_PATH} --include="*.cs" | gr
 grep -rn "GenerateHapticFeedback\|HapticController" {SCRIPTS_PATH} --include="*.cs" | grep -v HyperLane
 ```
 
-## HapticController 유틸 준비
+## HapticController 유틸
 
-iOS·Android는 같은 의도(약함·중간 등)라도 `tick`·`basic` 타입의 체감 강도가 반대로 느껴진다 — 플랫폼별로 다른 타입을 배정해야 한다. 이 매핑을 `HapticTier` enum으로 추상화한 공용 템플릿을 쓴다.
+iOS·Android는 같은 의도(약함·중간 등)라도 `tick`·`basic` 타입의 체감 강도가 반대로 느껴진다 — 플랫폼별로 다른 타입을 배정해야 한다. 이 매핑은 `HLSDK.HapticController`(HLSDK 패키지에 내장)의 `HapticTier` enum으로 이미 추상화되어 있다 — 프로젝트로 별도 복사할 필요 없음.
 
-- 위 grep에서 이미 `HapticController`(또는 유사 Tier 기반 유틸)가 있으면 → 재사용, 아래 복사 생략.
-- 없으면 공용 템플릿을 프로젝트로 **복사**한다.
-
-> ⚠️ 심볼릭 링크 금지 — 원격/CI 빌더엔 `$H5PW_ROOT/templates`가 없어 dangling 링크로 깨진다. 반드시 복사해 프로젝트 git에 실파일로 커밋되게 한다.
-
-- 템플릿 위치: `$H5PW_ROOT/templates/Runtime/HapticController.cs`
-- `.cs`를 복사한다. `.meta`는 Unity가 프로젝트 로컬에 생성한다:
-  ```bash
-  mkdir -p {SCRIPTS_PATH}/Utility
-  cp $H5PW_ROOT/templates/Runtime/HapticController.cs \
-     {SCRIPTS_PATH}/Utility/HapticController.cs
-  ```
-- 사용 가능한 Tier(정의는 템플릿이 유일한 소스): `Weak`·`WeakStrong`·`Medium`·`MediumStrong`·`Soft`·`Tap`·`Success`·`Confetti`. 필요한 효과가 없으면 `HLSDK.Instance.GenerateHapticFeedback("{타입}")`을 직접 호출한다(예외적인 경우로 한정).
-- 복사 방식이라 프로젝트마다 사본이 생긴다. 템플릿을 고치면 각 프로젝트에서 재복사해야 반영된다.
+- 사용 가능한 Tier(정의는 HLSDK 패키지가 유일한 소스): `Weak`·`WeakStrong`·`Medium`·`MediumStrong`·`Soft`·`Tap`·`Success`·`Confetti`. 필요한 효과가 없으면 `HLSDK.Instance.GenerateHapticFeedback("{타입}")`을 직접 호출한다(예외적인 경우로 한정).
+- 위 grep에서 프로젝트 로컬에 별도의 Tier 기반 유틸(구버전 복사본 등)이 있으면 정리 대상인지 확인 — HLSDK 내장 버전으로 통일한다.
 
 ## 탐색 결과에 따라 분기
 
