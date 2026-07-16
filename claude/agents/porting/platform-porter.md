@@ -18,13 +18,13 @@ effort: max
 
 > **전처리문 추가 전 필수 확인**: 새 `#if` 전처리문을 추가하기 전에 사용할 심볼을 반드시 사용자에게 먼저 물어본다.
 
-> **공용 규칙 — `templates/porter-rule.md`를 Read해서 따른다**: 탐색 기본 원칙(VOCAB-first)·`{SCRIPTS_PATH}`/EXTRA_PATHS 확정·결정 필요 라우팅·완료 여부 사전 확인·문서 오류 교정 기록·컴파일 체크 자동화·worktree 병렬 작업 방침·HLSDK API 참조·코딩 컨벤션(전처리문 규칙·패턴 A/B·에디터 섀도잉 금지·전처리문 3박자·불필요한 주석 금지)은 전부 이 문서가 단일 소스다. `{PLATFORM_SYMBOL}`은 고정 심볼이 없으므로(여러 플랫폼 공통) `$(cat .porting-context 2>/dev/null || echo TOSS)`로 현재 선택된 플랫폼을 읽어 사용, `{platform}-checklist.md` = `platform-checklist.md`로 치환해서 읽는다.
+> **공용 규칙 — `templates/porter-rule.md`를 Read해서 따른다**: 탐색 기본 원칙(VOCAB-first)·`{SCRIPTS_PATH}`/EXTRA_PATHS 확정·결정 필요 라우팅·완료 여부 사전 확인·문서 오류 교정 기록·컴파일 체크 자동화·worktree 병렬 작업 방침·HLSDK API 참조·코딩 컨벤션(전처리문 규칙·패턴 A/B·에디터 섀도잉 금지·전처리문 3박자·불필요한 주석 금지)은 전부 이 문서가 단일 소스다. 치환값(셋은 서로 다른 축이다): `{PLATFORM_SYMBOL}` = **없음** — 이 포터는 HLSDK 공통 API를 다루므로 코드엔 `UNITY_WEBGL` 단독을 쓴다(아래 `## 코딩 컨벤션` 참조). `{PLATFORM_ARG}`(compile-check.sh 인자) = `.porting-context` 값(`TOSS` 등). `{VERIFY_PLATFORM}`(check-editor-shadow 검사 렌즈) = `WEBGL_TOSS` 고정. `{platform}-checklist.md` = `platform-checklist.md`.
 
 ---
 
 ## 컴파일 체크 자동화
 
-`templates/porter-rule.md` § 컴파일 체크 자동화 참조. `{PLATFORM_SYMBOL}`은 `.porting-context`로 현재 선택된 플랫폼(TOSS 등)을 읽어 사용, hook 미설정 시 Unity 메뉴 **Tools/H5/Compile Check** 수동 실행, git commit prefix는 `[웹지엘]`(대부분)/`[공통]`/`[수정]`.
+`templates/porter-rule.md` § 컴파일 체크 자동화 참조. `{PLATFORM_ARG}`(스크립트 인자)는 `.porting-context`로 현재 선택된 플랫폼(`TOSS` 등)을 읽어 사용, hook 미설정 시 Unity 메뉴 **Tools/H5/Compile Check** 수동 실행, git commit prefix는 `[웹지엘]`(대부분)/`[공통]`/`[수정]`.
 
 ---
 
@@ -1185,13 +1185,14 @@ grep -E "error CS" Docs/porting/compile_result.log 2>/dev/null | head -3
 
 ### 에디터 섀도잉 검사 (check-editor-shadow) — 커밋 전 필수
 
-이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). `.porting-context`로 현재 선택된 플랫폼을 읽어 `--platform`에 반드시 전달한다(누락 시 플랫폼별 판정이 부정확해짐). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
+이번 작업에서 수정·추가한 .cs 파일만 검사한다(원본 기존 WEBGL 체인은 검사 대상 아님). 결과 해석은 `templates/porter-rule.md` § 에디터 섀도잉 검사 참조.
+
+`--platform`은 **`WEBGL_TOSS` 고정**이다 — `.porting-context`를 읽지 않는다. 이 포터의 산출물은 목표가 토스든 카카오든 항상 `#if UNITY_WEBGL && !WEBGL_PUREWEB` / `#elif UNITY_WEBGL` 같은 **비-퓨어웹 경로**에 들어가므로, 렌즈도 항상 비-퓨어웹이어야 한다. 퓨어웹 렌즈(`WEBGL_PUREWEB`)로 검사하면 그 블록들이 "퓨어웹 빌드에서 꺼진 코드"로 판정돼 **검사에서 통째로 건너뛴다**(실측: 같은 파일에서 TOSS 렌즈 2건 검출 → PUREWEB 렌즈 1건 누락). `.porting-context`는 "지금 컴파일할 대상"이라 검사 렌즈와는 다른 축이다.
 
 ```bash
-PLATFORM="WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS)"
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 $H5PW_ROOT/templates/scripts/h5-port-verify.py \
-      --platform "$PLATFORM" --mode check-editor-shadow
+      --platform WEBGL_TOSS --mode check-editor-shadow
 ```
 
 ### 최종 전체 검증 (완료 보고 전 필수)

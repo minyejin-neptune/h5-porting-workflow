@@ -6,7 +6,7 @@ tools: Read, Bash, Edit, Write, Agent
 
 # {PORTER_TITLE} 에이전트
 
-> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. 상단 `> 추론 금지` 블록부터 `## 코딩 컨벤션` 섹션 끝(하단 템플릿 주석 직전)까지가 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. `{PLATFORM_SYMBOL}`은 각 포터의 실제 심볼(WEBGL_PUREWEB 등)로, `{PLATFORM_ARG}`는 `compile-check.sh` 인자용 short form(`PUREWEB`·`TOSS` — `WEBGL_` 접두 없음)으로, `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
+> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. 상단 `> 추론 금지` 블록부터 `## 코딩 컨벤션` 섹션 끝(하단 템플릿 주석 직전)까지가 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. 치환 규칙 — 셋은 서로 다른 축이므로 섞지 않는다: `{PLATFORM_SYMBOL}`은 **코드에 쓸 심볼**(WEBGL_PUREWEB 등. platform-porter는 심볼 없이 `UNITY_WEBGL` 단독), `{PLATFORM_ARG}`는 **`compile-check.sh` 인자**용 short form(`PUREWEB`·`TOSS` — `WEBGL_` 접두 없음), `{VERIFY_PLATFORM}`은 **check-editor-shadow 검사 렌즈**(pureweb → `WEBGL_PUREWEB`, toss·platform → `WEBGL_TOSS`). `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
 
 `{PLATFORM_SYMBOL}` 빌드에서 게임이 정상 동작하도록 코드를 처리하고 체크리스트를 검증하는 전담 에이전트.
 **h5-port 오케스트레이터(encoding-fix → porting-scan → porting-scan-verify) 완료 이후 단계**를 담당한다.
@@ -356,12 +356,14 @@ grep -rln "SomeManager" Assets --include="*.unity" --include="*.prefab" 2>/dev/n
 
 이번 작업에서 수정·추가한 .cs 파일만 검사한다. 원본의 기존 WEBGL 체인은 불변식의 기준선이므로 검사 대상에 넣지 않는다.
 
-`{PLATFORM_SYMBOL}` 결정: pureweb-porter는 항상 `WEBGL_PUREWEB`, toss-porter는 항상 `WEBGL_TOSS`. platform-porter는 고정 심볼이 없으므로(여러 플랫폼에 공통 적용) `WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS)`로 현재 선택된 플랫폼을 읽어 사용한다(`.porting-context`는 `TOSS`/`PUREWEB` 형식이므로 `WEBGL_` 접두가 필요 — `--platform`은 `WEBGL_TOSS`/`WEBGL_PUREWEB`만 받는다) — `--platform` 인자를 생략하지 않는다.
+`{VERIFY_PLATFORM}`(검사 렌즈) 결정: pureweb-porter는 `WEBGL_PUREWEB`, toss-porter는 `WEBGL_TOSS`, platform-porter는 `WEBGL_TOSS`(비-퓨어웹 대표값). **코드 작성용 `{PLATFORM_SYMBOL}`과는 별개 축이다** — 예: platform-porter는 코드엔 `UNITY_WEBGL` 단독을 쓰지만(심볼 없음) 검사 렌즈는 `WEBGL_TOSS`다. `--platform` 인자를 생략하지 않는다.
+
+> **`.porting-context`를 `--platform`에 쓰지 않는다** — 그 파일은 "지금 컴파일할 대상"이고 `--platform`은 "어떤 렌즈로 검사할지"라 축이 다르다. 특히 platform-porter의 산출물은 항상 비-퓨어웹 경로(`#if UNITY_WEBGL && !WEBGL_PUREWEB` 등)에 들어가는데, 파이프라인상 `.porting-context`엔 직전 pureweb-porter가 쓴 `PUREWEB`이 남아 있다. 퓨어웹 렌즈로 검사하면 그 블록들이 "퓨어웹 빌드에서 꺼진 코드"로 판정돼 검사에서 통째로 빠진다(실측: 같은 파일에서 TOSS 렌즈 2건 검출 → PUREWEB 렌즈 1건 누락).
 
 ```bash
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
   | xargs python3 $H5PW_ROOT/templates/scripts/h5-port-verify.py \
-      --platform {PLATFORM_SYMBOL} --mode check-editor-shadow
+      --platform {VERIFY_PLATFORM} --mode check-editor-shadow
 ```
 
 | 출력 | 대응 |
