@@ -252,7 +252,7 @@ grep -rln "using System\.IO\|using System\.Net\|using System\.Threading" \
 ```
 
 히트 파일 상위 5개를 Read해 실제 API 호출(파일:라인)을 확인한다.
-근거 있으면 pureweb-checklist.md `## 이슈`에 `[런타임]` 항목으로 `(fallback)` 표기로 추가. 근거 없으면 "코드에서 근거를 찾지 못했습니다"로 기록.
+근거 확인되면 pureweb-checklist.md `## 이슈`에 `[런타임]` 항목으로 `(fallback)` 표기로 추가한다. 판정 불가 시 `확인 필요`로 남기고 미해결 항목으로 분류한다 — **"없음" 임의 단정 금지.**
 
 ---
 
@@ -479,7 +479,7 @@ grep -rilnE "save|load|저장|불러|persist|serialize|repository" {SCRIPTS_PATH
 ```
 
 후보 파일을 Read해 클래스 책임·진입점 메서드명(파일:라인)을 확인한다.
-확인되면 VOCAB 해당 행에 `(fallback 확인: 파일:라인)` 표기. 판정 불가 시 `확인 필요 — fallback 후보: {파일목록}`으로 기록. **"없음" 임의 단정 금지.**
+근거 확인되면 VOCAB 해당 행에 `(fallback)` 표기로 기록한다. 판정 불가 시 `확인 필요`로 남기고 미해결 항목으로 분류한다 — **"없음" 임의 단정 금지.**
 
 #### 4-D. Addressables 로드 시점 분석
 
@@ -528,7 +528,8 @@ find {SCRIPTS_PATH} -name "*.cs" 2>/dev/null \
 grep -rn "this\[string\|SetValue\|GetValue" {SCRIPTS_PATH} --include="*.cs" 2>/dev/null | grep -v HyperLane | head -5
 ```
 
-후보 상위 5개를 Read해 저장 매체·키 패턴·인코딩을 판정한다. VOCAB `저장 키`·`저장 인코딩` 행에 `(fallback)` 표기로 기록. 매체 불명확 시 `판정: 확인 필요`로 남기고 미해결 항목으로 분류.
+후보 상위 5개를 Read해 저장 매체·키 패턴·인코딩을 판정한다.
+근거 확인되면 VOCAB `저장 키`·`저장 인코딩` 행에 `(fallback)` 표기로 기록한다. 판정 불가 시 `확인 필요`로 남기고 미해결 항목으로 분류한다 — **"없음" 임의 단정 금지.**
 
 **2단계 — 저장 담당 클래스 Read**
 
