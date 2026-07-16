@@ -110,6 +110,8 @@ grep -rhoE "^namespace [A-Za-z0-9_.]+" {SCRIPTS_PATH} --include="*.cs" 2>/dev/nu
 
 발견된 외부 네임스페이스·패키지를 목록에 `처리 방법: 확인 필요`, `상태: fallback 식별`로 추가한다.
 
+**fallback도 0건이면** — 표를 빈 채로 두지 않는다. 빈 표는 "탐색이 실패한 것"과 "정말 SDK가 없는 것"을 구분해주지 못하는데, 이 목록은 porting-scan이 `NATIVE_BASELINE.md ## 외부 SDK 목록`으로 그대로 수용하고 pureweb-porter 7단계(SDK 비활성화)가 그걸 대상 목록으로 삼는다 — 조용히 비면 실제 SDK가 있어도 비활성화가 통째로 스킵된다. `## 메모`에 `- 외부 SDK: 없음 (폴더·네임스페이스·의존성 메타데이터 모두 0건 — fallback 확인함)`으로 **명시 기록**한다. **"없음" 임의 단정 금지** — 이 문장은 위 fallback을 실제로 실행한 뒤에만 쓴다.
+
 ---
 
 ## STEP 4 — 산출물 저장

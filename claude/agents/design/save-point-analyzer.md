@@ -285,18 +285,20 @@ grep -rn "AES\|Encrypt\|Decrypt\|Cipher\|CryptoStream\|RijndaelManaged" \
 
 | 항목 | 내용 |
 |---|---|
-| 로컬 저장 | 있음 (PlayerPrefs / File / BinaryFormatter / 기타) / 없음 |
-| 서버 저장 | 있음 (HTTP API / Firebase / PlayFab / 기타) / 없음 |
-| 혼합 구조 | 있음 — 로컬 우선 / 서버 우선 / 독립 병렬 / 없음 |
+| 로컬 저장 | 있음 (PlayerPrefs / File / BinaryFormatter / 기타) / 없음 / 확인 필요 |
+| 서버 저장 | 있음 (HTTP API / Firebase / PlayFab / 기타) / 없음 / 확인 필요 |
+| 혼합 구조 | 있음 — 로컬 우선 / 서버 우선 / 독립 병렬 / 없음 / 확인 필요 |
 | 오프라인 fallback | 있음 / 없음 / 확인 필요 |
+
+> `없음`은 위 STEP의 grep + 의미 기반 탐색을 모두 거친 뒤에만 쓴다. 탐색했으나 판정이 안 서면 `확인 필요` — **"없음" 임의 단정 금지.**
 
 ---
 
 ## 직렬화 · 암호화 정책
 
 **저장 포맷**: STEP 2 저장 클래스 분석 결과 기재 (JSON / XML / Binary / Key-Value / 커스텀 직렬화 / 혼합 등)
-**인코딩**: Base64 있음 / 없음
-**암호화**: 있음 (방식: AES / 커스텀 / 기타) / 없음
+**인코딩**: Base64 있음 / 없음 / 확인 필요
+**암호화**: 있음 (방식: AES / 커스텀 / 기타) / 없음 / 확인 필요
 
 ---
 
