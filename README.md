@@ -19,7 +19,8 @@ Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude C
   → STEP 3  pureweb-porter (에이전트)           SDK 초기화·로그인·저장·광고·IAP — 브라우저 테스트 가능
               → platform-porter (에이전트)      HLSDK 서버 연동 — Toss/Kakao 공통
                 → toss-porter (에이전트)        Toss 전용 — 배너·프로모션 등
-  → STEP 4  h5-port-verify.py (스크립트)        플랫폼별 처리 누락 최종 검증
+  → STEP 4  porting-verify (스킬)               플랫폼별 처리 누락 최종 검증
+                                                (h5-port-verify.py 실행 + ❌/⚠️ 해석·exceptions 처리)
 
 📊 = grep 탐색 결과를 대상 프로젝트의 Docs/porting/.stats/agent-stats.md 에 기록 (Hit/Zero-Hit 패턴 누적)
 ```
@@ -27,8 +28,9 @@ Unity 모바일 게임을 **Toss / PureWeb WebGL(H5)** 로 포팅하는 Claude C
 ### 독립 실행 — 파이프라인 밖에서 필요할 때 직접 호출
 
 ```
-analyze:content-analyze (스킬)
-  콘텐츠 시스템 역기획서/작업가이드/단계출시 문서 생성
+analyze:content-scan (스킬) → analyze:content-analyze (스킬)
+  content-scan   콘텐츠명으로 코드 참조를 추적 → {콘텐츠명}_연관그래프.md 생성
+  content-analyze 그 연관그래프를 읽어 역기획서/작업가이드/단계출시 문서 생성
 
 design:iap-analyzer / iaa-analyzer / save-point-analyzer (에이전트) 📊
   porting-scan 산출물(NATIVE_BASELINE·VOCAB) 재사용 → 사업팀 전달용 IAP/IAA/저장 역기획 문서
@@ -51,15 +53,26 @@ claude/                       # ~/.claude 에 심볼릭될 내용
   commands/
     h5/         h5-port, porting-scan, porting-scan-verify, stats-logging-analyzer
     project/    porting-init
-    analyze/    content-analyze
+    analyze/    content-scan, content-analyze
     common/     feature-breakdown, create-issue, resolve-issue, auto-resolve
+  skills/
+    platform-decisions/       # 사람 판단 이관 항목 처리 (+ references/ 6종)
+    porting-verify/           # h5-port-verify.py 실행 + ❌/⚠️ 해석·exceptions 처리
 templates/                    # 워크플로우가 repo 경로로 직접 참조 (심볼릭 없음)
-  CLAUDE_Porting.md, porter-rule.md, README.md
-  scripts/h5-port-verify.py, scripts/compile-check.sh
-  Editor/*.cs, Runtime/*.cs
+  CLAUDE_Porting.md           # 게임 프로젝트 CLAUDE.md 원본 (porting-init이 복사)
+  porter-rule.md              # 포터 3종 공용 규칙 단일 소스 + 새 포터 템플릿
+  README.md                   # 산출물 전체 목록
+  stats-logging-format.md     # agent-stats.md 기록 형식
+  porter-patterns/            # 포터가 "코드 패턴" 포인터로 참조 — platform/pureweb/toss
+  scripts/
+    h5-port-verify.py         # CLI 진입점 (모드 dispatch)
+    h5_port_verify/           # 검증 로직 패키지 (core, verify/shadow/void/callers_mode)
+    compile-check.sh          # 컴파일 체크 — CLI 모드 + hook 모드 겸용
+    worktree-setup.sh, hyperlane-init.sh, hyperlane-update.sh
+  Editor/*.cs                 # porting-init이 게임 프로젝트로 복사
 docs/
   기준-체크리스트.md           # 사람 수동 포팅 체크 표 — 워크플로우가 커버해야 하는 정답지
-install.sh                    # claude/ 를 ~/.claude 로 심볼릭 연결
+install.sh                    # $H5PW_ROOT 등록 + claude/·컴파일 체크 hook 심볼릭 연결
 ```
 
 > **clone 위치는 자유, 폴더명만 고정**: 워크플로우가 `$H5PW_ROOT/templates/...`를 직접 참조하는데,
@@ -106,7 +119,7 @@ cd ~/github/h5-porting-workflow
 cd $H5PW_ROOT && git pull
 ```
 `~/.claude` 는 심볼릭이라 **재설치 없이** 즉시 반영. 템플릿(`templates/`)도 repo 실파일이라 pull하면 바로 최신.
-단, 이미 포팅한 프로젝트에 **복사된** Editor/Runtime 스크립트는 자동 갱신 안 됨(복사본) — 갱신하려면 porting-init 재실행 또는 수동 재복사.
+단, 이미 포팅한 프로젝트에 **복사된** Editor 스크립트는 자동 갱신 안 됨(복사본) — 갱신하려면 porting-init 재실행 또는 수동 재복사.
 
 ## 처음 사용하기
 
@@ -137,7 +150,7 @@ cd $H5PW_ROOT && git pull
 
 repo 안 파일끼리의 참조 경로 기준:
 - 커맨드 상호참조 → `~/.claude/commands/...` (심볼릭 경유)
-- 템플릿·스크립트·Editor·Runtime → `$H5PW_ROOT/templates/...` (repo 직접)
+- 템플릿·스크립트·Editor → `$H5PW_ROOT/templates/...` (repo 직접)
 
 새 문서·에이전트를 작성할 때 이 두 경로 형식만 사용한다 — 특정 사용자 홈 디렉토리를 가리키는 경로를 박지 않는다.
 
