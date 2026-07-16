@@ -251,7 +251,7 @@ python3 Docs/porting/h5-port-verify.py \
 | 출력에서 사라짐 | WebGL arm 추가 완료 | 해당 `## 이슈` 항목 `- [x]`로 체크 |
 | 신규 `CONTROL_FLOW`·`STATE_UNDEF` 발견 | scan 이후 신규 발생 또는 scan 누락 | pureweb-checklist `## 이슈`에 `- [ ]` 추가 |
 
-`## WebGL 공백 이슈` 테이블이 없거나 비어있으면 → porting-scan STEP 6이 실행되지 않은 것. 이 자리에서 직접 실행한다.
+`## 이슈`에 `[공백...]` 항목도 없고 `WebGL 공백 스캔 — 이상 없음` 마커 줄(porting-scan STEP 6이 0건일 때 남기는 것)도 없으면 → STEP 6이 실행되지 않은 것. 이 자리에서 직접 실행한다.
 
 ---
 
