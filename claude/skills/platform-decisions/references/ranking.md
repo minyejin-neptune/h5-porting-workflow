@@ -19,7 +19,7 @@ grep -rn "OpenLeaderBoard\|LeaderBoard\|Leaderboard\|RankButton\|OnClickRank" {S
 
 > 특정 플랫폼에서만 숨겨야 한다는 사실이 확인되면(예: 그 플랫폼이 `OpenLeaderBoardAsync`를 no-op으로 구현) 위 분기를 좁힌다 — 개별 플랫폼 포터가 필요 시 조정.
 
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "10-1. 랭킹 접근 버튼 확인"
+> **코드 패턴**: `$H5PW_ROOT/templates/porter-patterns/platform-patterns.md` → "10-1. 랭킹 접근 버튼 확인"
 
 ## 처리 후
 

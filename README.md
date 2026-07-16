@@ -62,8 +62,9 @@ docs/
 install.sh                    # claude/ 를 ~/.claude 로 심볼릭 연결
 ```
 
-> **clone 위치 고정**: 워크플로우가 `~/github/h5-porting-workflow/templates/...` 를 직접 참조하므로
-> repo는 반드시 **`~/github/h5-porting-workflow`** 에 clone해야 한다 (다른 경로면 템플릿 참조가 깨짐).
+> **clone 위치는 자유, 폴더명만 고정**: 워크플로우가 `$H5PW_ROOT/templates/...`를 직접 참조하는데,
+> `$H5PW_ROOT`는 `install.sh`가 실행 시점의 실제 clone 경로를 감지해 셸 rc에 등록해준다.
+> 단 repo 폴더명은 반드시 **`h5-porting-workflow`**여야 한다 (문서들이 이 이름을 전제로 함).
 
 ## 설치 (각자 1회)
 
@@ -77,14 +78,14 @@ cd ~/github/h5-porting-workflow
 - `claude/` 의 모든 파일 → `~/.claude/` 에 심볼릭 (agents·commands)
 - 기존 실제 파일이 있으면 `.bak` 으로 백업
 
-> `templates/` 는 심볼릭하지 않는다. 워크플로우가 `~/github/h5-porting-workflow/templates/` 를 직접 참조한다.
+> `templates/` 는 심볼릭하지 않는다. 워크플로우가 `$H5PW_ROOT/templates/` 를 직접 참조한다.
 
 설치 후 Claude Code 재시작.
 
 ## 업데이트
 
 ```bash
-cd ~/github/h5-porting-workflow && git pull
+cd $H5PW_ROOT && git pull
 ```
 `~/.claude` 는 심볼릭이라 **재설치 없이** 즉시 반영. 템플릿(`templates/`)도 repo 실파일이라 pull하면 바로 최신.
 단, 이미 포팅한 프로젝트에 **복사된** Editor/Runtime 스크립트는 자동 갱신 안 됨(복사본) — 갱신하려면 porting-init 재실행 또는 수동 재복사.
@@ -118,7 +119,7 @@ cd ~/github/h5-porting-workflow && git pull
 
 repo 안 파일끼리의 참조 경로 기준:
 - 커맨드 상호참조 → `~/.claude/commands/...` (심볼릭 경유)
-- 템플릿·스크립트·Editor·Runtime → `~/github/h5-porting-workflow/templates/...` (repo 직접)
+- 템플릿·스크립트·Editor·Runtime → `$H5PW_ROOT/templates/...` (repo 직접)
 
 새 문서·에이전트를 작성할 때 이 두 경로 형식만 사용한다 — 특정 사용자 홈 디렉토리를 가리키는 경로를 박지 않는다.
 

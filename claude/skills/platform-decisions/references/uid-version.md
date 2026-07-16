@@ -19,4 +19,4 @@ grep -rn "uid\|userId\|UserID\|GetUserKey\|userKey" {SCRIPTS_PATH} --include="*.
 - **기존 표시 UI가 있음** → 해당 UI에 `#if UNITY_WEBGL` 분기로 HLSDK 값(`HLSDK.Instance.GetUserKey()`) 표시하고 바로 진행(판단 불필요, 기계적으로 처리).
 - **기존 표시 UI가 없음** → **AskUserQuestion으로 확정**: "UID/version을 표시할 기존 UI가 없습니다 — 어느 화면에 추가할까요?" (예: 설정 화면, 타이틀 화면 등 후보 제시 + "직접 지정"). 확정되면 그 위치에 구현. 미확정이면 `platform-checklist.md` `## 확인 필요`에 "UID/version 표시 위치 확인 필요" 기록하고 스킵.
 
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "13. UID / version 추가"
+> **코드 패턴**: `$H5PW_ROOT/templates/porter-patterns/platform-patterns.md` → "13. UID / version 추가"

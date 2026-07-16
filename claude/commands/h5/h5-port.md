@@ -16,7 +16,7 @@ $ARGUMENTS 프로젝트의 H5 포팅을 순서대로 실행한다.
 `$ARGUMENTS`가 SDK/HyperLane 업데이트 의도로만 해석되면(예: "sdk 업데이트", "hyperlane 업데이트해줘"), 아래 인자 파싱·후속 모드 감지·STEP 0-A 설치확인을 모두 건너뛰고 즉시 실행한다:
 
 ```bash
-bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-update.sh
+bash $H5PW_ROOT/templates/scripts/hyperlane-update.sh
 ```
 
 완료되면 결과만 보여주고 종료한다 — STEP 0~4 파이프라인으로 이어지지 않는다.
@@ -102,7 +102,7 @@ ls Assets/HyperLane/ 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
 **설치 절차**:
 
 ```bash
-bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-init.sh
+bash $H5PW_ROOT/templates/scripts/hyperlane-init.sh
 ```
 
 - 토스처럼 게임 외부 wrapper 프로젝트가 필요한 플랫폼은 추가로 `npx hyperlane setup toss` 실행 (대화형은 `npx hyperlane setup`). 셋업 중 `npm create vite@latest`의 `Install with npm and start now?` 질문에는 **반드시 `No`** 선택 — `Yes` 선택 시 dev server가 떠서 셋업이 멈춘다.
@@ -111,7 +111,7 @@ bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-init.sh
 **업데이트 절차** (이미 셋업된 프로젝트에서 SDK 코드만 최신화 — `init`/`setup` 재실행 불필요):
 
 ```bash
-bash ~/github/h5-porting-workflow/templates/scripts/hyperlane-update.sh
+bash $H5PW_ROOT/templates/scripts/hyperlane-update.sh
 ```
 
 - 원복 정책·안전장치는 스크립트 주석 참고.
@@ -261,7 +261,7 @@ git commit -m "[공통] EUC-KR → UTF-8 인코딩 변환"
 컴파일 실행과 **같은 응답에서** `Agent 도구(subagent_type: "sdk-list-analyzer")`를 백그라운드로 실행한다 — 아래 오류 분류에서 외부 SDK 목록이 필요하다. 에이전트는 BASELINE 존재·기존 산출물 신선도를 스스로 판정하므로(에이전트 STEP 0) 조건 분기 없이 항상 호출한다.
 
 ```bash
-bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh ANDROID
+bash $H5PW_ROOT/templates/scripts/compile-check.sh ANDROID
 ```
 
 사전 점검(버전 미판독·미설치·이 프로젝트 에디터 열림)과 판정은 스크립트에 내장되어 있다.
@@ -446,10 +446,10 @@ git branch --show-current
 
 ```bash
 # 퓨어웹 포팅인 경우
-bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh PUREWEB
+bash $H5PW_ROOT/templates/scripts/compile-check.sh PUREWEB
 
 # 토스 포팅인 경우
-bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh TOSS
+bash $H5PW_ROOT/templates/scripts/compile-check.sh TOSS
 ```
 
 STEP 3에서 "둘 다"를 선택한 경우 **퓨어웹 먼저** 실행한다(STEP 3 순서 규칙과 동일) — 퓨어웹 컴파일 체크·포터 완료 후, 토스 컴파일 체크(`compile-check.sh TOSS`)를 다시 실행하고 STEP 3-C를 토스로 재진입한다.

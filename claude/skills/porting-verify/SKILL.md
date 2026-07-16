@@ -24,13 +24,13 @@ effort: max
 
 ```bash
 # narrow 모드
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
+python3 $H5PW_ROOT/templates/scripts/h5-port-verify.py \
   --platform {platform} \
   --scripts {scripts-path} \
   --method {method1} --method {method2} ...
 
 # full 모드
-python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
+python3 $H5PW_ROOT/templates/scripts/h5-port-verify.py \
   --platform {platform} \
   --vocab {vocab-path} \
   --scripts {scripts-path}

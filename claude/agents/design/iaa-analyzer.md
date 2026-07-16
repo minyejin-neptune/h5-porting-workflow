@@ -347,7 +347,7 @@ grep -rn "{COOLTIME_VAR}" {SCRIPTS_PATH} --include="*.cs" | grep -v "//" | grep 
 
 ## Stats Logging
 
-`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `iaa-analyzer`). `Docs/design/IAA.md` 저장 완료 후 기록한다.
+`$H5PW_ROOT/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `iaa-analyzer`). `Docs/design/IAA.md` 저장 완료 후 기록한다.
 
 추적 대상 패턴 (보상형):
 - `enum AdRewardType / RewardAdType` — 광고 타입 enum

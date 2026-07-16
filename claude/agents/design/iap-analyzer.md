@@ -461,7 +461,7 @@ for name, pid, pbuff, rtype_h, ridx_h, rval_h in blocks:
 
 ## Stats Logging
 
-`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `iap-analyzer`). `Docs/design/IAP.md` 저장 완료 후 기록한다.
+`$H5PW_ROOT/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `iap-analyzer`). `Docs/design/IAP.md` 저장 완료 후 기록한다.
 
 추적 대상 패턴:
 - `UnityPurchasing / IStoreListener` — IAP 매니저 탐색

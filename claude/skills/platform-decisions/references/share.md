@@ -18,7 +18,7 @@ grep -rn "NativeShare\|ShareLink\|OnClickShare\|UIButtonShare\|ShareButton" {SCR
 
 클릭 핸들러를 Read해서 함수 본문 확인. 확정된 공유 문구로 `HLSDK.Instance.ShareLink(문구)`를 `#if UNITY_WEBGL` 가드 안에 삽입.
 
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "11. 공유하기"
+> **코드 패턴**: `$H5PW_ROOT/templates/porter-patterns/platform-patterns.md` → "11. 공유하기"
 
 ## B. 기존 버튼 없음
 

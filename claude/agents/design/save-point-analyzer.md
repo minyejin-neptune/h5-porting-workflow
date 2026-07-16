@@ -359,7 +359,7 @@ grep -rn "AES\|Encrypt\|Decrypt\|Cipher\|CryptoStream\|RijndaelManaged" \
 
 ## Stats Logging
 
-`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `save-point-analyzer`). `Docs/design/데이터-저장-로드.md` 저장 완료 후 기록한다.
+`$H5PW_ROOT/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `save-point-analyzer`). `Docs/design/데이터-저장-로드.md` 저장 완료 후 기록한다.
 
 추적 대상 패턴:
 - `PlayerPrefs.Set*` — 로컬 키-값 저장

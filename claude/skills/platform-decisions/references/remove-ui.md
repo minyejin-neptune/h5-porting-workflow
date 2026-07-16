@@ -12,4 +12,4 @@ WebGL에서 의미 없는 네이티브 전용 UI를 비활성화한다.
 
 확정된 항목만 `#if !UNITY_WEBGL` 가드로 비활성화. 미확정이면 `platform-checklist.md` `## 확인 필요`에 후보 목록 기록하고 스킵.
 
-> **코드 패턴**: `~/github/h5-porting-workflow/templates/porter-patterns/platform-patterns.md` → "14. 불필요한 UI 삭제"
+> **코드 패턴**: `$H5PW_ROOT/templates/porter-patterns/platform-patterns.md` → "14. 불필요한 UI 삭제"

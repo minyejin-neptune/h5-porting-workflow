@@ -145,7 +145,7 @@ git commit -m "[문서] 외부 SDK 목록 분석 (.sdk-list.md)"
 
 ## Stats Logging
 
-`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `sdk-list-analyzer`). STEP 4 저장 완료 후 기록한다.
+`$H5PW_ROOT/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `sdk-list-analyzer`). STEP 4 저장 완료 후 기록한다.
 
 추적 라벨: SDK폴더탐지 · jslib존재 · SDK타입상속 · ZeroHitFallback(asmdef/manifest/link.xml/namespace휴리스틱)
 

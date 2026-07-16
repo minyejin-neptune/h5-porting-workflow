@@ -176,7 +176,7 @@ A 처리 완료 파일(`using D_SDK_NS` 있고 UNITY_WEBGL 가드 있는 파일)
 
 ```bash
 # 스크립트가 없으면 템플릿에서 복사
-[ -f Docs/porting/h5-port-verify.py ] || cp ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py Docs/porting/
+[ -f Docs/porting/h5-port-verify.py ] || cp $H5PW_ROOT/templates/scripts/h5-port-verify.py Docs/porting/
 
 python3 Docs/porting/h5-port-verify.py \
   --platform {PLATFORM_SYMBOL} \
@@ -261,7 +261,7 @@ STEP 1 완료를 기다리지 않고 즉시 실행 가능.
 
 ```bash
 # 스크립트가 없으면 템플릿에서 복사
-[ -f Docs/porting/h5-port-verify.py ] || cp ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py Docs/porting/
+[ -f Docs/porting/h5-port-verify.py ] || cp $H5PW_ROOT/templates/scripts/h5-port-verify.py Docs/porting/
 
 python3 Docs/porting/h5-port-verify.py \
   --platform {PLATFORM_SYMBOL} \
@@ -954,7 +954,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 ## Stats Logging
 
-`~/github/h5-porting-workflow/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `porting-scan`). STEP 5 저장 완료 후 기록한다.
+`$H5PW_ROOT/templates/stats-logging-format.md`를 Read해서 그 형식을 따른다(agent-name은 `porting-scan`). STEP 5 저장 완료 후 기록한다.
 
 추적 라벨(정규식은 각 STEP 본문 참조 — 여기서 재정의하지 않는다):
 

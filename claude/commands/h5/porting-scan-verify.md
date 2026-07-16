@@ -264,7 +264,7 @@ python3 Docs/porting/h5-port-verify.py \
 
 Unity 메뉴: Tools/H5/Compile Check
 또는 배치모드:
-  bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh PUREWEB
+  bash $H5PW_ROOT/templates/scripts/compile-check.sh PUREWEB
 ```
 
 ---

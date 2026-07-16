@@ -100,7 +100,7 @@ git commit -m "[{prefix}] {단계명}"
 1. 표준 스크립트로 실행 (사전 점검·부수효과 되돌리기 내장):
    ```bash
    PLATFORM=$(cat .porting-context 2>/dev/null || echo {PLATFORM_SYMBOL})
-   bash ~/github/h5-porting-workflow/templates/scripts/compile-check.sh "$PLATFORM"
+   bash $H5PW_ROOT/templates/scripts/compile-check.sh "$PLATFORM"
    ```
 2. 출력 판정:
    - `✅` → 계속 진행
@@ -129,7 +129,7 @@ git commit -m "[{prefix}] {단계명}"
 # worktree 생성 — 표준 스크립트 사용(git worktree add + Library 복사를 함께 처리).
 # 표준출력의 절대경로로 반드시 cd한다 — 이후 모든 bash 명령(특히 compile-check.sh처럼
 # 현재 디렉토리 기준 상대경로로 동작하는 스크립트)이 이 디렉토리를 기준으로 실행된다.
-WORKTREE_DIR=$(bash ~/github/h5-porting-workflow/templates/scripts/worktree-setup.sh {이름} {브랜치명})
+WORKTREE_DIR=$(bash $H5PW_ROOT/templates/scripts/worktree-setup.sh {이름} {브랜치명})
 cd "$WORKTREE_DIR"
 
 # worktree 안에서는 checklist.md를 건드리지 않는다.
@@ -359,7 +359,7 @@ grep -rln "SomeManager" Assets --include="*.unity" --include="*.prefab" 2>/dev/n
 
 ```bash
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
-  | xargs python3 ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py \
+  | xargs python3 $H5PW_ROOT/templates/scripts/h5-port-verify.py \
       --platform {PLATFORM_SYMBOL} --mode check-editor-shadow
 ```
 

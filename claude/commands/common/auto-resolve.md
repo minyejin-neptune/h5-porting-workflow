@@ -40,7 +40,7 @@ gh issue view $ARGUMENTS --json number,title,state,body,labels,comments,assignee
 ```bash
 ls package.json 2>/dev/null && grep -A3 '"scripts"' package.json   # npm test/build
 ls *.sln *.csproj 2>/dev/null                                       # dotnet build/test
-ls ~/github/h5-porting-workflow/templates/scripts/h5-port-verify.py 2>/dev/null  # H5 검증
+ls $H5PW_ROOT/templates/scripts/h5-port-verify.py 2>/dev/null  # H5 검증
 ```
 - 후보(예: `dotnet build`, `npm test`, `h5-port-verify.py`, Unity 컴파일 로그 감시)를 **1개 이상 확정**한다.
 - 못 찾으면 진행하지 말고 "이 이슈의 해결 여부를 무엇으로 판정하면 될까요?"라고 사용자에게 묻는다.

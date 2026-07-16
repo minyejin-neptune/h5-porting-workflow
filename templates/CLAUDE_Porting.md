@@ -130,7 +130,7 @@ Progress large tasks in the following order.
 # Create a new worktree — standard script (git worktree add + copies Library to avoid
 # re-import cost and Temp/UnityLockfile sharing between worktrees). Prints the new
 # worktree's absolute path — cd there before running anything else.
-WORKTREE_DIR=$(bash ~/github/h5-porting-workflow/templates/scripts/worktree-setup.sh <suffix> <branch-name>)
+WORKTREE_DIR=$(bash $H5PW_ROOT/templates/scripts/worktree-setup.sh <suffix> <branch-name>)
 cd "$WORKTREE_DIR"
 
 # List worktrees
@@ -162,7 +162,7 @@ If changes are already mixed on the same branch — before committing:
 2. `git checkout <target-branch>` — files are now separated.
 3. Manually apply only the target files, then commit.
 
-#### Standard Scripts (`~/github/h5-porting-workflow/templates/scripts/`)
+#### Standard Scripts (`$H5PW_ROOT/templates/scripts/`)
 
 Use these instead of writing ad-hoc equivalent commands — they already handle the sharp edges (pre-checks, Editor-open detection, etc.).
 
