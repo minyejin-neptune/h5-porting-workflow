@@ -20,6 +20,11 @@ if [ "$REPO" != "$EXPECTED" ]; then
 fi
 
 # 1) claude/ 미러 → ~/.claude/ (파일 단위 심볼릭)
+if [ ! -d "$REPO/claude" ]; then
+  echo "✗ 에러: $REPO/claude 디렉토리가 없습니다. repo가 손상되었거나 잘못된 위치에서 실행했을 수 있습니다." >&2
+  exit 1
+fi
+
 echo "▶ ~/.claude 심볼릭 링크"
 while IFS= read -r src; do
   rel="${src#"$REPO"/claude/}"
@@ -32,6 +37,11 @@ while IFS= read -r src; do
     if [ "$(cd "$(dirname "$dst")" && pwd -P)/$(basename "$dst")" = "$(cd "$(dirname "$src")" && pwd -P)/$(basename "$src")" ]; then
       echo "  ↷ 이미 동일 파일(상위 디렉토리가 심볼릭) — 건너뜀: $dst"
       continue
+    fi
+    if [ -e "$dst.bak" ]; then
+      echo "✗ 에러: 백업 대상이 이미 존재합니다: $dst.bak" >&2
+      echo "   기존 .bak을 직접 확인 후 옮기거나 삭제하고 재실행하세요." >&2
+      exit 1
     fi
     mv "$dst" "$dst.bak"
     echo "  ⚠ 기존 실파일 백업: $dst.bak"
