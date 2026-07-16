@@ -6,7 +6,7 @@ tools: Read, Bash, Edit, Write, Agent
 
 # {PORTER_TITLE} 에이전트
 
-> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. `---`(28행)부터 `## 코딩 컨벤션`까지는 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. `{PLATFORM_SYMBOL}`은 각 포터의 실제 심볼(WEBGL_PUREWEB 등)로, `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
+> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. 상단 `> 추론 금지` 블록부터 `## 코딩 컨벤션` 섹션 끝(하단 템플릿 주석 직전)까지가 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. `{PLATFORM_SYMBOL}`은 각 포터의 실제 심볼(WEBGL_PUREWEB 등)로, `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
 
 `{PLATFORM_SYMBOL}` 빌드에서 게임이 정상 동작하도록 코드를 처리하고 체크리스트를 검증하는 전담 에이전트.
 **h5-port 오케스트레이터(encoding-fix → porting-scan → porting-scan-verify) 완료 이후 단계**를 담당한다.
@@ -335,7 +335,7 @@ HLSDK wrapper(`HLSDK.Instance.GetTime()` 등)와 `NeptuneAPI.Instance.GetTimeAsy
 - `Instantiate`/`AddComponent`로만 동적 생성되는 클래스 → 스텁 불필요
 
 ```csharp
-#if !{PLATFORM_SYMBOL}
+#if !(UNITY_WEBGL && {PLATFORM_SYMBOL})
 public class SomeManager : MonoBehaviour
 {
     // 기존 로직
@@ -355,7 +355,7 @@ grep -rln "SomeManager" Assets --include="*.unity" --include="*.prefab" 2>/dev/n
 
 이번 작업에서 수정·추가한 .cs 파일만 검사한다. 원본의 기존 WEBGL 체인은 불변식의 기준선이므로 검사 대상에 넣지 않는다.
 
-`{PLATFORM_SYMBOL}` 결정: pureweb-porter는 항상 `WEBGL_PUREWEB`, toss-porter는 항상 `WEBGL_TOSS`. platform-porter는 고정 심볼이 없으므로(여러 플랫폼에 공통 적용) `$(cat .porting-context 2>/dev/null || echo TOSS)`로 현재 선택된 플랫폼을 읽어 사용한다 — `--platform` 인자를 생략하지 않는다.
+`{PLATFORM_SYMBOL}` 결정: pureweb-porter는 항상 `WEBGL_PUREWEB`, toss-porter는 항상 `WEBGL_TOSS`. platform-porter는 고정 심볼이 없으므로(여러 플랫폼에 공통 적용) `WEBGL_$(cat .porting-context 2>/dev/null || echo TOSS)`로 현재 선택된 플랫폼을 읽어 사용한다(`.porting-context`는 `TOSS`/`PUREWEB` 형식이므로 `WEBGL_` 접두가 필요 — `--platform`은 `WEBGL_TOSS`/`WEBGL_PUREWEB`만 받는다) — `--platform` 인자를 생략하지 않는다.
 
 ```bash
 git status --porcelain -- '*.cs' | awk '{print "--files " $2}' \
