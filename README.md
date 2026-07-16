@@ -126,8 +126,3 @@ repo 안 파일끼리의 참조 경로 기준:
 ## 커밋 컨벤션 (기여 시)
 
 커밋 메시지는 `[한글 프리픽스] 내용` 형식을 쓴다 (프리픽스 목록은 `templates/CLAUDE_Porting.md`의 "Commit Message Prefix" 표가 정본). 신규 플랫폼 포팅을 추가하면 그 표에 해당 플랫폼 프리픽스도 함께 추가한다.
-
-## 범위
-
-- 포함: 코어 포팅(스캔/검증/포터/컴파일) + analyzer 3종(iap/iaa/save-point) + content-analyze
-- 미포함: currency-analyzer, local-push-analyzer, biz-doc-writer (필요 시 추가)
