@@ -751,7 +751,7 @@ grep -rln "ClaimPromotion\|PromotionReward\|promotionId" \
 
 | 시스템 | 파일:라인 | 플레이스홀더 | 비고 |
 |---|---|---|---|
-| 햅틱/진동 | ... | `{HAPTIC_FILE}` | 없으면 "없음" / 역기획 필요 |
+| 햅틱/진동 | ... | `{HAPTIC_FILE}` | 없으면 "역기획 필요" |
 | 가격 표시 UI | ... | `{PRICE_UI_CLASS}` | SetPrice 메서드 존재 여부 |
 | 랭킹 연동 | ... | `{RANKING_FILE}` | 없으면 "없음" |
 | 공유하기 | ... | `{SHARE_FILE}` | 없으면 "없음" |
@@ -976,7 +976,7 @@ ls Docs/porting/NATIVE_BASELINE.md && rm -f Docs/porting/.sdk-list.md
 
 **STEP 5 실행 전 — 미해결 항목 확인**
 
-fallback에서 `확인 필요` 또는 `근거 없음`으로 기록된 항목이 1건 이상이면, 문서 저장 후 AskUserQuestion을 호출한다:
+fallback에서 `확인 필요`로 기록된 항목이 1건 이상이면, 문서 저장 후 AskUserQuestion을 호출한다:
 
 > 질문: "스캔 완료 후 아래 항목을 코드에서 확인하지 못했습니다. 포팅 전에 직접 확인이 필요합니다.\n\n{항목별 시스템명 + 이유 목록}\n\n확인 후 포팅을 시작해 주세요."
 > 옵션:
