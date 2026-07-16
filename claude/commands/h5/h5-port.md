@@ -338,13 +338,38 @@ grep -q "compile-check\.sh\|CompileChecker" ~/.claude/settings.json 2>/dev/null 
 - **`NOT_FOUND`** → AskUserQuestion:
 
 > "`.cs` 파일 수정 시 자동 컴파일 체크를 위한 PostToolUse hook이 설정되어 있지 않습니다.
-> Claude Code 설정(`~/.claude/settings.json`)에 아래 hook을 추가하면 코드 수정 후 즉시 오류를 감지할 수 있습니다.
+> Claude Code 설정(`~/.claude/settings.json`)에 hook을 추가하면 코드 수정 후 즉시 오류를 감지할 수 있습니다.
 > 지금 추가할까요?
-> - 예 → 아래 설정 안내
+> - 예 → 아래 등록 절차 수행
 > - 아니오 → 포팅 중 수동으로 **Tools/H5/Compile Check** 메뉴를 직접 실행해야 합니다. 계속 진행합니다."
 
-> hook 설정 방법: Claude Code 설정(`~/.claude/settings.json`) → PostToolUse 항목에 `.cs` 파일 수정 시 컴파일 체크 명령 추가.
-> 설정 방법을 모르면 `/help`에서 hooks 관련 문서를 참고하거나, 사용자에게 직접 설정 요청 후 계속 진행한다.
+**"예" 선택 시 — hook 등록 절차**
+
+hook은 `compile-check.sh`를 **인자 없이** 호출한다(인자 없음 = hook 모드: stdin JSON에서 `.cs` 여부를 판별하고, 플랫폼은 `.porting-context`에서 읽는다 — hook은 인자를 받을 수 없기 때문). `$H5PW_ROOT`는 hook 실행 셸에 정의돼 있지 않을 수 있으므로 **절대경로로 해석해 기록한다**:
+
+```bash
+echo "$H5PW_ROOT/templates/scripts/compile-check.sh"   # 이 출력값을 아래 command에 그대로 넣는다
+command -v jq >/dev/null || echo "⚠️ jq 없음 — hook 모드는 jq가 필요하다(없으면 hook이 조용히 아무것도 하지 않음)"
+```
+
+`~/.claude/settings.json`의 `hooks.PostToolUse` 배열에 아래 항목을 **추가**한다 — 기존 hook을 덮어쓰지 않고 병합한다(다른 PostToolUse hook이 이미 있을 수 있다):
+
+```json
+{
+  "matcher": "Edit|Write",
+  "hooks": [
+    { "type": "command", "command": "{위에서 출력된 절대경로}" }
+  ]
+}
+```
+
+등록 후 확인하고, 실패하면 사용자에게 직접 설정을 요청한 뒤 계속 진행한다:
+
+```bash
+grep -q "compile-check\.sh" ~/.claude/settings.json && echo "OK" || echo "등록 실패 — 수동 확인 필요"
+```
+
+> 등록 직후 hook이 바로 발화하지 않으면 사용자에게 `/hooks`를 한 번 열어달라고(설정 재로드) 안내한 뒤 계속 진행한다 — 이 명령은 AI가 대신 실행할 수 없다.
 
 > HyperLane SDK 설치는 STEP 0-A에서 이미 끝났다 — 여기서 다시 확인하지 않는다.
 

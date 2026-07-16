@@ -1175,7 +1175,7 @@ WEBGL_LIVE_VER narrow {SCRIPTS_PATH} platform-checklist.md SubmitLeaderBoard
 hook이 각 `.cs` 수정 시 자동 실행했으므로 마지막 컴파일 결과만 확인한다:
 
 ```bash
-grep -E "error CS" /tmp/compile_result.log 2>/dev/null | head -3
+grep -E "error CS" Docs/porting/compile_result.log 2>/dev/null | head -3
 ```
 
 - 에러 없음 → ✅ 완료 리포트 출력

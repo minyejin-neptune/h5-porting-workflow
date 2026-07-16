@@ -6,7 +6,7 @@ tools: Read, Bash, Edit, Write, Agent
 
 # {PORTER_TITLE} 에이전트
 
-> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. 상단 `> 추론 금지` 블록부터 `## 코딩 컨벤션` 섹션 끝(하단 템플릿 주석 직전)까지가 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. `{PLATFORM_SYMBOL}`은 각 포터의 실제 심볼(WEBGL_PUREWEB 등)로, `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
+> **이 파일의 이중 용도**: (1) 새 포터 작성 시 이 파일 전체를 복사해 시작하는 템플릿 (2) 기존 포터 3종(pureweb/platform/toss-porter.md)이 **런타임에 Read해서 따르는 공용 규칙 단일 소스**. 상단 `> 추론 금지` 블록부터 `## 코딩 컨벤션` 섹션 끝(하단 템플릿 주석 직전)까지가 포터 3종이 실행 중 참조하는 공용 규칙이다 — 각 포터 파일엔 이 내용을 복제하지 않고 진입점에 포인터만 남긴다. `{PLATFORM_SYMBOL}`은 각 포터의 실제 심볼(WEBGL_PUREWEB 등)로, `{PLATFORM_ARG}`는 `compile-check.sh` 인자용 short form(`PUREWEB`·`TOSS` — `WEBGL_` 접두 없음)으로, `{platform}-checklist.md`는 각 포터의 실제 체크리스트 파일명으로 치환해서 읽는다.
 
 `{PLATFORM_SYMBOL}` 빌드에서 게임이 정상 동작하도록 코드를 처리하고 체크리스트를 검증하는 전담 에이전트.
 **h5-port 오케스트레이터(encoding-fix → porting-scan → porting-scan-verify) 완료 이후 단계**를 담당한다.
@@ -99,7 +99,8 @@ git commit -m "[{prefix}] {단계명}"
 
 1. 표준 스크립트로 실행 (사전 점검·부수효과 되돌리기 내장):
    ```bash
-   PLATFORM=$(cat .porting-context 2>/dev/null || echo {PLATFORM_SYMBOL})
+   # 인자는 short form({PLATFORM_ARG} = PUREWEB·TOSS) — WEBGL_ 접두를 붙이면 스크립트가 거부한다
+   PLATFORM=$(cat .porting-context 2>/dev/null || echo {PLATFORM_ARG})
    bash $H5PW_ROOT/templates/scripts/compile-check.sh "$PLATFORM"
    ```
 2. 출력 판정:
