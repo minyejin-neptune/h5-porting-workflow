@@ -106,8 +106,6 @@ Porter subagents (pureweb/platform/toss-porter) own their full operational proce
 - Checklist/VOCAB updates
 - Compile checks, verification
 
-For platform-porter's 6 judgment steps it can't resolve on its own (haptic, ranking button, share text, UID/version placement, unnecessary-UI removal, localization), run the `platform-decisions` skill.
-
 ---
 
 ## Workflow Rules
